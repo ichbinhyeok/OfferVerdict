@@ -53,31 +53,36 @@ public class ComparisonController {
                        @RequestParam(required = false) Double offerSalary,
                        @RequestParam(required = false, defaultValue = "SINGLE") String householdType,
                        @RequestParam(required = false, defaultValue = "RENT") String housingType,
-                       Model model,
-                       RedirectAttributes redirectAttributes) {
+                       Model model) {
+
+        // 1. 모든 필수 파라미터가 있으면 결과 페이지로 리다이렉트 (pSEO 연결)
         if (job != null && cityA != null && cityB != null && currentSalary != null && offerSalary != null) {
             String normalizedJob = SlugNormalizer.normalize(job);
             String normalizedCityA = SlugNormalizer.normalize(cityA);
             String normalizedCityB = SlugNormalizer.normalize(cityB);
 
             if (repository.hasJob(normalizedJob) && repository.hasCity(normalizedCityA) && repository.hasCity(normalizedCityB)) {
-                JobInfo jobInfo = repository.getJob(normalizedJob);
-                CityCostEntry cityEntryA = repository.getCity(normalizedCityA);
-                CityCostEntry cityEntryB = repository.getCity(normalizedCityB);
-                RedirectView redirectView = new RedirectView("/" + jobInfo.getSlug() + "-salary-" + cityEntryA.getSlug() + "-vs-" + cityEntryB.getSlug(), true);
-                redirectAttributes.addAttribute("currentSalary", currentSalary);
-                redirectAttributes.addAttribute("offerSalary", offerSalary);
-                redirectAttributes.addAttribute("householdType", normalizeHouseholdType(householdType).name());
-                redirectAttributes.addAttribute("housingType", normalizeHousingType(housingType).name());
-                return redirectView;
+                // [수정 포인트] RedirectView 객체 대신 문자열 "redirect:..."를 리턴합니다.
+                // .name()을 사용하여 Enum 값을 문자열 파라미터로 안전하게 전달합니다.
+                return String.format("redirect:/%s-salary-%s-vs-%s?currentSalary=%.0f&offerSalary=%.0f&householdType=%s&housingType=%s",
+                        normalizedJob,
+                        normalizedCityA,
+                        normalizedCityB,
+                        currentSalary,
+                        offerSalary,
+                        normalizeHouseholdType(householdType).name(),
+                        normalizeHousingType(housingType).name());
             }
         }
 
+        // 2. 파라미터가 없거나 첫 진입 시: 홈 페이지(index.html) 렌더링
+        // 이 데이터들이 주입되어야 드롭다운이 정상적으로 작동합니다.
         model.addAttribute("jobs", repository.getJobs());
         model.addAttribute("cities", repository.getCities());
         model.addAttribute("title", "OfferVerdict | Reality-check your job move");
-        model.addAttribute("metaDescription", "Plug in your salary, cities, and role to see if the job move is a GO, CONDITIONAL, WARNING, or NO GO.");
-        return "index";
+        model.addAttribute("metaDescription", "Compare your actual buying power with taxes and cost of living.");
+
+        return "index"; // templates/index.html 파일명을 문자열로 반환
     }
 
     @GetMapping("/{job}-salary-{cityA}-vs-{cityB}")
