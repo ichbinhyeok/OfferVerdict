@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: offer-verdict
+  thymeleaf:
+    cache: false
+
+app:
+  publicBaseUrl: http://localhost:8080
+  baselineLivingCost: 1800
+  sitemapChunkSize: 25
+  devReloadEnabled: true
+
+logging:
+  level:
+    root: INFO

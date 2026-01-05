@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Jobs</title>
+    <meta name="description" th:attr="content=${metaDescription}"/>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="container">
+    <div class="panel">
+        <h1>Salary verdict hubs by job</h1>
+        <ul class="related-list">
+            <li th:each="job : ${jobs}">
+                <a th:href="@{'/' + ${job.slug} + '-salary-new-york-ny-vs-austin-tx?currentSalary=120000&offerSalary=150000'}"
+                   th:text="${job.title}"></a>
+            </li>
+        </ul>
+    </div>
+    <div class="footer">Not financial or tax advice.</div>
+</div>
+</body>
+</html>

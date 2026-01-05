@@ -1,0 +1,48 @@
+.verdict-banner {
+  min-height: 40vh;
+  border-radius: 18px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #0b1221;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.verdict-banner h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.verdict-copy {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.verdict-metrics {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.verdict-go {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #052e16;
+}
+
+.verdict-conditional {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #422006;
+}
+
+.verdict-warning {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #431407;
+}
+
+.verdict-no-go {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: #450a0a;
+}
