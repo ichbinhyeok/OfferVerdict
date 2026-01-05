@@ -142,6 +142,63 @@ tfoot td {
   color: #ffffff;
 }
 
+.hero {
+  margin: 1rem 0 1.5rem 0;
+}
+
+.hero h1 {
+  margin: 0.25rem 0 0.35rem 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0;
+}
+
+.lead {
+  color: var(--muted);
+  margin: 0;
+  max-width: 720px;
+}
+
+.home-form .grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.home-form .field span {
+  color: var(--muted);
+}
+
+.home-form input,
+.home-form select {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+.home-form input:focus,
+.home-form select:focus {
+  outline: 2px solid var(--accent);
+}
+
+.muted {
+  color: var(--muted);
+  margin: 0;
+}
+
 @media (max-width: 640px) {
   .container {
     padding: 1rem;

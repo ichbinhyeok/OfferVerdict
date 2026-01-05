@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">OfferVerdict</title>
+    <meta name="description" th:attr="content=${metaDescription}"/>
+    <meta name="robots" content="noindex, nofollow"/>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <p class="eyebrow">Verdict-first</p>
+        <h1>Reality-check your job move</h1>
+        <p class="lead">Input your salaries, cities, and role. We keep it server-rendered and point you to the canonical verdict page.</p>
+    </div>
+
+    <div class="panel">
+        <form th:action="@{/}" method="get" class="home-form">
+            <div class="grid">
+                <label class="field">
+                    <span>Job</span>
+                    <select name="job" required>
+                        <option value="" disabled selected>Select a role</option>
+                        <option th:each="j : ${jobs}" th:value="${j.slug}" th:text="${j.title}"></option>
+                    </select>
+                </label>
+                <label class="field">
+                    <span>Current city</span>
+                    <input name="cityA" list="cities" placeholder="san-francisco-ca" required>
+                </label>
+                <label class="field">
+                    <span>Offer city</span>
+                    <input name="cityB" list="cities" placeholder="austin-tx" required>
+                </label>
+                <label class="field">
+                    <span>Current salary</span>
+                    <input type="number" name="currentSalary" min="30000" max="1000000" step="1000" placeholder="120000" required>
+                </label>
+                <label class="field">
+                    <span>Offer salary</span>
+                    <input type="number" name="offerSalary" min="30000" max="1000000" step="1000" placeholder="135000" required>
+                </label>
+                <label class="field">
+                    <span>Household type</span>
+                    <select name="householdType">
+                        <option value="SINGLE">Single</option>
+                        <option value="FAMILY">Family</option>
+                    </select>
+                </label>
+                <label class="field">
+                    <span>Housing type</span>
+                    <select name="housingType">
+                        <option value="RENT">Rent</option>
+                        <option value="OWN">Own</option>
+                    </select>
+                </label>
+            </div>
+            <div class="cta-row">
+                <button type="submit" class="cta">Get verdict</button>
+                <p class="muted">We redirect you to the canonical, SEO-safe result page—no calculators on homepage.</p>
+            </div>
+        </form>
+    </div>
+
+    <datalist id="cities">
+        <option th:each="city : ${cities}" th:value="${city.slug}" th:text="${city.city + ', ' + city.state}"></option>
+    </datalist>
+</div>
+</body>
+</html>

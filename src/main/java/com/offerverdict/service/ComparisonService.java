@@ -7,6 +7,9 @@ import com.offerverdict.model.ComparisonBreakdown;
 import com.offerverdict.model.ComparisonResult;
 import com.offerverdict.model.JobInfo;
 import com.offerverdict.model.Verdict;
+import com.offerverdict.model.HouseholdType;
+import com.offerverdict.model.HousingType;
+import com.offerverdict.util.SlugNormalizer;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -31,12 +34,17 @@ public class ComparisonService {
         this.appProperties = appProperties;
     }
 
-    public ComparisonResult compare(String cityASlug, String cityBSlug, double currentSalary, double offerSalary) {
+    public ComparisonResult compare(String cityASlug,
+                                    String cityBSlug,
+                                    double currentSalary,
+                                    double offerSalary,
+                                    HouseholdType householdType,
+                                    HousingType housingType) {
         CityCostEntry cityA = repository.getCity(cityASlug);
         CityCostEntry cityB = repository.getCity(cityBSlug);
 
-        ComparisonBreakdown current = buildBreakdown(currentSalary, cityA);
-        ComparisonBreakdown offer = buildBreakdown(offerSalary, cityB);
+        ComparisonBreakdown current = buildBreakdown(currentSalary, cityA, householdType, housingType);
+        ComparisonBreakdown offer = buildBreakdown(offerSalary, cityB, householdType, housingType);
 
         double deltaPercent = computeDeltaPercent(current.getResidual(), offer.getResidual());
         Verdict verdict = classifyVerdict(deltaPercent);
@@ -50,11 +58,15 @@ public class ComparisonService {
         return result;
     }
 
-    private ComparisonBreakdown buildBreakdown(double salary, CityCostEntry city) {
+    private ComparisonBreakdown buildBreakdown(double salary,
+                                               CityCostEntry city,
+                                               HouseholdType householdType,
+                                               HousingType housingType) {
         double netAnnual = taxCalculatorService.calculateNetAnnual(salary, city.getState());
         double netMonthly = netAnnual / 12.0;
-        double rent = city.getAvgRent();
-        double livingCost = costCalculatorService.calculateLivingCost(city);
+        double rentBaseline = housingType == HousingType.OWN ? city.getAvgRent() * 0.6 : city.getAvgRent();
+        double livingCost = costCalculatorService.calculateLivingCost(city, householdType);
+        double rent = rentBaseline;
         double residual = netMonthly - (rent + livingCost);
 
         ComparisonBreakdown breakdown = new ComparisonBreakdown();
@@ -95,21 +107,30 @@ public class ComparisonService {
         };
     }
 
-    public List<String> relatedCityComparisons(String jobSlug, String baseCitySlug) {
+    public List<String> relatedCityComparisons(String jobSlug,
+                                               String baseCitySlug,
+                                               String offerCitySlug,
+                                               String queryString) {
+        JobInfo job = repository.getJob(jobSlug);
+        String canonicalJob = job.getSlug();
         CityCostEntry origin = repository.getCity(baseCitySlug);
         return repository.getCities().stream()
                 .filter(c -> !c.getSlug().equals(origin.getSlug()))
+                .filter(c -> !c.getSlug().equals(offerCitySlug))
+                .filter(c -> SlugNormalizer.isCanonicalCitySlug(c.getSlug()))
                 .sorted(Comparator.comparing(CityCostEntry::getSlug))
                 .limit(5)
-                .map(c -> "/" + jobSlug + "-salary-" + origin.getSlug() + "-vs-" + c.getSlug())
+                .map(c -> "/" + canonicalJob + "-salary-" + origin.getSlug() + "-vs-" + c.getSlug() + queryString)
                 .toList();
     }
 
-    public List<String> relatedJobComparisons(String cityASlug, String cityBSlug) {
+    public List<String> relatedJobComparisons(String cityASlug,
+                                              String cityBSlug,
+                                              String queryString) {
         return repository.getJobs().stream()
                 .limit(5)
                 .map(JobInfo::getSlug)
-                .map(slug -> "/" + slug + "-salary-" + cityASlug + "-vs-" + cityBSlug)
+                .map(slug -> "/" + slug + "-salary-" + cityASlug + "-vs-" + cityBSlug + queryString)
                 .collect(Collectors.toList());
     }
 
