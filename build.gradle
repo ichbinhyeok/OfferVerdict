@@ -10,7 +10,8 @@ description = 'OfferVerdict'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        // Java 17로 설정하신 것 아주 좋습니다. 안정적입니다.
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -22,6 +23,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // [중요] 제가 드린 코드(@Data, @Builder)를 쓰기 위해 꼭 필요한 Lombok 추가
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
