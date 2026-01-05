@@ -2,9 +2,10 @@ package com.offerverdict.controller;
 
 import com.offerverdict.config.AppProperties;
 import com.offerverdict.data.DataRepository;
-import com.offerverdict.exception.BadRequestException;
 import com.offerverdict.model.CityCostEntry;
 import com.offerverdict.model.ComparisonResult;
+import com.offerverdict.model.HousingType;
+import com.offerverdict.model.HouseholdType;
 import com.offerverdict.model.JobInfo;
 import com.offerverdict.model.Verdict;
 import com.offerverdict.service.ComparisonService;
@@ -19,7 +20,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -50,6 +50,8 @@ public class ComparisonController {
                           @PathVariable String cityB,
                           @RequestParam double currentSalary,
                           @RequestParam double offerSalary,
+                          @RequestParam(defaultValue = "SINGLE") HouseholdType householdType,
+                          @RequestParam(defaultValue = "RENT") HousingType housingType,
                           RedirectAttributes redirectAttributes,
                           Model model) {
 
@@ -67,14 +69,15 @@ public class ComparisonController {
             RedirectView redirectView = new RedirectView(canonicalPath, true);
             redirectAttributes.addAttribute("currentSalary", currentSalary);
             redirectAttributes.addAttribute("offerSalary", offerSalary);
+            redirectAttributes.addAttribute("householdType", householdType);
+            redirectAttributes.addAttribute("housingType", housingType);
             redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
             return redirectView;
         }
 
-        validateSalary(currentSalary);
-        validateSalary(offerSalary);
+        String validationMessage = validateSalary(currentSalary, offerSalary);
 
-        ComparisonResult result = comparisonService.compare(cityEntryA.getSlug(), cityEntryB.getSlug(), currentSalary, offerSalary);
+        ComparisonResult result = comparisonService.compare(cityEntryA.getSlug(), cityEntryB.getSlug(), currentSalary, offerSalary, householdType, housingType);
 
         String title = "Is $" + Math.round(offerSalary) + " in " + comparisonService.formatCityName(cityEntryB)
                 + " better than $" + Math.round(currentSalary) + " in " + comparisonService.formatCityName(cityEntryA)
@@ -99,17 +102,34 @@ public class ComparisonController {
         model.addAttribute("result", result);
         model.addAttribute("currentSalary", currentSalary);
         model.addAttribute("offerSalary", offerSalary);
-        model.addAttribute("otherJobLinks", comparisonService.relatedJobComparisons(cityEntryA.getSlug(), cityEntryB.getSlug()));
-        model.addAttribute("otherCityLinks", comparisonService.relatedCityComparisons(jobInfo.getSlug(), cityEntryA.getSlug()));
+        model.addAttribute("householdType", householdType);
+        model.addAttribute("housingType", housingType);
+        model.addAttribute("otherJobLinks", comparisonService.relatedJobComparisons(cityEntryA.getSlug(), cityEntryB.getSlug(), currentSalary));
+        model.addAttribute("otherCityLinks", comparisonService.relatedCityComparisons(jobInfo.getSlug(), cityEntryA.getSlug(), currentSalary));
         model.addAttribute("structuredDataJson", toJson(buildStructuredData(title, metaDescription, canonicalUrl, result)));
+        if (validationMessage != null) {
+            model.addAttribute("error", validationMessage);
+        }
 
         return "result";
     }
 
-    private void validateSalary(double salary) {
-        if (salary < MIN_SALARY || salary > MAX_SALARY) {
-            throw new BadRequestException("Salary must be between 30,000 and 1,000,000");
+    private String validateSalary(double currentSalary, double offerSalary) {
+        boolean currentTooLow = currentSalary < MIN_SALARY;
+        boolean offerTooLow = offerSalary < MIN_SALARY;
+        if (currentTooLow && offerTooLow) {
+            return "Both salaries must be at least $30,000 for a reliable verdict.";
         }
+        if (currentTooLow) {
+            return "Current salary must be at least $30,000 for a reliable verdict.";
+        }
+        if (offerTooLow) {
+            return "Offer salary must be at least $30,000 for a reliable verdict.";
+        }
+        if (currentSalary > MAX_SALARY || offerSalary > MAX_SALARY) {
+            return "Salary entries above $1,000,000 may be inaccurate. Results shown with your provided values.";
+        }
+        return null;
     }
 
     private Map<String, Object> buildStructuredData(String title, String description, String canonicalUrl, ComparisonResult result) {

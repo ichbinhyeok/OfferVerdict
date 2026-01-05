@@ -5,6 +5,8 @@ import com.offerverdict.data.DataRepository;
 import com.offerverdict.model.CityCostEntry;
 import com.offerverdict.model.ComparisonBreakdown;
 import com.offerverdict.model.ComparisonResult;
+import com.offerverdict.model.HousingType;
+import com.offerverdict.model.HouseholdType;
 import com.offerverdict.model.JobInfo;
 import com.offerverdict.model.Verdict;
 import org.springframework.stereotype.Service;
@@ -31,12 +33,17 @@ public class ComparisonService {
         this.appProperties = appProperties;
     }
 
-    public ComparisonResult compare(String cityASlug, String cityBSlug, double currentSalary, double offerSalary) {
+    public ComparisonResult compare(String cityASlug,
+                                    String cityBSlug,
+                                    double currentSalary,
+                                    double offerSalary,
+                                    HouseholdType householdType,
+                                    HousingType housingType) {
         CityCostEntry cityA = repository.getCity(cityASlug);
         CityCostEntry cityB = repository.getCity(cityBSlug);
 
-        ComparisonBreakdown current = buildBreakdown(currentSalary, cityA);
-        ComparisonBreakdown offer = buildBreakdown(offerSalary, cityB);
+        ComparisonBreakdown current = buildBreakdown(currentSalary, cityA, householdType, housingType);
+        ComparisonBreakdown offer = buildBreakdown(offerSalary, cityB, householdType, housingType);
 
         double deltaPercent = computeDeltaPercent(current.getResidual(), offer.getResidual());
         Verdict verdict = classifyVerdict(deltaPercent);
@@ -50,11 +57,14 @@ public class ComparisonService {
         return result;
     }
 
-    private ComparisonBreakdown buildBreakdown(double salary, CityCostEntry city) {
+    private ComparisonBreakdown buildBreakdown(double salary,
+                                               CityCostEntry city,
+                                               HouseholdType householdType,
+                                               HousingType housingType) {
         double netAnnual = taxCalculatorService.calculateNetAnnual(salary, city.getState());
         double netMonthly = netAnnual / 12.0;
-        double rent = city.getAvgRent();
-        double livingCost = costCalculatorService.calculateLivingCost(city);
+        double rent = housingType.adjustedRent(city.getAvgRent());
+        double livingCost = costCalculatorService.calculateLivingCost(city) * householdType.multiplier();
         double residual = netMonthly - (rent + livingCost);
 
         ComparisonBreakdown breakdown = new ComparisonBreakdown();
@@ -95,21 +105,23 @@ public class ComparisonService {
         };
     }
 
-    public List<String> relatedCityComparisons(String jobSlug, String baseCitySlug) {
+    public List<String> relatedCityComparisons(String jobSlug, String baseCitySlug, double currentSalary) {
         CityCostEntry origin = repository.getCity(baseCitySlug);
+        String salaryQuery = "?currentSalary=" + Math.round(currentSalary);
         return repository.getCities().stream()
                 .filter(c -> !c.getSlug().equals(origin.getSlug()))
                 .sorted(Comparator.comparing(CityCostEntry::getSlug))
                 .limit(5)
-                .map(c -> "/" + jobSlug + "-salary-" + origin.getSlug() + "-vs-" + c.getSlug())
+                .map(c -> "/" + jobSlug + "-salary-" + origin.getSlug() + "-vs-" + c.getSlug() + salaryQuery)
                 .toList();
     }
 
-    public List<String> relatedJobComparisons(String cityASlug, String cityBSlug) {
+    public List<String> relatedJobComparisons(String cityASlug, String cityBSlug, double currentSalary) {
+        String salaryQuery = "?currentSalary=" + Math.round(currentSalary);
         return repository.getJobs().stream()
                 .limit(5)
                 .map(JobInfo::getSlug)
-                .map(slug -> "/" + slug + "-salary-" + cityASlug + "-vs-" + cityBSlug)
+                .map(slug -> "/" + slug + "-salary-" + cityASlug + "-vs-" + cityBSlug + salaryQuery)
                 .collect(Collectors.toList());
     }
 
