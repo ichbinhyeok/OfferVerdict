@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex" th:if="${robots}">
+    <title th:text="${title}">OfferVerdict</title>
+    <meta name="description" th:attr="content=${metaDescription}"/>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="container">
+    <div class="panel">
+        <h1>Relocation verdicts without the fluff</h1>
+        <p>Plug in your current situation and we’ll send you to a verdict-first comparison.</p>
+        <form th:action="@{/start}" method="get" class="quick-edit">
+            <div class="grid">
+                <label>
+                    Current salary
+                    <input name="currentSalary" type="number" min="30000" max="1000000" step="1000" th:value="${currentSalary}">
+                </label>
+                <label>
+                    Offer salary
+                    <input name="offerSalary" type="number" min="30000" max="1000000" step="1000" th:value="${offerSalary}">
+                </label>
+                <label>
+                    Current city
+                    <select name="cityA">
+                        <option th:each="city : ${cities}" th:value="${city.slug}" th:text="${city.city + ', ' + city.state}"></option>
+                    </select>
+                </label>
+                <label>
+                    Offer city
+                    <select name="cityB">
+                        <option th:each="city : ${cities}" th:value="${city.slug}" th:text="${city.city + ', ' + city.state}"
+                                th:selected="${city == cities[1]}"></option>
+                    </select>
+                </label>
+                <label>
+                    Job
+                    <select name="job">
+                        <option th:each="jobItem : ${jobs}" th:value="${jobItem.slug}" th:text="${jobItem.title}"></option>
+                    </select>
+                </label>
+                <label>
+                    Household
+                    <select name="householdType">
+                        <option value="SINGLE">Single</option>
+                        <option value="FAMILY">Family</option>
+                    </select>
+                </label>
+                <label>
+                    Housing
+                    <select name="housingType">
+                        <option value="RENT">Rent</option>
+                        <option value="OWN">Own</option>
+                    </select>
+                </label>
+            </div>
+            <div class="cta-row">
+                <button class="cta" type="submit">Get my verdict</button>
+            </div>
+        </form>
+    </div>
+    <div class="footer">Not financial or tax advice.</div>
+</div>
+</body>
+</html>
