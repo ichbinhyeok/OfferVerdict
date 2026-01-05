@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Verdict</title>
+    <meta name="description" th:attr="content=${metaDescription}"/>
+    <link rel="canonical" th:attr="href=${canonicalUrl}"/>
+    <meta property="og:title" th:attr="content=${ogTitle}"/>
+    <meta property="og:description" th:attr="content=${ogDescription}"/>
+    <meta property="og:url" th:attr="content=${ogUrl}"/>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/verdict.css}">
+    <link rel="stylesheet" th:href="@{/css/ads.css}">
+</head>
+<body>
+<div class="container">
+    <div class="panel quick-edit">
+        <form th:action="@{/start}" method="get" class="quick-edit-form">
+            <div class="quick-grid">
+                <label>
+                    Current salary
+                    <input name="currentSalary" type="number" min="30000" max="1000000" step="1000" th:value="${currentSalary}">
+                </label>
+                <label>
+                    Offer salary
+                    <input name="offerSalary" type="number" min="30000" max="1000000" step="1000" th:value="${offerSalary}">
+                </label>
+                <label>
+                    Current city
+                    <select name="cityA">
+                        <option th:each="city : ${citiesList}" th:value="${city.slug}"
+                                th:selected="${city.slug == cityA.slug}"
+                                th:text="${city.city + ', ' + city.state}"></option>
+                    </select>
+                </label>
+                <label>
+                    Offer city
+                    <select name="cityB">
+                        <option th:each="city : ${citiesList}" th:value="${city.slug}"
+                                th:selected="${city.slug == cityB.slug}"
+                                th:text="${city.city + ', ' + city.state}"></option>
+                    </select>
+                </label>
+                <label>
+                    Job
+                    <select name="job">
+                        <option th:each="jobItem : ${jobsList}" th:value="${jobItem.slug}"
+                                th:selected="${jobItem.slug == job.slug}"
+                                th:text="${jobItem.title}"></option>
+                    </select>
+                </label>
+                <label>
+                    Household
+                    <select name="householdType">
+                        <option value="SINGLE" th:selected="${householdType.name() == 'SINGLE'}">Single</option>
+                        <option value="FAMILY" th:selected="${householdType.name() == 'FAMILY'}">Family</option>
+                    </select>
+                </label>
+                <label>
+                    Housing
+                    <select name="housingType">
+                        <option value="RENT" th:selected="${housingType.name() == 'RENT'}">Rent</option>
+                        <option value="OWN" th:selected="${housingType.name() == 'OWN'}">Own</option>
+                    </select>
+                </label>
+            </div>
+            <div class="cta-row">
+                <button class="cta" type="submit">Update verdict</button>
+            </div>
+        </form>
+        <div th:if="${validationError}" class="validation-message" th:text="${validationError}"></div>
+    </div>
+
+    <div id="topAdSlot"><!-- ADSENSE HERE --></div>
+
+    <div th:class="'verdict-banner verdict-' + ${result.verdict.name().toLowerCase().replace('_','-')}">
+        <div>
+            <div class="badge">
+                <span th:text="${job.title}">Job</span>
+                <strong th:text="${#numbers.formatDecimal(result.deltaPercent,1,1)} + '%'">Delta</strong>
+            </div>
+            <h1 th:text="${result.verdict}">GO</h1>
+            <p class="verdict-copy" th:text="${result.verdictCopy}">Punchy copy</p>
+        </div>
+        <div class="verdict-metrics">
+            <div class="badge">Residual A: <strong th:text="${'$' + #numbers.formatDecimal(result.current.residual, 1, 0)}">0</strong></div>
+            <div class="badge">Residual B: <strong th:text="${'$' + #numbers.formatDecimal(result.offer.residual, 1, 0)}">0</strong></div>
+        </div>
+        <div class="residual-bars" th:with="range=${residualRange}, offset=${residualOffset}">
+            <div class="residual-row">
+                <span>Current city</span>
+                <progress th:attr="max=${range}, value=${result.current.residual + offset}"></progress>
+                <span class="residual-value" th:text="${'$' + #numbers.formatDecimal(result.current.residual,1,0)}"></span>
+            </div>
+            <div class="residual-row">
+                <span>Offer city</span>
+                <progress th:attr="max=${range}, value=${result.offer.residual + offset}"></progress>
+                <span class="residual-value" th:text="${'$' + #numbers.formatDecimal(result.offer.residual,1,0)}"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="meta-row">
+            <span th:text="'From ' + ${cityA.city} + ', ' + ${cityA.state}"></span>
+            <span>→</span>
+            <span th:text="'To ' + ${cityB.city} + ', ' + ${cityB.state}"></span>
+            <span class="badge" th:text="'Household: ' + ${householdType}"></span>
+            <span class="badge" th:text="'Housing: ' + ${housingType}"></span>
+        </div>
+
+        <div class="cta-row" th:switch="${result.verdict}">
+            <a class="cta" th:case="${T(com.offerverdict.model.Verdict).GO}" href="#moving">Book moving quotes</a>
+            <a class="cta" th:case="${T(com.offerverdict.model.Verdict).CONDITIONAL}" href="#moving">Lock in apartment scouting</a>
+            <a class="cta secondary" th:case="${T(com.offerverdict.model.Verdict).WARNING}" href="#negotiate">Use this to negotiate</a>
+            <a class="cta secondary" th:case="${T(com.offerverdict.model.Verdict).NO_GO}" href="#budgeting">Grab a budgeting reset</a>
+        </div>
+
+        <details class="details" open>
+            <summary>Details: net monthly, rent, living cost, residual</summary>
+            <div class="grid">
+                <div>
+                    <h3 th:text="${cityA.city} + ' take-home'">City A</h3>
+                    <table>
+                        <tr><td>Net monthly</td><td th:text="${'$' + #numbers.formatDecimal(result.current.netMonthly, 1, 0)}"></td></tr>
+                        <tr><td>Avg rent</td><td th:text="${'$' + #numbers.formatDecimal(result.current.rent, 1, 0)}"></td></tr>
+                        <tr><td>Living cost baseline</td><td th:text="${'$' + #numbers.formatDecimal(result.current.livingCost, 1, 0)}"></td></tr>
+                        <tfoot><tr><td>Residual</td><td th:text="${'$' + #numbers.formatDecimal(result.current.residual, 1, 0)}"></td></tr></tfoot>
+                    </table>
+                </div>
+                <div>
+                    <h3 th:text="${cityB.city} + ' take-home'">City B</h3>
+                    <table>
+                        <tr><td>Net monthly</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.netMonthly, 1, 0)}"></td></tr>
+                        <tr><td>Avg rent</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.rent, 1, 0)}"></td></tr>
+                        <tr><td>Living cost baseline</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.livingCost, 1, 0)}"></td></tr>
+                        <tfoot><tr><td>Residual</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.residual, 1, 0)}"></td></tr></tfoot>
+                    </table>
+                </div>
+            </div>
+        </details>
+
+        <div class="section-title" th:text="'Other ' + ${job.title} + ' salary comparisons'"></div>
+        <ul class="related-list">
+            <li th:each="link : ${otherJobLinks}">
+                <a th:href="${link}" th:text="${link}"></a>
+            </li>
+        </ul>
+
+        <div class="section-title" th:text="'Compare ' + ${cityA.city} + ' with other cities'"></div>
+        <ul class="related-list">
+            <li th:each="link : ${otherCityLinks}">
+                <a th:href="${link}" th:text="${link}"></a>
+            </li>
+        </ul>
+
+        <div id="bottomAdSlot"><!-- ADSENSE HERE --></div>
+    </div>
+
+    <div class="footer">
+        Not financial or tax advice.
+    </div>
+</div>
+
+<script type="application/ld+json" th:utext="${structuredDataJson}"></script>
+</body>
+</html>

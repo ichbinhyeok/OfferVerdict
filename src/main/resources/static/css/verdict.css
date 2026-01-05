@@ -1,0 +1,49 @@
+.verdict-banner {
+  min-height: 40vh;
+  border-radius: 18px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #0b1221;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.75));
+}
+
+.verdict-banner h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.verdict-copy {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.verdict-metrics {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.verdict-go {
+  background: radial-gradient(circle at 20% 20%, rgba(34, 197, 94, 0.15), transparent 35%), linear-gradient(145deg, #e8fff5, #c5f6e7);
+  color: #064e3b;
+}
+
+.verdict-conditional {
+  background: radial-gradient(circle at 20% 20%, rgba(245, 158, 11, 0.18), transparent 35%), linear-gradient(145deg, #fff7e6, #ffe8bf);
+  color: #7c3c0a;
+}
+
+.verdict-warning {
+  background: radial-gradient(circle at 20% 20%, rgba(249, 115, 22, 0.2), transparent 35%), linear-gradient(145deg, #fff1e6, #ffd9bf);
+  color: #7a3410;
+}
+
+.verdict-no-go {
+  background: radial-gradient(circle at 20% 20%, rgba(239, 68, 68, 0.25), transparent 35%), linear-gradient(145deg, #ffecec, #ffd1d1);
+  color: #7f1d1d;
+}

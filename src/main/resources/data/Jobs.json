@@ -1,0 +1,7 @@
+[
+  { "title": "Software Engineer", "slug": "software-engineer" },
+  { "title": "Data Scientist", "slug": "data-scientist" },
+  { "title": "Product Manager", "slug": "product-manager" },
+  { "title": "UX Designer", "slug": "ux-designer" },
+  { "title": "DevOps Engineer", "slug": "devops-engineer" }
+]

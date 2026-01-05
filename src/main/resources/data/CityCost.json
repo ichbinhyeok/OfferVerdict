@@ -1,0 +1,37 @@
+[
+  {
+    "city": "New York",
+    "state": "NY",
+    "slug": "new-york-ny",
+    "avgRent": 3200,
+    "colIndex": 160
+  },
+  {
+    "city": "Austin",
+    "state": "TX",
+    "slug": "austin-tx",
+    "avgRent": 1900,
+    "colIndex": 110
+  },
+  {
+    "city": "San Francisco",
+    "state": "CA",
+    "slug": "san-francisco-ca",
+    "avgRent": 3700,
+    "colIndex": 180
+  },
+  {
+    "city": "Denver",
+    "state": "CO",
+    "slug": "denver-co",
+    "avgRent": 1700,
+    "colIndex": 105
+  },
+  {
+    "city": "Raleigh",
+    "state": "NC",
+    "slug": "raleigh-nc",
+    "avgRent": 1550,
+    "colIndex": 95
+  }
+]

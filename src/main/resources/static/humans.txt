@@ -1,0 +1,6 @@
+/* Team */
+Developer: Offer Verdict Automation
+Site: http://localhost:8080
+
+/* Notes */
+Built for verdict-first relocation clarity. Not financial or tax advice.
