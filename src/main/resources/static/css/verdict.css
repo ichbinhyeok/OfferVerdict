@@ -195,6 +195,7 @@
 .bar-fill {
   height: 100%;
   border-radius: 999px;
+  transition: width 0.85s ease;
 }
 
 .bar-fill.win {
@@ -244,6 +245,68 @@
   padding: 0.2rem 0.65rem;
   color: #cbd5e1;
   font-size: 0.85rem;
+}
+
+.share-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0 0.25rem 0;
+  flex-wrap: wrap;
+}
+
+.ghost-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #e2e8f0;
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.ghost-btn:hover {
+  border-color: #22d3ee;
+  transform: translateY(-1px);
+}
+
+.dream-card {
+  margin-top: 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.1), rgba(59, 130, 246, 0.05));
+  padding: 1rem;
+}
+
+.dream-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.75rem;
+}
+
+.dream-metric {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.dream-metric.win {
+  border-color: rgba(34, 197, 94, 0.6);
+  box-shadow: 0 12px 24px rgba(34, 197, 94, 0.15);
+}
+
+.dream-metric p {
+  margin: 0;
+  color: #cbd5e1;
+}
+
+.dream-metric strong {
+  font-size: 1.3rem;
+  color: #f8fafc;
 }
 
 @media (max-width: 640px) {

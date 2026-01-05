@@ -1,37 +1,77 @@
 [
   {
-    "city": "New York",
-    "state": "NY",
-    "slug": "new-york-ny",
-    "avgRent": 3200,
-    "colIndex": 160
+    "city": "New York", "state": "NY", "slug": "new-york-ny",
+    "avgRent": 3800, "colIndex": 160, "medianIncome": 75000, "avgHousePrice": 850000,
+    "details": { "groceries": 550, "transport": 140, "utilities": 160, "misc": 300 }
   },
   {
-    "city": "Austin",
-    "state": "TX",
-    "slug": "austin-tx",
-    "avgRent": 1900,
-    "colIndex": 110
+    "city": "San Francisco", "state": "CA", "slug": "san-francisco-ca",
+    "avgRent": 3500, "colIndex": 180, "medianIncome": 110000, "avgHousePrice": 1300000,
+    "details": { "groceries": 600, "transport": 130, "utilities": 150, "misc": 350 }
   },
   {
-    "city": "San Francisco",
-    "state": "CA",
-    "slug": "san-francisco-ca",
-    "avgRent": 3700,
-    "colIndex": 180
+    "city": "Austin", "state": "TX", "slug": "austin-tx",
+    "avgRent": 1900, "colIndex": 110, "medianIncome": 80000, "avgHousePrice": 550000,
+    "details": { "groceries": 400, "transport": 100, "utilities": 140, "misc": 200 }
   },
   {
-    "city": "Denver",
-    "state": "CO",
-    "slug": "denver-co",
-    "avgRent": 1700,
-    "colIndex": 105
+    "city": "Seattle", "state": "WA", "slug": "seattle-wa",
+    "avgRent": 2400, "colIndex": 145, "medianIncome": 105000, "avgHousePrice": 800000,
+    "details": { "groceries": 500, "transport": 120, "utilities": 110, "misc": 250 }
   },
   {
-    "city": "Raleigh",
-    "state": "NC",
-    "slug": "raleigh-nc",
-    "avgRent": 1550,
-    "colIndex": 95
+    "city": "Los Angeles", "state": "CA", "slug": "los-angeles-ca",
+    "avgRent": 2900, "colIndex": 150, "medianIncome": 70000, "avgHousePrice": 950000,
+    "details": { "groceries": 480, "transport": 150, "utilities": 130, "misc": 280 }
+  },
+  {
+    "city": "Chicago", "state": "IL", "slug": "chicago-il",
+    "avgRent": 2200, "colIndex": 120, "medianIncome": 72000, "avgHousePrice": 350000,
+    "details": { "groceries": 420, "transport": 130, "utilities": 120, "misc": 220 }
+  },
+  {
+    "city": "Miami", "state": "FL", "slug": "miami-fl",
+    "avgRent": 2600, "colIndex": 122, "medianIncome": 55000, "avgHousePrice": 500000,
+    "details": { "groceries": 450, "transport": 110, "utilities": 140, "misc": 240 }
+  },
+  {
+    "city": "Boston", "state": "MA", "slug": "boston-ma",
+    "avgRent": 3100, "colIndex": 150, "medianIncome": 85000, "avgHousePrice": 750000,
+    "details": { "groceries": 520, "transport": 100, "utilities": 180, "misc": 260 }
+  },
+  {
+    "city": "Denver", "state": "CO", "slug": "denver-co",
+    "avgRent": 2100, "colIndex": 115, "medianIncome": 82000, "avgHousePrice": 600000,
+    "details": { "groceries": 410, "transport": 110, "utilities": 100, "misc": 210 }
+  },
+  {
+    "city": "Las Vegas", "state": "NV", "slug": "las-vegas-nv",
+    "avgRent": 1700, "colIndex": 103, "medianIncome": 60000, "avgHousePrice": 420000,
+    "details": { "groceries": 380, "transport": 120, "utilities": 150, "misc": 180 }
+  },
+  {
+    "city": "Atlanta", "state": "GA", "slug": "atlanta-ga",
+    "avgRent": 1900, "colIndex": 102, "medianIncome": 70000, "avgHousePrice": 400000,
+    "details": { "groceries": 390, "transport": 100, "utilities": 130, "misc": 190 }
+  },
+  {
+    "city": "Phoenix", "state": "AZ", "slug": "phoenix-az",
+    "avgRent": 1800, "colIndex": 104, "medianIncome": 65000, "avgHousePrice": 450000,
+    "details": { "groceries": 380, "transport": 110, "utilities": 160, "misc": 180 }
+  },
+  {
+    "city": "Dallas", "state": "TX", "slug": "dallas-tx",
+    "avgRent": 1850, "colIndex": 102, "medianIncome": 68000, "avgHousePrice": 420000,
+    "details": { "groceries": 390, "transport": 110, "utilities": 140, "misc": 190 }
+  },
+  {
+    "city": "Houston", "state": "TX", "slug": "houston-tx",
+    "avgRent": 1600, "colIndex": 98, "medianIncome": 64000, "avgHousePrice": 340000,
+    "details": { "groceries": 370, "transport": 120, "utilities": 150, "misc": 180 }
+  },
+  {
+    "city": "Raleigh", "state": "NC", "slug": "raleigh-nc",
+    "avgRent": 1650, "colIndex": 96, "medianIncome": 78000, "avgHousePrice": 430000,
+    "details": { "groceries": 380, "transport": 90, "utilities": 110, "misc": 170 }
   }
 ]

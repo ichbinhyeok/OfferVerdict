@@ -1,11 +1,32 @@
 package com.offerverdict.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Map;
+
 public class CityCostEntry {
     private String city;
     private String state;
     private String slug;
     private double avgRent;
     private double colIndex;
+    private double medianIncome;
+    private double avgHousePrice;
+    private Map<String, Double> details;
+
+    public CityCostEntry() {
+    }
+
+    public CityCostEntry(String city, String state, String slug, double avgRent, double colIndex, double medianIncome, double avgHousePrice, Map<String, Double> details) {
+        this.city = city;
+        this.state = state;
+        this.slug = slug;
+        this.avgRent = avgRent;
+        this.colIndex = colIndex;
+        this.medianIncome = medianIncome;
+        this.avgHousePrice = avgHousePrice;
+        this.details = details;
+    }
 
     public String getCity() {
         return city;
@@ -35,6 +56,7 @@ public class CityCostEntry {
         return avgRent;
     }
 
+    @JsonProperty("avgRent")
     public void setAvgRent(double avgRent) {
         this.avgRent = avgRent;
     }
@@ -43,7 +65,35 @@ public class CityCostEntry {
         return colIndex;
     }
 
+    @JsonProperty("colIndex")
     public void setColIndex(double colIndex) {
         this.colIndex = colIndex;
+    }
+
+    public double getMedianIncome() {
+        return medianIncome;
+    }
+
+    @JsonProperty("medianIncome")
+    public void setMedianIncome(double medianIncome) {
+        this.medianIncome = medianIncome;
+    }
+
+    public double getAvgHousePrice() {
+        return avgHousePrice;
+    }
+
+    @JsonProperty("avgHousePrice")
+    public void setAvgHousePrice(double avgHousePrice) {
+        this.avgHousePrice = avgHousePrice;
+    }
+
+    public Map<String, Double> getDetails() {
+        return details;
+    }
+
+    @JsonProperty("details")
+    public void setDetails(Map<String, Double> details) {
+        this.details = details;
     }
 }

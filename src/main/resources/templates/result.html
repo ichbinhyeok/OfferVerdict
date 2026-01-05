@@ -106,6 +106,11 @@
             <span class="pill" th:text="${housingType == T(com.offerverdict.model.HousingType).OWN ? 'Owning' : 'Renting'}"></span>
         </div>
 
+        <div class="share-row">
+            <button type="button" class="ghost-btn" id="shareButton">Share verdict</button>
+            <small class="muted">Copy the canonical link or use native share.</small>
+        </div>
+
         <div class="cta-row" th:switch="${result.verdict}">
             <a class="cta" th:case="${T(com.offerverdict.model.Verdict).GO}" href="#moving">Book moving quotes</a>
             <a class="cta" th:case="${T(com.offerverdict.model.Verdict).CONDITIONAL}" href="#moving">Lock in apartment scouting</a>
@@ -121,7 +126,8 @@
                     <div class="bar-track">
                         <div class="bar-fill"
                              th:classappend="${winnerIsOffer} ? 'lose' : 'win'"
-                             th:style="'width:' + ${#numbers.formatDecimal((T(java.lang.Math).abs(result.current.residual) / maxResidual) * 100, 1, 1)} + '%'"></div>
+                             style="width:0%"
+                             th:attr="data-width=${#numbers.formatDecimal((T(java.lang.Math).abs(result.current.residual) / maxResidual) * 100, 1, 1)}"></div>
                     </div>
                     <div class="bar-value" th:text="${'$' + #numbers.formatDecimal(result.current.residual,1,0)}">0</div>
                 </div>
@@ -130,12 +136,35 @@
                     <div class="bar-track">
                         <div class="bar-fill"
                              th:classappend="${winnerIsOffer} ? 'win' : 'lose'"
-                             th:style="'width:' + ${#numbers.formatDecimal((T(java.lang.Math).abs(result.offer.residual) / maxResidual) * 100, 1, 1)} + '%'"></div>
+                             style="width:0%"
+                             th:attr="data-width=${#numbers.formatDecimal((T(java.lang.Math).abs(result.offer.residual) / maxResidual) * 100, 1, 1)}"></div>
                     </div>
                     <div class="bar-value" th:text="${'$' + #numbers.formatDecimal(result.offer.residual,1,0)}">0</div>
                 </div>
             </div>
             <p class="residual-caption" th:text="${winnerIsOffer ? cityB.city + ' keeps more monthly breathing room.' : cityA.city + ' keeps more monthly breathing room.'}"></p>
+        </div>
+
+        <div class="dream-card" th:with="homeYearsA=${result.current.yearsToBuyHouse}, homeYearsB=${result.offer.yearsToBuyHouse}, teslaMonthsA=${result.current.monthsToBuyTesla}, teslaMonthsB=${result.offer.monthsToBuyTesla}">
+            <div class="section-title">Time to dream</div>
+            <div class="dream-grid">
+                <div class="dream-metric" th:classappend="${homeYearsA <= homeYearsB} ? 'win' : ''">
+                    <p th:text="${cityA.city} + ' time to buy a home (20% down)'">City A home</p>
+                    <strong th:text="${homeYearsA >= 999 ? 'Impossible' : #numbers.formatDecimal(homeYearsA,1,1) + ' years'}"></strong>
+                </div>
+                <div class="dream-metric" th:classappend="${homeYearsB < homeYearsA} ? 'win' : ''">
+                    <p th:text="${cityB.city} + ' time to buy a home (20% down)'">City B home</p>
+                    <strong th:text="${homeYearsB >= 999 ? 'Impossible' : #numbers.formatDecimal(homeYearsB,1,1) + ' years'}"></strong>
+                </div>
+                <div class="dream-metric" th:classappend="${teslaMonthsA <= teslaMonthsB} ? 'win' : ''">
+                    <p th:text="${cityA.city} + ' time to buy a Tesla'">City A tesla</p>
+                    <strong th:text="${teslaMonthsA >= 999 ? 'Impossible' : #numbers.formatDecimal(teslaMonthsA,1,1) + ' months'}"></strong>
+                </div>
+                <div class="dream-metric" th:classappend="${teslaMonthsB < teslaMonthsA} ? 'win' : ''">
+                    <p th:text="${cityB.city} + ' time to buy a Tesla'">City B tesla</p>
+                    <strong th:text="${teslaMonthsB >= 999 ? 'Impossible' : #numbers.formatDecimal(teslaMonthsB,1,1) + ' months'}"></strong>
+                </div>
+            </div>
         </div>
 
         <details class="details" open>
@@ -167,20 +196,20 @@
             <div>
                 <h3 th:text="${cityA.city} + ' essentials'">City A breakdown</h3>
                 <table class="breakdown-table">
-                    <tr><td>Groceries (30%)</td><td th:text="${'$' + #numbers.formatDecimal(result.current.groceries,1,0)}"></td></tr>
-                    <tr><td>Transport (15%)</td><td th:text="${'$' + #numbers.formatDecimal(result.current.transport,1,0)}"></td></tr>
-                    <tr><td>Utilities (10%)</td><td th:text="${'$' + #numbers.formatDecimal(result.current.utilities,1,0)}"></td></tr>
-                    <tr><td>Misc (45%)</td><td th:text="${'$' + #numbers.formatDecimal(result.current.misc,1,0)}"></td></tr>
+                    <tr><td>Groceries</td><td th:text="${'$' + #numbers.formatDecimal(result.current.groceries,1,0)}"></td></tr>
+                    <tr><td>Transport</td><td th:text="${'$' + #numbers.formatDecimal(result.current.transport,1,0)}"></td></tr>
+                    <tr><td>Utilities</td><td th:text="${'$' + #numbers.formatDecimal(result.current.utilities,1,0)}"></td></tr>
+                    <tr><td>Misc</td><td th:text="${'$' + #numbers.formatDecimal(result.current.misc,1,0)}"></td></tr>
                     <tfoot><tr><td>Total living cost</td><td th:text="${'$' + #numbers.formatDecimal(result.current.livingCost,1,0)}"></td></tr></tfoot>
                 </table>
             </div>
             <div>
                 <h3 th:text="${cityB.city} + ' essentials'">City B breakdown</h3>
                 <table class="breakdown-table">
-                    <tr><td>Groceries (30%)</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.groceries,1,0)}"></td></tr>
-                    <tr><td>Transport (15%)</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.transport,1,0)}"></td></tr>
-                    <tr><td>Utilities (10%)</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.utilities,1,0)}"></td></tr>
-                    <tr><td>Misc (45%)</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.misc,1,0)}"></td></tr>
+                    <tr><td>Groceries</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.groceries,1,0)}"></td></tr>
+                    <tr><td>Transport</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.transport,1,0)}"></td></tr>
+                    <tr><td>Utilities</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.utilities,1,0)}"></td></tr>
+                    <tr><td>Misc</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.misc,1,0)}"></td></tr>
                     <tfoot><tr><td>Total living cost</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.livingCost,1,0)}"></td></tr></tfoot>
                 </table>
             </div>
@@ -209,5 +238,37 @@
 </div>
 
 <script type="application/ld+json" th:utext="${structuredDataJson}"></script>
+<script>
+    (function animateBars() {
+        const bars = document.querySelectorAll('.bar-fill');
+        bars.forEach(bar => {
+            const width = bar.getAttribute('data-width');
+            if (!width) return;
+            requestAnimationFrame(() => {
+                bar.style.width = width + '%';
+            });
+        });
+    })();
+
+    (function wireShare() {
+        const shareButton = document.getElementById('shareButton');
+        if (!shareButton) return;
+        shareButton.addEventListener('click', async () => {
+            const url = window.location.href;
+            try {
+                if (navigator.share) {
+                    await navigator.share({ title: document.title, url });
+                    return;
+                }
+                await navigator.clipboard.writeText(url);
+                shareButton.textContent = 'Link copied!';
+                setTimeout(() => shareButton.textContent = 'Share verdict', 1500);
+            } catch (e) {
+                shareButton.textContent = 'Unable to share';
+                setTimeout(() => shareButton.textContent = 'Share verdict', 2000);
+            }
+        });
+    })();
+</script>
 </body>
 </html>

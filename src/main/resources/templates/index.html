@@ -22,7 +22,9 @@
                     <span>Job</span>
                     <select name="job" required>
                         <option value="" disabled selected>Select a role</option>
-                        <option th:each="j : ${jobs}" th:value="${j.slug}" th:text="${j.title}"></option>
+                        <optgroup th:each="group : ${jobsByCategory.entrySet()}" th:label="${group.key}">
+                            <option th:each="j : ${group.value}" th:value="${j.slug}" th:text="${j.title}"></option>
+                        </optgroup>
                     </select>
                 </label>
                 <label class="field">

@@ -3,6 +3,16 @@ package com.offerverdict.model;
 public class JobInfo {
     private String title;
     private String slug;
+    private String category;
+
+    public JobInfo() {
+    }
+
+    public JobInfo(String title, String slug, String category) {
+        this.title = title;
+        this.slug = slug;
+        this.category = category;
+    }
 
     public String getTitle() {
         return title;
@@ -18,5 +28,13 @@ public class JobInfo {
 
     public void setSlug(String slug) {
         this.slug = slug;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

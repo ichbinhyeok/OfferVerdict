@@ -9,6 +9,8 @@ public class ComparisonBreakdown {
     private double transport;
     private double utilities;
     private double misc;
+    private double yearsToBuyHouse;
+    private double monthsToBuyTesla;
 
     public double getNetMonthly() {
         return netMonthly;
@@ -72,5 +74,21 @@ public class ComparisonBreakdown {
 
     public void setMisc(double misc) {
         this.misc = misc;
+    }
+
+    public double getYearsToBuyHouse() {
+        return yearsToBuyHouse;
+    }
+
+    public void setYearsToBuyHouse(double yearsToBuyHouse) {
+        this.yearsToBuyHouse = yearsToBuyHouse;
+    }
+
+    public double getMonthsToBuyTesla() {
+        return monthsToBuyTesla;
+    }
+
+    public void setMonthsToBuyTesla(double monthsToBuyTesla) {
+        this.monthsToBuyTesla = monthsToBuyTesla;
     }
 }

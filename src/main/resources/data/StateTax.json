@@ -45,9 +45,54 @@
       ]
     },
     {
+      "state": "WA",
+      "brackets": [
+        { "upTo": null, "rate": 0.0 }
+      ]
+    },
+    {
+      "state": "IL",
+      "brackets": [
+        { "upTo": null, "rate": 0.0495 }
+      ]
+    },
+    {
+      "state": "FL",
+      "brackets": [
+        { "upTo": null, "rate": 0.0 }
+      ]
+    },
+    {
+      "state": "MA",
+      "brackets": [
+        { "upTo": null, "rate": 0.05 }
+      ]
+    },
+    {
       "state": "CO",
       "brackets": [
         { "upTo": null, "rate": 0.044 }
+      ]
+    },
+    {
+      "state": "NV",
+      "brackets": [
+        { "upTo": null, "rate": 0.0 }
+      ]
+    },
+    {
+      "state": "GA",
+      "brackets": [
+        { "upTo": null, "rate": 0.0575 }
+      ]
+    },
+    {
+      "state": "AZ",
+      "brackets": [
+        { "upTo": 28808, "rate": 0.025 },
+        { "upTo": 57615, "rate": 0.033 },
+        { "upTo": 86423, "rate": 0.041 },
+        { "upTo": null, "rate": 0.045 }
       ]
     },
     {

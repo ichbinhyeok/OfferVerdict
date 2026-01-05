@@ -27,7 +27,10 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 @Controller
 public class ComparisonController {
@@ -63,9 +66,9 @@ public class ComparisonController {
             String normalizedCityA = SlugNormalizer.normalize(cityA);
             String normalizedCityB = SlugNormalizer.normalize(cityB);
 
-            Optional<JobInfo> jobInfo = repository.findJobLoosely(normalizedJob);
-            Optional<CityCostEntry> cityMatchA = repository.findCityLoosely(normalizedCityA);
-            Optional<CityCostEntry> cityMatchB = repository.findCityLoosely(normalizedCityB);
+            Optional<JobInfo> jobInfo = resolveJobInput(job, normalizedJob);
+            Optional<CityCostEntry> cityMatchA = resolveCityInput(cityA, normalizedCityA);
+            Optional<CityCostEntry> cityMatchB = resolveCityInput(cityB, normalizedCityB);
 
             if (jobInfo.isPresent() && cityMatchA.isPresent() && cityMatchB.isPresent()) {
                 String targetPath = String.format("/%s-salary-%s-vs-%s",
@@ -86,6 +89,7 @@ public class ComparisonController {
         model.addAttribute("cities", repository.getCities());
         model.addAttribute("title", "OfferVerdict | Reality-check your job move");
         model.addAttribute("metaDescription", "Compare your actual buying power with taxes and cost of living.");
+        model.addAttribute("jobsByCategory", groupJobsByCategory());
 
         return "index"; // templates/index.html 파일명을 문자열로 반환
     }
@@ -259,5 +263,44 @@ public class ComparisonController {
         }
         repository.reload();
         return ResponseEntity.ok("Data reloaded");
+    }
+
+    private Optional<JobInfo> resolveJobInput(String rawInput, String normalizedInput) {
+        if (normalizedInput == null || normalizedInput.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Optional<JobInfo> looseMatch = repository.findJobLoosely(normalizedInput);
+        if (looseMatch.isPresent()) {
+            return looseMatch;
+        }
+
+        String rawLower = rawInput == null ? "" : rawInput.toLowerCase(Locale.US);
+        return repository.getJobs().stream()
+                .filter(job -> job.getSlug().toLowerCase(Locale.US).contains(normalizedInput)
+                        || job.getTitle().toLowerCase(Locale.US).startsWith(rawLower))
+                .findFirst();
+    }
+
+    private Optional<CityCostEntry> resolveCityInput(String rawInput, String normalizedInput) {
+        if (normalizedInput == null || normalizedInput.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Optional<CityCostEntry> looseMatch = repository.findCityLoosely(normalizedInput);
+        if (looseMatch.isPresent()) {
+            return looseMatch;
+        }
+
+        String rawLower = rawInput == null ? "" : rawInput.toLowerCase(Locale.US);
+        return repository.getCities().stream()
+                .filter(city -> city.getSlug().toLowerCase(Locale.US).contains(normalizedInput)
+                        || city.getCity().toLowerCase(Locale.US).startsWith(rawLower))
+                .findFirst();
+    }
+
+    private Map<String, List<JobInfo>> groupJobsByCategory() {
+        return repository.getJobs().stream()
+                .collect(Collectors.groupingBy(JobInfo::getCategory, TreeMap::new, Collectors.toList()));
     }
 }

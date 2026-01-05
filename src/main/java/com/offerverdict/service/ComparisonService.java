@@ -64,14 +64,32 @@ public class ComparisonService {
                                                HousingType housingType) {
         double netAnnual = taxCalculatorService.calculateNetAnnual(salary, city.getState());
         double netMonthly = netAnnual / 12.0;
+        double householdMultiplier = householdType == HouseholdType.FAMILY ? 1.4 : 1.0;
         double rentBaseline = housingType == HousingType.OWN ? city.getAvgRent() * 0.6 : city.getAvgRent();
-        double livingCost = costCalculatorService.calculateLivingCost(city, householdType);
         double rent = rentBaseline;
+        double livingCost = costCalculatorService.calculateLivingCost(city, householdType);
+        double groceries;
+        double transport;
+        double utilities;
+        double misc;
+
+        if (city.getDetails() != null && !city.getDetails().isEmpty()) {
+            groceries = city.getDetails().getOrDefault("groceries", 0.0) * householdMultiplier;
+            transport = city.getDetails().getOrDefault("transport", 0.0) * householdMultiplier;
+            utilities = city.getDetails().getOrDefault("utilities", 0.0) * householdMultiplier;
+            misc = city.getDetails().getOrDefault("misc", 0.0) * householdMultiplier;
+            livingCost = groceries + transport + utilities + misc;
+        } else {
+            groceries = livingCost * 0.30;
+            transport = livingCost * 0.15;
+            utilities = livingCost * 0.10;
+            misc = livingCost - (groceries + transport + utilities);
+        }
+
         double residual = netMonthly - (rent + livingCost);
-        double groceries = livingCost * 0.30;
-        double transport = livingCost * 0.15;
-        double utilities = livingCost * 0.10;
-        double misc = livingCost - (groceries + transport + utilities);
+        double monthlyResidual = residual;
+        double yearsToBuyHouse = monthlyResidual > 0 ? (city.getAvgHousePrice() * 0.20) / (monthlyResidual * 12) : 999.0;
+        double monthsToBuyTesla = monthlyResidual > 0 ? 50000.0 / monthlyResidual : 999.0;
 
         ComparisonBreakdown breakdown = new ComparisonBreakdown();
         breakdown.setNetMonthly(netMonthly);
@@ -82,6 +100,8 @@ public class ComparisonService {
         breakdown.setTransport(transport);
         breakdown.setUtilities(utilities);
         breakdown.setMisc(misc);
+        breakdown.setYearsToBuyHouse(yearsToBuyHouse);
+        breakdown.setMonthsToBuyTesla(monthsToBuyTesla);
         return breakdown;
     }
 
