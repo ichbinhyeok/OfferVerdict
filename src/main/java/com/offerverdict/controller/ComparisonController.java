@@ -2,6 +2,7 @@ package com.offerverdict.controller;
 
 import com.offerverdict.config.AppProperties;
 import com.offerverdict.data.DataRepository;
+import com.offerverdict.exception.ResourceNotFoundException;
 import com.offerverdict.model.CityCostEntry;
 import com.offerverdict.model.ComparisonResult;
 import com.offerverdict.model.HouseholdType;
@@ -45,14 +46,15 @@ public class ComparisonController {
         this.objectMapper = objectMapper;
     }
 
-    @GetMapping("/")
-    public String home(@RequestParam(required = false) String job,
+    @GetMapping({"/", "/start"})
+    public Object home(@RequestParam(required = false) String job,
                        @RequestParam(required = false) String cityA,
                        @RequestParam(required = false) String cityB,
                        @RequestParam(required = false) Double currentSalary,
                        @RequestParam(required = false) Double offerSalary,
                        @RequestParam(required = false, defaultValue = "SINGLE") String householdType,
                        @RequestParam(required = false, defaultValue = "RENT") String housingType,
+                       RedirectAttributes redirectAttributes,
                        Model model) {
 
         // 1. 모든 필수 파라미터가 있으면 결과 페이지로 리다이렉트 (pSEO 연결)
@@ -61,17 +63,20 @@ public class ComparisonController {
             String normalizedCityA = SlugNormalizer.normalize(cityA);
             String normalizedCityB = SlugNormalizer.normalize(cityB);
 
-            if (repository.hasJob(normalizedJob) && repository.hasCity(normalizedCityA) && repository.hasCity(normalizedCityB)) {
-                // [수정 포인트] RedirectView 객체 대신 문자열 "redirect:..."를 리턴합니다.
-                // .name()을 사용하여 Enum 값을 문자열 파라미터로 안전하게 전달합니다.
-                return String.format("redirect:/%s-salary-%s-vs-%s?currentSalary=%.0f&offerSalary=%.0f&householdType=%s&housingType=%s",
-                        normalizedJob,
-                        normalizedCityA,
-                        normalizedCityB,
-                        currentSalary,
-                        offerSalary,
-                        normalizeHouseholdType(householdType).name(),
-                        normalizeHousingType(housingType).name());
+            Optional<JobInfo> jobInfo = repository.findJobLoosely(normalizedJob);
+            Optional<CityCostEntry> cityMatchA = repository.findCityLoosely(normalizedCityA);
+            Optional<CityCostEntry> cityMatchB = repository.findCityLoosely(normalizedCityB);
+
+            if (jobInfo.isPresent() && cityMatchA.isPresent() && cityMatchB.isPresent()) {
+                String targetPath = String.format("/%s-salary-%s-vs-%s",
+                        jobInfo.get().getSlug(),
+                        cityMatchA.get().getSlug(),
+                        cityMatchB.get().getSlug());
+
+                RedirectView redirectView = new RedirectView(targetPath, true);
+                redirectView.setStatusCode(HttpStatus.FOUND);
+                addRedirectParams(redirectAttributes, currentSalary, offerSalary, householdType, housingType);
+                return redirectView;
             }
         }
 
@@ -100,18 +105,15 @@ public class ComparisonController {
         String normalizedCityA = SlugNormalizer.normalize(cityA);
         String normalizedCityB = SlugNormalizer.normalize(cityB);
 
-        JobInfo jobInfo = repository.getJob(normalizedJob);
-        CityCostEntry cityEntryA = repository.getCity(normalizedCityA);
-        CityCostEntry cityEntryB = repository.getCity(normalizedCityB);
+        JobInfo jobInfo = repository.findJobLoosely(normalizedJob).orElseThrow(() -> new ResourceNotFoundException("Unknown job slug: " + job));
+        CityCostEntry cityEntryA = repository.findCityLoosely(normalizedCityA).orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityA));
+        CityCostEntry cityEntryB = repository.findCityLoosely(normalizedCityB).orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityB));
 
         String canonicalPath = "/" + jobInfo.getSlug() + "-salary-" + cityEntryA.getSlug() + "-vs-" + cityEntryB.getSlug();
         if (!job.equals(jobInfo.getSlug()) || !cityA.equals(cityEntryA.getSlug()) || !cityB.equals(cityEntryB.getSlug())
                 || !SlugNormalizer.isCanonicalCitySlug(cityEntryA.getSlug()) || !SlugNormalizer.isCanonicalCitySlug(cityEntryB.getSlug())) {
             RedirectView redirectView = new RedirectView(canonicalPath, true);
-            redirectAttributes.addAttribute("currentSalary", currentSalary);
-            redirectAttributes.addAttribute("offerSalary", offerSalary);
-            redirectAttributes.addAttribute("householdType", normalizeHouseholdType(householdType).name());
-            redirectAttributes.addAttribute("housingType", normalizeHousingType(housingType).name());
+            addRedirectParams(redirectAttributes, currentSalary, offerSalary, householdType, housingType);
             redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
             return redirectView;
         }
@@ -230,6 +232,17 @@ public class ComparisonController {
         } catch (Exception e) {
             return HousingType.RENT;
         }
+    }
+
+    private void addRedirectParams(RedirectAttributes redirectAttributes,
+                                   double currentSalary,
+                                   double offerSalary,
+                                   String householdType,
+                                   String housingType) {
+        redirectAttributes.addAttribute("currentSalary", currentSalary);
+        redirectAttributes.addAttribute("offerSalary", offerSalary);
+        redirectAttributes.addAttribute("householdType", normalizeHouseholdType(householdType).name());
+        redirectAttributes.addAttribute("housingType", normalizeHousingType(housingType).name());
     }
 
     private String buildQueryString(double currentSalary, double offerSalary, HouseholdType householdType, HousingType housingType) {

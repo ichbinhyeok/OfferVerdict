@@ -189,6 +189,14 @@ tfoot td {
   font-size: 1rem;
 }
 
+.home-form select,
+.home-form option,
+.quick-edit select,
+.quick-edit option {
+  background-color: #111827;
+  color: #e5e7eb;
+}
+
 .home-form input:focus,
 .home-form select:focus {
   outline: 2px solid var(--accent);

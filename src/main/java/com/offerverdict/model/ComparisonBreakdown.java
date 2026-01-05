@@ -5,6 +5,10 @@ public class ComparisonBreakdown {
     private double rent;
     private double livingCost;
     private double residual;
+    private double groceries;
+    private double transport;
+    private double utilities;
+    private double misc;
 
     public double getNetMonthly() {
         return netMonthly;
@@ -36,5 +40,37 @@ public class ComparisonBreakdown {
 
     public void setResidual(double residual) {
         this.residual = residual;
+    }
+
+    public double getGroceries() {
+        return groceries;
+    }
+
+    public void setGroceries(double groceries) {
+        this.groceries = groceries;
+    }
+
+    public double getTransport() {
+        return transport;
+    }
+
+    public void setTransport(double transport) {
+        this.transport = transport;
+    }
+
+    public double getUtilities() {
+        return utilities;
+    }
+
+    public void setUtilities(double utilities) {
+        this.utilities = utilities;
+    }
+
+    public double getMisc() {
+        return misc;
+    }
+
+    public void setMisc(double misc) {
+        this.misc = misc;
     }
 }

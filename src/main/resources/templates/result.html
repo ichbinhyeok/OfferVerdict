@@ -113,14 +113,14 @@
             <a class="cta secondary" th:case="${T(com.offerverdict.model.Verdict).NO_GO}" href="#budgeting">Grab a budgeting reset</a>
         </div>
 
-        <div class="residual-comparison" th:with="maxResidual=${T(java.lang.Math).max(T(java.lang.Math).abs(result.current.residual), T(java.lang.Math).abs(result.offer.residual)) == 0 ? 1 : T(java.lang.Math).max(T(java.lang.Math).abs(result.current.residual), T(java.lang.Math).abs(result.offer.residual))}">
+        <div class="residual-comparison" th:with="maxResidual=${T(java.lang.Math).max(T(java.lang.Math).abs(result.current.residual), T(java.lang.Math).abs(result.offer.residual)) == 0 ? 1 : T(java.lang.Math).max(T(java.lang.Math).abs(result.current.residual), T(java.lang.Math).abs(result.offer.residual))}, winnerIsOffer=${result.offer.residual >= result.current.residual}">
             <div class="section-title">Residual breathing room</div>
             <div class="residual-bars">
                 <div class="residual-bar">
                     <div class="bar-label" th:text="${cityA.city} + ' residual'">City A residual</div>
                     <div class="bar-track">
                         <div class="bar-fill"
-                             th:classappend="${result.current.residual >= 0} ? 'positive' : 'negative'"
+                             th:classappend="${winnerIsOffer} ? 'lose' : 'win'"
                              th:style="'width:' + ${#numbers.formatDecimal((T(java.lang.Math).abs(result.current.residual) / maxResidual) * 100, 1, 1)} + '%'"></div>
                     </div>
                     <div class="bar-value" th:text="${'$' + #numbers.formatDecimal(result.current.residual,1,0)}">0</div>
@@ -129,12 +129,13 @@
                     <div class="bar-label" th:text="${cityB.city} + ' residual'">City B residual</div>
                     <div class="bar-track">
                         <div class="bar-fill"
-                             th:classappend="${result.offer.residual >= 0} ? 'positive' : 'negative'"
+                             th:classappend="${winnerIsOffer} ? 'win' : 'lose'"
                              th:style="'width:' + ${#numbers.formatDecimal((T(java.lang.Math).abs(result.offer.residual) / maxResidual) * 100, 1, 1)} + '%'"></div>
                     </div>
                     <div class="bar-value" th:text="${'$' + #numbers.formatDecimal(result.offer.residual,1,0)}">0</div>
                 </div>
             </div>
+            <p class="residual-caption" th:text="${winnerIsOffer ? cityB.city + ' keeps more monthly breathing room.' : cityA.city + ' keeps more monthly breathing room.'}"></p>
         </div>
 
         <details class="details" open>
@@ -160,6 +161,30 @@
                 </div>
             </div>
         </details>
+
+        <div class="section-title">Simulated living cost split</div>
+        <div class="breakdown-grid">
+            <div>
+                <h3 th:text="${cityA.city} + ' essentials'">City A breakdown</h3>
+                <table class="breakdown-table">
+                    <tr><td>Groceries (30%)</td><td th:text="${'$' + #numbers.formatDecimal(result.current.groceries,1,0)}"></td></tr>
+                    <tr><td>Transport (15%)</td><td th:text="${'$' + #numbers.formatDecimal(result.current.transport,1,0)}"></td></tr>
+                    <tr><td>Utilities (10%)</td><td th:text="${'$' + #numbers.formatDecimal(result.current.utilities,1,0)}"></td></tr>
+                    <tr><td>Misc (45%)</td><td th:text="${'$' + #numbers.formatDecimal(result.current.misc,1,0)}"></td></tr>
+                    <tfoot><tr><td>Total living cost</td><td th:text="${'$' + #numbers.formatDecimal(result.current.livingCost,1,0)}"></td></tr></tfoot>
+                </table>
+            </div>
+            <div>
+                <h3 th:text="${cityB.city} + ' essentials'">City B breakdown</h3>
+                <table class="breakdown-table">
+                    <tr><td>Groceries (30%)</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.groceries,1,0)}"></td></tr>
+                    <tr><td>Transport (15%)</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.transport,1,0)}"></td></tr>
+                    <tr><td>Utilities (10%)</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.utilities,1,0)}"></td></tr>
+                    <tr><td>Misc (45%)</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.misc,1,0)}"></td></tr>
+                    <tfoot><tr><td>Total living cost</td><td th:text="${'$' + #numbers.formatDecimal(result.offer.livingCost,1,0)}"></td></tr></tfoot>
+                </table>
+            </div>
+        </div>
 
         <div class="section-title" th:text="'Other ' + ${job.title} + ' salary comparisons'"></div>
         <ul class="related-list">

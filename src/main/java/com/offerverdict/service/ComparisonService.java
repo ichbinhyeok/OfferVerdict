@@ -68,12 +68,20 @@ public class ComparisonService {
         double livingCost = costCalculatorService.calculateLivingCost(city, householdType);
         double rent = rentBaseline;
         double residual = netMonthly - (rent + livingCost);
+        double groceries = livingCost * 0.30;
+        double transport = livingCost * 0.15;
+        double utilities = livingCost * 0.10;
+        double misc = livingCost - (groceries + transport + utilities);
 
         ComparisonBreakdown breakdown = new ComparisonBreakdown();
         breakdown.setNetMonthly(netMonthly);
         breakdown.setRent(rent);
         breakdown.setLivingCost(livingCost);
         breakdown.setResidual(residual);
+        breakdown.setGroceries(groceries);
+        breakdown.setTransport(transport);
+        breakdown.setUtilities(utilities);
+        breakdown.setMisc(misc);
         return breakdown;
     }
 

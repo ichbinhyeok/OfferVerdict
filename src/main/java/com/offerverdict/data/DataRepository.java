@@ -73,9 +73,67 @@ public class DataRepository {
                 .orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + slug));
     }
 
+    public Optional<CityCostEntry> findCityLoosely(String slug) {
+        String normalized = SlugNormalizer.normalize(slug);
+        if (normalized.isEmpty()) {
+            return Optional.empty();
+        }
+
+        if (cityBySlug.containsKey(normalized)) {
+            return Optional.of(cityBySlug.get(normalized));
+        }
+
+        Optional<CityCostEntry> startsWith = cities.stream()
+                .filter(city -> {
+                    String citySlug = SlugNormalizer.normalize(city.getSlug());
+                    return citySlug.startsWith(normalized) || normalized.startsWith(citySlug);
+                })
+                .min(Comparator.comparingInt(city -> Math.abs(SlugNormalizer.normalize(city.getSlug()).length() - normalized.length())));
+
+        if (startsWith.isPresent()) {
+            return startsWith;
+        }
+
+        return cities.stream()
+                .filter(city -> {
+                    String citySlug = SlugNormalizer.normalize(city.getSlug());
+                    return citySlug.contains(normalized) || normalized.contains(citySlug);
+                })
+                .min(Comparator.comparingInt(city -> Math.abs(SlugNormalizer.normalize(city.getSlug()).length() - normalized.length())));
+    }
+
     public JobInfo getJob(String slug) {
         return Optional.ofNullable(jobBySlug.get(SlugNormalizer.normalize(slug)))
                 .orElseThrow(() -> new ResourceNotFoundException("Unknown job slug: " + slug));
+    }
+
+    public Optional<JobInfo> findJobLoosely(String slug) {
+        String normalized = SlugNormalizer.normalize(slug);
+        if (normalized.isEmpty()) {
+            return Optional.empty();
+        }
+
+        if (jobBySlug.containsKey(normalized)) {
+            return Optional.of(jobBySlug.get(normalized));
+        }
+
+        Optional<JobInfo> startsWith = jobs.stream()
+                .filter(job -> {
+                    String jobSlug = SlugNormalizer.normalize(job.getSlug());
+                    return jobSlug.startsWith(normalized) || normalized.startsWith(jobSlug);
+                })
+                .min(Comparator.comparingInt(job -> Math.abs(SlugNormalizer.normalize(job.getSlug()).length() - normalized.length())));
+
+        if (startsWith.isPresent()) {
+            return startsWith;
+        }
+
+        return jobs.stream()
+                .filter(job -> {
+                    String jobSlug = SlugNormalizer.normalize(job.getSlug());
+                    return jobSlug.contains(normalized) || normalized.contains(jobSlug);
+                })
+                .min(Comparator.comparingInt(job -> Math.abs(SlugNormalizer.normalize(job.getSlug()).length() - normalized.length())));
     }
 
     public boolean hasCity(String slug) {

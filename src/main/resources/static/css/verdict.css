@@ -82,11 +82,12 @@
 }
 
 .quick-edit {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(15, 23, 42, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   padding: 1rem 1.25rem;
   margin-bottom: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 .quick-edit-form {
@@ -110,7 +111,7 @@
 
 .field input,
 .field select {
-  background: rgba(255, 255, 255, 0.06);
+  background: #111827;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 10px;
   padding: 0.65rem 0.75rem;
@@ -196,17 +197,44 @@
   border-radius: 999px;
 }
 
-.bar-fill.positive {
-  background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+.bar-fill.win {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
 }
 
-.bar-fill.negative {
-  background: linear-gradient(135deg, #fb7185, #f472b6);
+.bar-fill.lose {
+  background: linear-gradient(135deg, #94a3b8, #64748b);
 }
 
 .bar-value {
   color: #f8fafc;
   font-weight: 700;
+}
+
+.residual-caption {
+  margin: 0.35rem 0 0 0;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+.breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.breakdown-table {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.breakdown-table td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.breakdown-table tfoot td {
+  color: #e2e8f0;
 }
 
 .pill {
