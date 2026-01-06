@@ -66,9 +66,17 @@
         <span th:text="${validationMessage}">Please enter a realistic salary.</span>
     </div>
 
-    <!-- Main Content: Top-Down Layout -->
-    <main class="main-content">
-        <!-- Hero Verdict Section (Top Center) -->
+    <!-- Mobile Sticky Header -->
+    <div class="mobile-sticky-header" id="mobileSticky">
+        <div class="verdict-mini" id="verdictMini" th:text="${result?.verdict ?: 'GO'}">GO</div>
+        <div class="residual-mini" id="residualMini" th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0)) : '$0'}">$0</div>
+    </div>
+
+    <!-- Split-View Dashboard Container -->
+    <main class="dashboard-container">
+        <!-- LEFT STICKY COLUMN: "Command Center" (40%) -->
+        <div class="command-center">
+        <!-- Hero Verdict Section -->
         <section class="verdict-hero" th:classappend="'verdict-' + ${result?.verdict?.name()?.toLowerCase()?.replace('_','-') ?: 'go'}" id="verdictHero">
             <div class="verdict-hero-content">
                 <p class="verdict-route" th:text="|${cityA?.city ?: 'City A'}, ${cityA?.state ?: 'ST'} → ${cityB?.city ?: 'City B'}, ${cityB?.state ?: 'ST'}|">Route</p>
@@ -96,7 +104,11 @@
                 </div>
             </div>
         </section>
+        </div>
+        <!-- END Command Center -->
 
+        <!-- RIGHT SCROLLABLE COLUMN: "Lab" (60%) -->
+        <div class="lab-controls">
         <!-- Life Simulator Section -->
         <section class="simulator-section" id="lifeSimulator">
             <div class="section-header">
@@ -224,6 +236,11 @@
             </div>
         </section>
 
+        <!-- Ad Placeholder 1 (Between Housing and Lifestyle) -->
+        <div class="ad-placeholder">
+            📢 Ad Space (Hidden in Production)
+        </div>
+
         <!-- Lifestyle Multiplier -->
         <section class="lifestyle-section">
             <h2 class="section-title">What that money really means</h2>
@@ -251,24 +268,40 @@
             </div>
         </section>
 
-        <!-- 3-Year Asset Projection -->
+        <!-- 3-Year Asset Projection - "The Race Track" -->
         <section class="dream-section">
-            <h2 class="section-title">3-Year Asset Projection</h2>
+            <h2 class="section-title">🏁 3-Year Asset Projection</h2>
             <div class="asset-projection">
+                <!-- Current City Progress Bar -->
                 <div class="projection-card">
-                    <div class="projection-label">Current City</div>
-                    <div class="projection-value tabular-nums" id="currentCityProjection"
-                         th:attr="data-value=${result?.current?.residual != null ? (result.current.residual * 36) : 0}"
-                         th:text="${result?.current?.residual != null ? ('$' + #numbers.formatDecimal(result.current.residual * 36, 1, 0)) : '$0'}">$0</div>
-                    <div class="projection-subtitle" th:text="|${cityA?.city ?: 'City A'} (36 months)|">City A (36 months)</div>
+                    <div class="projection-label" th:text="|${cityA?.city ?: 'City A'} - Current|">Current City</div>
+                    <div class="projection-progress">
+                        <div class="projection-progress-fill" id="currentCityProgress" style="width: 0%">
+                            <div class="projection-value tabular-nums" id="currentCityProjection"
+                                 th:attr="data-value=${result?.current?.residual != null ? (result.current.residual * 36) : 0}"
+                                 th:text="${result?.current?.residual != null ? ('$' + #numbers.formatDecimal(result.current.residual * 36, 1, 0)) : '$0'}">$0</div>
+                        </div>
+                    </div>
+                    <div class="projection-subtitle">36 months of saving</div>
                 </div>
+                
+                <!-- New City Progress Bar -->
                 <div class="projection-card">
-                    <div class="projection-label">New City</div>
-                    <div class="projection-value tabular-nums" id="newCityProjection"
-                         th:attr="data-value=${result?.offer?.residual != null ? (result.offer.residual * 36) : 0}"
-                         th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual * 36, 1, 0)) : '$0'}">$0</div>
-                    <div class="projection-subtitle" th:text="|${cityB?.city ?: 'City B'} (36 months)|">City B (36 months)</div>
+                    <div class="projection-label" th:text="|${cityB?.city ?: 'City B'} - New Offer|">New City</div>
+                    <div class="projection-progress">
+                        <div class="projection-progress-fill" id="newCityProgress" style="width: 0%">
+                            <div class="projection-value tabular-nums" id="newCityProjection"
+                                 th:attr="data-value=${result?.offer?.residual != null ? (result.offer.residual * 36) : 0}"
+                                 th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual * 36, 1, 0)) : '$0'}">$0</div>
+                        </div>
+                    </div>
+                    <div class="projection-subtitle">36 months of saving</div>
                 </div>
+            </div>
+            
+            <!-- Dynamic Dream Text -->
+            <div class="dream-text" id="dreamText">
+                <p>💭 At this rate, you're building wealth...</p>
             </div>
         </section>
 
@@ -288,6 +321,8 @@
                 </div>
             </div>
         </section>
+        </div>
+        <!-- END Lab Controls -->
     </main>
 </div>
 
@@ -312,12 +347,23 @@
         currentResidual: /*[[${result?.current?.residual ?: 0}]]*/ 0,
         cityAAvgHousePrice: /*[[${cityA?.avgHousePrice ?: 0}]]*/ 0,
         cityBAvgHousePrice: /*[[${cityB?.avgHousePrice ?: 0}]]*/ 0,
-        grossIncome: /*[[${result?.offer?.netMonthly != null ? (result.offer.netMonthly * 12 / (1 - 0.0765)) : 0}]]*/ 0,
-        taxes: /*[[${result?.offer?.netMonthly != null ? ((result.offer.netMonthly * 12 / (1 - 0.0765)) - (result.offer.netMonthly * 12)) : 0}]]*/ 0,
+        grossIncome: /*[[${offerTaxBreakdown?.grossIncome ?: 0}]]*/ 0,
+        taxes: /*[[${offerTaxBreakdown?.totalTax ?: 0}]]*/ 0,
         housingType: /*[[${housingType?.name() ?: 'RENT'}]]*/ 'RENT',
-        householdType: /*[[${householdType?.name() ?: 'SINGLE'}]]*/ 'SINGLE'
+        householdType: /*[[${householdType?.name() ?: 'SINGLE'}]]*/ 'SINGLE',
+        // Tax Breakdown for Precision
+        taxBreakdown: {
+            federal: /*[[${offerTaxBreakdown?.federalTax ?: 0}]]*/ 0,
+            state: /*[[${offerTaxBreakdown?.stateTax ?: 0}]]*/ 0,
+            socialSecurity: /*[[${offerTaxBreakdown?.socialSecurityTax ?: 0}]]*/ 0,
+            medicare: /*[[${offerTaxBreakdown?.medicareTax ?: 0}]]*/ 0,
+            additionalMedicare: /*[[${offerTaxBreakdown?.additionalMedicareTax ?: 0}]]*/ 0
+        },
+        offerSalary: /*[[${offerSalary ?: 0}]]*/ 0,
+        cityAName: /*[[${cityA?.city ?: 'City A'}]]*/ 'City A',
+        cityBName: /*[[${cityB?.city ?: 'City B'}]]*/ 'City B'
     };
-    console.log('INITIAL_DATA set:', window.INITIAL_DATA);
+    console.log('[INITIAL_DATA] Precision data loaded:', window.INITIAL_DATA);
 </script>
 
 <script th:src="@{/js/main.js}"></script>

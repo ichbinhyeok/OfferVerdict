@@ -209,4 +209,11 @@ public class ComparisonService {
     public String formatCityName(CityCostEntry city) {
         return city.getCity() + ", " + city.getState().toUpperCase(Locale.US);
     }
+    
+    /**
+     * Get detailed tax breakdown for waterfall chart
+     */
+    public TaxCalculatorService.TaxBreakdown getTaxBreakdown(double salary, String stateCode) {
+        return taxCalculatorService.calculateTaxBreakdown(salary, stateCode);
+    }
 }

@@ -192,6 +192,7 @@ function recalculateAll() {
     updateHeroSection();
     updateWaterfallChart();
     updateAssetProjection();
+    updateMobileStickyHeader(); // Mobile sticky header
     checkGamification();
     
     console.log('[recalculateAll] ✅ Recalculation complete!');
@@ -304,21 +305,66 @@ function updateWaterfallChart() {
 function updateAssetProjection() {
     const currentCityProjection = document.getElementById('currentCityProjection');
     const newCityProjection = document.getElementById('newCityProjection');
+    const currentCityProgress = document.getElementById('currentCityProgress');
+    const newCityProgress = document.getElementById('newCityProgress');
+    const dreamText = document.getElementById('dreamText');
     
     const currentProjection = window.appState.currentResidual * 36;
     const newProjection = window.appState.residual * 36;
     
+    // Update numbers with rolling animation
     if (currentCityProjection) {
-        currentCityProjection.textContent = formatNumber(currentProjection, '$');
+        currentCityProjection.classList.add('number-rolling');
+        animateRollingNumber(currentCityProjection, Math.round(currentProjection), '$');
         currentCityProjection.setAttribute('data-value', currentProjection);
+        setTimeout(() => currentCityProjection.classList.remove('number-rolling'), 600);
     }
     
     if (newCityProjection) {
-        newCityProjection.textContent = formatNumber(newProjection, '$');
+        newCityProjection.classList.add('number-rolling');
+        animateRollingNumber(newCityProjection, Math.round(newProjection), '$');
         newCityProjection.setAttribute('data-value', newProjection);
+        setTimeout(() => newCityProjection.classList.remove('number-rolling'), 600);
     }
     
-    console.log('[Asset] ✅ Projections updated');
+    // Animate progress bars
+    const maxProjection = Math.max(Math.abs(currentProjection), Math.abs(newProjection));
+    
+    if (currentCityProgress && maxProjection > 0) {
+        const currentPercent = Math.max(5, (Math.abs(currentProjection) / maxProjection) * 100);
+    setTimeout(() => {
+            currentCityProgress.style.width = currentPercent + '%';
+    }, 100);
+    }
+    
+    if (newCityProgress && maxProjection > 0) {
+        const newPercent = Math.max(5, (Math.abs(newProjection) / maxProjection) * 100);
+        setTimeout(() => {
+            newCityProgress.style.width = newPercent + '%';
+        }, 100);
+    }
+    
+    // Generate dynamic "dream" text
+    if (dreamText && newProjection > 0) {
+        const monthsToTesla = Math.ceil(45000 / (newProjection / 36)); // Tesla Model 3 ~$45k
+        const monthsToHouse = Math.ceil(50000 / (newProjection / 36)); // Down payment ~$50k
+        
+        let dreamMessage = '';
+        if (newProjection < 0) {
+            dreamMessage = '⚠️ Your savings are negative. Consider adjusting your lifestyle to break even.';
+        } else if (monthsToTesla <= 24) {
+            dreamMessage = `🚗 At this rate, you can buy a <strong>Tesla Model 3</strong> in <strong>${monthsToTesla} months</strong>.`;
+        } else if (monthsToHouse <= 36) {
+            dreamMessage = `🏠 At this rate, you can save a <strong>house down payment</strong> in <strong>${monthsToHouse} months</strong>.`;
+} else {
+            const yearlySavings = Math.round((newProjection / 36) * 12);
+            dreamMessage = `💰 You're saving <strong>$${formatNumber(yearlySavings, '')}/year</strong>. Keep building wealth!`;
+        }
+        
+        dreamText.innerHTML = `<p>${dreamMessage}</p>`;
+    }
+    
+    console.log('[Asset] ✅ Projections and dream text updated');
 }
 
 // ============================================
@@ -326,7 +372,7 @@ function updateAssetProjection() {
 // ============================================
 
 function loadInitialData(data) {
-    console.log('[Init] 📥 Loading initial data:', data);
+    console.log('[Init] 📥 Loading initial data with precision:', data);
     
     // window.appState에 데이터 주입
     window.appState.grossIncome = data.grossIncome || 0;
@@ -341,12 +387,23 @@ function loadInitialData(data) {
     window.appState.currentResidual = data.currentResidual || 0;
     window.appState.deltaPercent = data.deltaPercent || 0;
     window.appState.cityBAvgHousePrice = data.cityBAvgHousePrice || 0;
+    window.appState.offerSalary = data.offerSalary || 0;
+    window.appState.cityBName = data.cityBName || 'City B';
+    
+    // Tax Breakdown for precision tooltips
+    window.appState.taxBreakdown = data.taxBreakdown || {
+        federal: 0,
+        state: 0,
+        socialSecurity: 0,
+        medicare: 0,
+        additionalMedicare: 0
+    };
     
     // 초기 adjustedHousingCost 설정
     window.appState.adjustedHousingCost = window.appState.baseRent;
     window.appState.rentAdjustment = window.appState.baseRent;
     
-    console.log('[Init] ✅ appState initialized:', window.appState);
+    console.log('[Init] ✅ appState initialized with precision tax data');
     previousVerdict = classifyVerdict(window.appState.deltaPercent);
 }
 
@@ -450,18 +507,45 @@ function initLifeSimulator() {
         console.log('[Life Simulator] ✅ Roommate toggle bound');
     }
     
-    // C. Rent Slider
+    // C. Rent Slider with Dynamic Floating Label
     const rentSlider = document.getElementById('rentSlider');
-        const rentValue = document.getElementById('rentValue');
+    const rentValue = document.getElementById('rentValue');
     if (rentSlider && rentValue) {
+        // Update slider gradient progress
+        const updateSliderProgress = () => {
+            const min = parseFloat(rentSlider.min);
+            const max = parseFloat(rentSlider.max);
+            const value = parseFloat(rentSlider.value);
+            const progress = ((value - min) / (max - min)) * 100;
+            rentSlider.style.setProperty('--slider-progress', progress + '%');
+        };
+        
+        updateSliderProgress(); // Initial progress
+        
         rentSlider.addEventListener('input', () => {
             const value = parseFloat(rentSlider.value);
             window.appState.rentAdjustment = value;
             rentValue.textContent = formatNumber(value, '$');
-            console.log('[Life Simulator] 💰 Rent slider:', value);
+            
+            // Update slider gradient
+            updateSliderProgress();
+            
+            // Dynamic savings calculation
+            const savings = window.appState.baseRent - value;
+            if (savings > 0) {
+                rentValue.textContent = formatNumber(value, '$') + ' 💚';
+                rentValue.style.color = 'var(--green-600)';
+            } else if (savings < 0) {
+                rentValue.textContent = formatNumber(value, '$') + ' 📈';
+                rentValue.style.color = 'var(--red-600)';
+            } else {
+                rentValue.style.color = 'var(--blue-600)';
+            }
+            
+            console.log('[Life Simulator] 💰 Rent slider:', value, 'Savings:', savings);
             recalculateAll();
         });
-        console.log('[Life Simulator] ✅ Rent slider bound');
+        console.log('[Life Simulator] ✅ Rent slider bound with dynamic feedback');
     }
     
     // D. Transport Radio Buttons
@@ -489,38 +573,112 @@ function initLifeSimulator() {
     }
     console.log('[Life Simulator] ✅ Transport radios bound');
     
-    // E. Dining Slider
+    // E. Dining Slider with Dynamic Feedback
     const diningSlider = document.getElementById('diningSlider');
     const diningValue = document.getElementById('diningValue');
     if (diningSlider && diningValue) {
+        // Update slider gradient progress
+        const updateDiningProgress = () => {
+            const progress = parseFloat(diningSlider.value);
+            diningSlider.style.setProperty('--slider-progress', progress + '%');
+        };
+        
+        updateDiningProgress(); // Initial progress
+        
         diningSlider.addEventListener('input', () => {
             const value = parseFloat(diningSlider.value);
             window.appState.diningLevel = value;
-            diningValue.textContent = value + '%';
+            
+            // Update slider gradient
+            updateDiningProgress();
+            
+            // Dynamic emoji feedback
+            let emoji = '🥗';
+            if (value < 25) emoji = '👨‍🍳';
+            else if (value < 50) emoji = '🍱';
+            else if (value < 75) emoji = '🍕';
+            else emoji = '🍔';
+            
+            diningValue.textContent = value + '% ' + emoji;
             console.log('[Life Simulator] 🍽️ Dining slider:', value);
             recalculateAll();
         });
-        console.log('[Life Simulator] ✅ Dining slider bound');
+        console.log('[Life Simulator] ✅ Dining slider bound with dynamic feedback');
     }
     
     console.log('[Life Simulator] ✅ All controls initialized!');
 }
 
 function initWaterfallChart() {
-    console.log('[Waterfall] Initializing chart...');
+    console.log('[Waterfall] Initializing chart with precision tooltips...');
+    
+    // Add hover tooltips to waterfall bars
+    const waterfallItems = document.querySelectorAll('.waterfall-item');
+    waterfallItems.forEach((item, index) => {
+        const bar = item.querySelector('.waterfall-bar');
+        if (!bar) return;
+        
+        // Create tooltip
+        const tooltip = document.createElement('div');
+        tooltip.className = 'waterfall-tooltip';
+        bar.appendChild(tooltip);
+        
+        // Update tooltip content on hover
+        item.addEventListener('mouseenter', () => {
+            const dataValue = parseFloat(bar.getAttribute('data-value')) || 0;
+            const label = item.querySelector('.waterfall-label')?.textContent || '';
+            
+            let tooltipText = label + ': ' + formatNumber(dataValue, '$');
+            
+            // PRECISION BREAKDOWN from TaxCalculatorService
+            if (label.includes('Taxes') && window.appState.taxBreakdown) {
+                const { federal, state, socialSecurity, medicare, additionalMedicare } = window.appState.taxBreakdown;
+                const federalMonthly = federal / 12;
+                const stateMonthly = state / 12;
+                const ssMonthly = socialSecurity / 12;
+                const medicareMonthly = (medicare + additionalMedicare) / 12;
+                
+                tooltipText = `Federal: ${formatNumber(federalMonthly, '$')}\n`;
+                tooltipText += `State: ${formatNumber(stateMonthly, '$')}\n`;
+                tooltipText += `Social Security: ${formatNumber(ssMonthly, '$')}\n`;
+                tooltipText += `Medicare: ${formatNumber(medicareMonthly, '$')}`;
+            }
+            
+            // Housing tooltip with rent details
+            if (label.includes('Housing')) {
+                const cityName = window.appState.cityBName || 'City';
+                const savings = window.appState.baseRent - window.appState.adjustedHousingCost;
+                tooltipText = `${cityName} Rent: ${formatNumber(window.appState.baseRent, '$')}\n`;
+                if (savings > 0) {
+                    tooltipText += `Savings: ${formatNumber(savings, '$')} 💚`;
+                } else if (savings < 0) {
+                    tooltipText += `Increase: ${formatNumber(Math.abs(savings), '$')} 📈`;
+                }
+            }
+            
+            tooltip.textContent = tooltipText;
+        });
+    });
+    
     updateWaterfallChart();
 }
 
 function initRollingNumbers() {
     const elements = document.querySelectorAll('.rolling-number');
-    console.log('[Rolling] Found', elements.length, 'elements');
+    console.log('[Rolling] Found', elements.length, 'elements - initializing with stagger');
     
-    elements.forEach((el) => {
+    elements.forEach((el, index) => {
         const target = parseFloat(el.getAttribute('data-target'));
         if (!isNaN(target)) {
             const prefix = el.getAttribute('data-prefix') || '';
             const isPercent = el.classList.contains('delta-percent');
-            animateRollingNumber(el, target, prefix, isPercent);
+            
+            // Stagger animation for visual appeal
+            setTimeout(() => {
+                el.classList.add('number-rolling');
+                animateRollingNumber(el, target, prefix, isPercent);
+                setTimeout(() => el.classList.remove('number-rolling'), 600);
+            }, index * 100);
         }
     });
 }
@@ -544,6 +702,66 @@ function initCitySwapper() {
         }
     });
     console.log('[City Swap] ✅ Listener bound');
+}
+
+/**
+ * Initialize Mobile Sticky Header
+ * Shows verdict and residual when scrolling down
+ */
+function initMobileStickyHeader() {
+    const mobileSticky = document.getElementById('mobileSticky');
+    if (!mobileSticky) {
+        console.log('[Mobile Sticky] Element not found');
+        return;
+    }
+    
+    let lastScrollY = window.scrollY;
+    const threshold = 200; // Show after scrolling 200px
+    
+    const updateStickyHeader = () => {
+        const currentScrollY = window.scrollY;
+        
+        // Show when scrolling down past threshold
+        if (currentScrollY > threshold && currentScrollY > lastScrollY) {
+            mobileSticky.classList.add('visible');
+        } else if (currentScrollY < threshold) {
+            mobileSticky.classList.remove('visible');
+        }
+        
+        lastScrollY = currentScrollY;
+    };
+    
+    // Throttle scroll event
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                updateStickyHeader();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+    
+    console.log('[Mobile Sticky] ✅ Initialized');
+}
+
+/**
+ * Update mobile sticky header when verdict changes
+ */
+function updateMobileStickyHeader() {
+    const verdictMini = document.getElementById('verdictMini');
+    const residualMini = document.getElementById('residualMini');
+    
+    if (verdictMini) {
+        const verdict = classifyVerdict(window.appState.deltaPercent);
+        verdictMini.textContent = getVerdictText(verdict);
+        verdictMini.className = 'verdict-mini verdict-' + verdict.toLowerCase().replace('_', '-');
+    }
+    
+    if (residualMini) {
+        residualMini.textContent = formatNumber(window.appState.residual, '$');
+    }
 }
 
 function initFormValidation() {
@@ -640,9 +858,28 @@ function checkGamification() {
         (previousVerdict === 'NO_GO' || previousVerdict === 'WARNING') &&
         (newVerdict === 'GO' || newVerdict === 'CONDITIONAL')) {
         triggerCelebration();
+        triggerSuccessPulse(); // Green pulse on sticky header
     }
     
     previousVerdict = newVerdict;
+}
+
+/**
+ * Trigger success pulse animation on verdict improvement
+ */
+function triggerSuccessPulse() {
+    const verdictHero = document.getElementById('verdictHero');
+    const mobileSticky = document.getElementById('mobileSticky');
+    
+    if (verdictHero) {
+        verdictHero.classList.add('pulse-success');
+        setTimeout(() => verdictHero.classList.remove('pulse-success'), 2000);
+    }
+    
+    if (mobileSticky) {
+        mobileSticky.style.animation = 'successPulse 1s cubic-bezier(0.25, 0.8, 0.25, 1) 2';
+        setTimeout(() => mobileSticky.style.animation = '', 2000);
+    }
 }
 
 function triggerCelebration() {
@@ -700,22 +937,37 @@ function showSuccessMessage() {
         transform: translate(-50%, -50%);
         background: linear-gradient(135deg, #22c55e, #16a34a);
         color: white;
-        padding: 1rem 2rem;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 1.25rem;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        padding: 2rem 3rem;
+        border-radius: 24px;
+        font-weight: 800;
+        font-size: 2rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         z-index: 10001;
-        animation: popIn 0.3s ease-out;
+        animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        text-align: center;
+        backdrop-filter: blur(12px);
     `;
-    message.textContent = '🎉 You found a way to make it work!';
+    
+    message.innerHTML = `
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
+        <div>You found a way to make it work!</div>
+        <div style="font-size: 1rem; font-weight: 600; margin-top: 0.5rem; opacity: 0.9;">Keep optimizing!</div>
+    `;
     
     document.body.appendChild(message);
     
+    // Pulse animation
     setTimeout(() => {
-        message.style.animation = 'popOut 0.3s ease-out';
-        setTimeout(() => message.remove(), 300);
-    }, 2000);
+        message.style.transform = 'translate(-50%, -50%) scale(1.05)';
+        setTimeout(() => {
+            message.style.transform = 'translate(-50%, -50%) scale(1)';
+        }, 150);
+    }, 300);
+    
+    setTimeout(() => {
+        message.style.animation = 'popOut 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+        setTimeout(() => message.remove(), 400);
+    }, 2500);
 }
 
 // ============================================
@@ -883,6 +1135,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initWaterfallChart();
     initRollingNumbers();
     initCitySwapper();
+    initMobileStickyHeader(); // 📱 Mobile sticky header
     
     // 초기 재계산 (서버 데이터로 한 번 실행)
     console.log('');
@@ -892,9 +1145,48 @@ document.addEventListener('DOMContentLoaded', function() {
     
     recalculateAll();
     
+    // Initial entrance animations for lifestyle items
+    setTimeout(() => {
+        const lifestyleItems = document.querySelectorAll('.lifestyle-item');
+        lifestyleItems.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                item.style.transition = 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                item.style.opacity = '1';
+                item.style.transform = 'scale(1)';
+            }, index * 100);
+        });
+    }, 300);
+    
+    // Initial progress bar animations
+    setTimeout(() => {
+        const currentProgress = document.getElementById('currentCityProgress');
+        const newProgress = document.getElementById('newCityProgress');
+        
+        if (currentProgress) {
+            const width = currentProgress.style.width || '0%';
+            currentProgress.style.width = '0%';
+            setTimeout(() => {
+                currentProgress.style.transition = 'width 1s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                currentProgress.style.width = width;
+            }, 100);
+        }
+        
+        if (newProgress) {
+            const width = newProgress.style.width || '0%';
+            newProgress.style.width = '0%';
+            setTimeout(() => {
+                newProgress.style.transition = 'width 1s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                newProgress.style.width = width;
+            }, 200);
+        }
+    }, 500);
+    
     console.log('');
     console.log('═══════════════════════════════════════════');
     console.log('✅ RESULT PAGE INITIALIZATION COMPLETE');
+    console.log('✨ THE GLASS LAB IS READY');
     console.log('═══════════════════════════════════════════');
     console.log('');
 });

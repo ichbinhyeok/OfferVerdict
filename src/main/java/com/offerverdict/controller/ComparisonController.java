@@ -187,6 +187,10 @@ public class ComparisonController {
         model.addAttribute("otherJobLinks", comparisonService.relatedJobComparisons(cityEntryA.getSlug(), cityEntryB.getSlug(), buildQueryString(currentSalary, offerSalary)));
         model.addAttribute("otherCityLinks", comparisonService.relatedCityComparisons(jobInfo.getSlug(), cityEntryA.getSlug(), cityEntryB.getSlug(), buildQueryString(currentSalary, offerSalary)));
         model.addAttribute("structuredDataJson", toJson(buildStructuredData(title, metaDescription, canonicalUrl, result)));
+        
+        // Add tax breakdown for waterfall chart precision
+        model.addAttribute("currentTaxBreakdown", comparisonService.getTaxBreakdown(safeCurrentSalary, cityEntryA.getState()));
+        model.addAttribute("offerTaxBreakdown", comparisonService.getTaxBreakdown(safeOfferSalary, cityEntryB.getState()));
 
         return "result";
     }

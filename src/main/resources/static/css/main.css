@@ -190,23 +190,43 @@ h3 {
   color: var(--text-primary);
 }
 
-/* Edit Panel Accordion */
+/* Edit Panel Accordion - "The Glass Lab" Style */
 .edit-panel {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border-subtle);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  opacity: 0;
+  transform: translateY(-10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0);
 }
 
 .edit-panel.open {
   max-height: 800px;
+  opacity: 1;
+  transform: translateY(0);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .edit-panel-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--space-xl);
+  animation: slideUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .edit-grid {
