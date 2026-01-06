@@ -34,7 +34,8 @@ import java.util.stream.Collectors;
 
 @Controller
 public class ComparisonController {
-    private static final double MIN_SALARY = 30_000;
+    // 하한선을 1,000으로 낮춰 13,333 같은 숫자 입력을 허용합니다.
+    private static final double MIN_SALARY = 1_000;
     private static final double MAX_SALARY = 1_000_000;
 
     private final DataRepository repository;
@@ -60,7 +61,6 @@ public class ComparisonController {
                        RedirectAttributes redirectAttributes,
                        Model model) {
 
-        // 1. 모든 필수 파라미터가 있으면 결과 페이지로 리다이렉트 (pSEO 연결)
         if (job != null && cityA != null && cityB != null && currentSalary != null && offerSalary != null) {
             String normalizedJob = SlugNormalizer.normalize(job);
             String normalizedCityA = SlugNormalizer.normalize(cityA);
@@ -68,6 +68,7 @@ public class ComparisonController {
 
             Optional<JobInfo> jobInfo = resolveJobInput(job, normalizedJob);
             Optional<CityCostEntry> cityMatchA = resolveCityInput(cityA, normalizedCityA);
+            // [수정됨] CityMatchB -> CityCostEntry 로 변경하여 오타 수정
             Optional<CityCostEntry> cityMatchB = resolveCityInput(cityB, normalizedCityB);
 
             if (jobInfo.isPresent() && cityMatchA.isPresent() && cityMatchB.isPresent()) {
@@ -83,15 +84,13 @@ public class ComparisonController {
             }
         }
 
-        // 2. 파라미터가 없거나 첫 진입 시: 홈 페이지(index.html) 렌더링
-        // 이 데이터들이 주입되어야 드롭다운이 정상적으로 작동합니다.
         model.addAttribute("jobs", repository.getJobs());
         model.addAttribute("cities", repository.getCities());
         model.addAttribute("title", "OfferVerdict | Reality-check your job move");
         model.addAttribute("metaDescription", "Compare your actual buying power with taxes and cost of living.");
         model.addAttribute("jobsByCategory", groupJobsByCategory());
 
-        return "index"; // templates/index.html 파일명을 문자열로 반환
+        return "index";
     }
 
     @GetMapping("/{job}-salary-{cityA}-vs-{cityB}")
