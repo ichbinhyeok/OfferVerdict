@@ -13,6 +13,7 @@ public class CityCostEntry {
     private double medianIncome;
     private double avgHousePrice;
     private Map<String, Double> details;
+    private Map<String, Double> lifestyle;
 
     public CityCostEntry() {
     }
@@ -95,5 +96,14 @@ public class CityCostEntry {
     @JsonProperty("details")
     public void setDetails(Map<String, Double> details) {
         this.details = details;
+    }
+
+    public Map<String, Double> getLifestyle() {
+        return lifestyle;
+    }
+
+    @JsonProperty("lifestyle")
+    public void setLifestyle(Map<String, Double> lifestyle) {
+        this.lifestyle = lifestyle;
     }
 }

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:fragment="head(title, description, canonicalUrl, ogTitle, ogDescription, ogUrl, ogImageUrl)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">OfferVerdict</title>
+    <meta name="description" th:attr="content=${description}"/>
+    <link rel="canonical" th:if="${canonicalUrl}" th:attr="href=${canonicalUrl}"/>
+    
+    <!-- Open Graph -->
+    <meta property="og:title" th:if="${ogTitle}" th:attr="content=${ogTitle}"/>
+    <meta property="og:description" th:if="${ogDescription}" th:attr="content=${ogDescription}"/>
+    <meta property="og:url" th:if="${ogUrl}" th:attr="content=${ogUrl}"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:image" th:if="${ogImageUrl}" th:attr="content=${ogImageUrl}"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" th:if="${ogTitle}" th:attr="content=${ogTitle}"/>
+    <meta name="twitter:description" th:if="${ogDescription}" th:attr="content=${ogDescription}"/>
+    <meta name="twitter:image" th:if="${ogImageUrl}" th:attr="content=${ogImageUrl}"/>
+    
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/verdict.css}">
+    <link rel="stylesheet" th:href="@{/css/ads.css}">
+</head>
+

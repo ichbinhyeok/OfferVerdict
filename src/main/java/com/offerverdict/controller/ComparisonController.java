@@ -34,9 +34,9 @@ import java.util.stream.Collectors;
 
 @Controller
 public class ComparisonController {
-    // 하한선을 1,000으로 낮춰 13,333 같은 숫자 입력을 허용합니다.
+    // 유연한 검증: 1,000 ~ 10,000,000 허용
     private static final double MIN_SALARY = 1_000;
-    private static final double MAX_SALARY = 1_000_000;
+    private static final double MAX_SALARY = 10_000_000;
 
     private final DataRepository repository;
     private final ComparisonService comparisonService;
@@ -62,25 +62,39 @@ public class ComparisonController {
                        Model model) {
 
         if (job != null && cityA != null && cityB != null && currentSalary != null && offerSalary != null) {
-            String normalizedJob = SlugNormalizer.normalize(job);
-            String normalizedCityA = SlugNormalizer.normalize(cityA);
-            String normalizedCityB = SlugNormalizer.normalize(cityB);
+            try {
+                String normalizedJob = SlugNormalizer.normalize(job);
+                String normalizedCityA = SlugNormalizer.normalize(cityA);
+                String normalizedCityB = SlugNormalizer.normalize(cityB);
 
-            Optional<JobInfo> jobInfo = resolveJobInput(job, normalizedJob);
-            Optional<CityCostEntry> cityMatchA = resolveCityInput(cityA, normalizedCityA);
-            // [수정됨] CityMatchB -> CityCostEntry 로 변경하여 오타 수정
-            Optional<CityCostEntry> cityMatchB = resolveCityInput(cityB, normalizedCityB);
+                Optional<JobInfo> jobInfo = resolveJobInput(job, normalizedJob);
+                Optional<CityCostEntry> cityMatchA = resolveCityInput(cityA, normalizedCityA);
+                Optional<CityCostEntry> cityMatchB = resolveCityInput(cityB, normalizedCityB);
 
-            if (jobInfo.isPresent() && cityMatchA.isPresent() && cityMatchB.isPresent()) {
-                String targetPath = String.format("/%s-salary-%s-vs-%s",
-                        jobInfo.get().getSlug(),
-                        cityMatchA.get().getSlug(),
-                        cityMatchB.get().getSlug());
+                if (jobInfo.isPresent() && cityMatchA.isPresent() && cityMatchB.isPresent()) {
+                    // Validate salaries
+                    if (currentSalary < MIN_SALARY || currentSalary > MAX_SALARY ||
+                        offerSalary < MIN_SALARY || offerSalary > MAX_SALARY) {
+                        model.addAttribute("validationMessage", 
+                            String.format("Salaries must be between $%,.0f and $%,.0f", MIN_SALARY, MAX_SALARY));
+                    } else {
+                        String targetPath = String.format("/%s-salary-%s-vs-%s",
+                                jobInfo.get().getSlug(),
+                                cityMatchA.get().getSlug(),
+                                cityMatchB.get().getSlug());
 
-                RedirectView redirectView = new RedirectView(targetPath, true);
-                redirectView.setStatusCode(HttpStatus.FOUND);
-                addRedirectParams(redirectAttributes, currentSalary, offerSalary, householdType, housingType);
-                return redirectView;
+                        RedirectView redirectView = new RedirectView(targetPath, true);
+                        redirectView.setStatusCode(HttpStatus.FOUND);
+                        addRedirectParams(redirectAttributes, currentSalary, offerSalary, householdType, housingType);
+                        return redirectView;
+                    }
+                } else {
+                    model.addAttribute("validationMessage", 
+                        "Could not find matching job or cities. Please check your inputs.");
+                }
+            } catch (Exception e) {
+                model.addAttribute("validationMessage", 
+                    "An error occurred. Please check your inputs and try again.");
             }
         }
 
@@ -142,6 +156,7 @@ public class ComparisonController {
                 155);
 
         String canonicalUrl = comparisonService.buildCanonicalUrl(canonicalPath);
+        String ogImageUrl = comparisonService.buildCanonicalUrl("/share/" + jobInfo.getSlug() + "-salary-" + cityEntryA.getSlug() + "-vs-" + cityEntryB.getSlug() + ".png?currentSalary=" + Math.round(safeCurrentSalary) + "&offerSalary=" + Math.round(safeOfferSalary) + "&delta=" + Math.round(result.getDeltaPercent()) + "&verdict=" + result.getVerdict().name());
 
         model.addAttribute("title", title);
         model.addAttribute("metaDescription", metaDescription);
@@ -149,6 +164,7 @@ public class ComparisonController {
         model.addAttribute("ogTitle", title);
         model.addAttribute("ogDescription", metaDescription);
         model.addAttribute("ogUrl", canonicalUrl);
+        model.addAttribute("ogImageUrl", ogImageUrl);
         model.addAttribute("job", jobInfo);
         model.addAttribute("cityA", cityEntryA);
         model.addAttribute("cityB", cityEntryB);

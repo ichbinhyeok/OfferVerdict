@@ -10,3 +10,4 @@ public class OfferVerdictApplication {
         SpringApplication.run(OfferVerdictApplication.class, args);
     }
 }
+ 

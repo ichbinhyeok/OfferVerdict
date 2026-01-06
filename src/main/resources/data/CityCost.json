@@ -2,22 +2,26 @@
   {
     "city": "New York", "state": "NY", "slug": "new-york-ny",
     "avgRent": 3800, "colIndex": 160, "medianIncome": 75000, "avgHousePrice": 850000,
-    "details": { "groceries": 550, "transport": 140, "utilities": 160, "misc": 300 }
+    "details": { "groceries": 550, "transport": 140, "utilities": 160, "misc": 300 },
+    "lifestyle": { "sunnyDays": 224, "walkScore": 88, "crimeRate": 35, "avgCommute": 42, "bikeScore": 67 }
   },
   {
     "city": "San Francisco", "state": "CA", "slug": "san-francisco-ca",
     "avgRent": 3500, "colIndex": 180, "medianIncome": 110000, "avgHousePrice": 1300000,
-    "details": { "groceries": 600, "transport": 130, "utilities": 150, "misc": 350 }
+    "details": { "groceries": 600, "transport": 130, "utilities": 150, "misc": 350 },
+    "lifestyle": { "sunnyDays": 259, "walkScore": 86, "crimeRate": 38, "avgCommute": 33, "bikeScore": 70 }
   },
   {
     "city": "Austin", "state": "TX", "slug": "austin-tx",
     "avgRent": 1900, "colIndex": 110, "medianIncome": 80000, "avgHousePrice": 550000,
-    "details": { "groceries": 400, "transport": 100, "utilities": 140, "misc": 200 }
+    "details": { "groceries": 400, "transport": 100, "utilities": 140, "misc": 200 },
+    "lifestyle": { "sunnyDays": 228, "walkScore": 42, "crimeRate": 35, "avgCommute": 25, "bikeScore": 70 }
   },
   {
     "city": "Seattle", "state": "WA", "slug": "seattle-wa",
     "avgRent": 2400, "colIndex": 145, "medianIncome": 105000, "avgHousePrice": 800000,
-    "details": { "groceries": 500, "transport": 120, "utilities": 110, "misc": 250 }
+    "details": { "groceries": 500, "transport": 120, "utilities": 110, "misc": 250 },
+    "lifestyle": { "sunnyDays": 152, "walkScore": 73, "crimeRate": 42, "avgCommute": 28, "bikeScore": 71 }
   },
   {
     "city": "Los Angeles", "state": "CA", "slug": "los-angeles-ca",

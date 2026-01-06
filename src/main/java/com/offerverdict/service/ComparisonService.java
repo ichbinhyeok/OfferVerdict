@@ -6,6 +6,7 @@ import com.offerverdict.model.CityCostEntry;
 import com.offerverdict.model.ComparisonBreakdown;
 import com.offerverdict.model.ComparisonResult;
 import com.offerverdict.model.JobInfo;
+import com.offerverdict.model.LifestyleMetrics;
 import com.offerverdict.model.Verdict;
 import com.offerverdict.model.HouseholdType;
 import com.offerverdict.model.HousingType;
@@ -49,10 +50,22 @@ public class ComparisonService {
         double deltaPercent = computeDeltaPercent(current.getResidual(), offer.getResidual());
         Verdict verdict = classifyVerdict(deltaPercent);
 
+        double maxRes = Math.max(Math.abs(current.getResidual()), Math.abs(offer.getResidual()));
+        if (maxRes < 1.0) {
+            maxRes = 1.0;
+        }
+
+        // Calculate hourly rates for lifestyle metrics
+        double currentHourlyRate = currentSalary / 2080.0; // 2080 hours per year
+        double offerHourlyRate = offerSalary / 2080.0;
+
         ComparisonResult result = new ComparisonResult();
         result.setCurrent(current);
         result.setOffer(offer);
         result.setDeltaPercent(deltaPercent);
+        result.setMaxResidual(maxRes);
+        result.setCurrentLifestyle(new LifestyleMetrics(current.getResidual(), currentHourlyRate));
+        result.setOfferLifestyle(new LifestyleMetrics(offer.getResidual(), offerHourlyRate));
         result.setVerdict(verdict);
         result.setVerdictCopy(generateVerdictCopy(verdict, deltaPercent));
         return result;
