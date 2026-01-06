@@ -68,39 +68,90 @@
 
     <!-- Mobile Sticky Header -->
     <div class="mobile-sticky-header" id="mobileSticky">
-        <div class="verdict-mini" id="verdictMini" th:text="${result?.verdict ?: 'GO'}">GO</div>
-        <div class="residual-mini" id="residualMini" th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0)) : '$0'}">$0</div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="verdict-mini" id="verdictMini" th:text="${result?.verdict ?: 'GO'}">GO</div>
+            <div class="residual-mini" id="residualMini">
+                <span th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0)) : '$0'}">$0</span>
+                <span class="unit" style="font-size: 0.75rem; opacity: 0.7;">/mo</span>
+            </div>
+        </div>
+        <button class="mobile-edit-btn" onclick="document.getElementById('editInputsBtn').click();" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.5rem;">
+            ✏️
+        </button>
     </div>
 
     <!-- Split-View Dashboard Container -->
     <main class="dashboard-container">
         <!-- LEFT STICKY COLUMN: "Command Center" (40%) -->
         <div class="command-center">
-        <!-- Hero Verdict Section -->
+        <!-- Financial Receipt Card -->
         <section class="verdict-hero" th:classappend="'verdict-' + ${result?.verdict?.name()?.toLowerCase()?.replace('_','-') ?: 'go'}" id="verdictHero">
             <div class="verdict-hero-content">
+                <!-- Header -->
                 <p class="verdict-route" th:text="|${cityA?.city ?: 'City A'}, ${cityA?.state ?: 'ST'} → ${cityB?.city ?: 'City B'}, ${cityB?.state ?: 'ST'}|">Route</p>
                 <h1 class="verdict-badge" id="verdictBadge" th:text="${result?.verdict ?: 'GO'}">GO</h1>
                 <p class="verdict-copy" id="verdictCopy" th:text="${result?.verdictCopy ?: 'Calculating...'}">Punchy copy</p>
                 
-                <div class="verdict-metrics">
-                    <div class="metric-item">
-                        <div class="metric-label">Monthly Residual</div>
-                        <div class="metric-value" id="heroResidualValue">
-                            <span class="rolling-number tabular-nums" 
-                                  th:attr="data-target=${result?.offer?.residual != null ? #numbers.formatDecimal(result.offer.residual, 1, 0) : 0}" 
-                                  data-prefix="$"
-                                  th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0)) : '$0'}">$0</span>
+                <!-- Financial Receipt -->
+                <div class="financial-receipt">
+                    <!-- Income Section -->
+                    <div class="receipt-section">
+                        <div class="receipt-header">INCOME</div>
+                        <div class="receipt-line">
+                            <span class="receipt-label">Annual Salary</span>
+                            <span class="receipt-value" th:text="${offerSalary != null ? ('$' + #numbers.formatDecimal(offerSalary, 1, 0) + '/yr') : '$0/yr'}">$0/yr</span>
+                        </div>
+                        <div class="receipt-line highlight">
+                            <span class="receipt-label">Monthly Net</span>
+                            <span class="receipt-value" id="heroNetValue" th:text="${result?.offer?.netMonthly != null ? ('$' + #numbers.formatDecimal(result.offer.netMonthly, 1, 0) + '/mo') : '$0/mo'}">$0/mo</span>
                         </div>
                     </div>
-                    <div class="metric-item">
-                        <div class="metric-label">vs Current</div>
-                        <div class="metric-value">
-                            <span class="rolling-number tabular-nums delta-percent" id="deltaPercentValue"
-                                  th:attr="data-target=${result?.deltaPercent != null ? #numbers.formatDecimal(result.deltaPercent, 1, 1) : 0}"
-                                  th:text="${result?.deltaPercent != null ? (#numbers.formatDecimal(result.deltaPercent, 1, 1) + '%') : '0%'}">0%</span>
+                    
+                    <!-- Expenses Section -->
+                    <div class="receipt-section">
+                        <div class="receipt-header">EXPENSES</div>
+                        <div class="receipt-line">
+                            <span class="receipt-label">Housing</span>
+                            <span class="receipt-value negative" id="heroHousingValue" th:text="${result?.offer?.rent != null ? ('-$' + #numbers.formatDecimal(result.offer.rent, 1, 0) + '/mo') : '-$0/mo'}">-$0/mo</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span class="receipt-label">Living Costs</span>
+                            <span class="receipt-value negative" id="heroLivingValue" th:text="${result?.offer?.livingCost != null ? ('-$' + #numbers.formatDecimal(result.offer.livingCost, 1, 0) + '/mo') : '-$0/mo'}">-$0/mo</span>
                         </div>
                     </div>
+                    
+                    <!-- Total Section -->
+                    <div class="receipt-total">
+                        <div class="receipt-line total">
+                            <span class="receipt-label">MONTHLY RESIDUAL</span>
+                            <span class="receipt-value" id="heroResidualValue">
+                                <span class="rolling-number tabular-nums" 
+                                      th:attr="data-target=${result?.offer?.residual != null ? #numbers.formatDecimal(result.offer.residual, 1, 0) : 0}" 
+                                      data-prefix="$"
+                                      th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0)) : '$0'}">$0</span>
+                                <span class="unit">/mo</span>
+                            </span>
+                        </div>
+                        <div class="receipt-line delta">
+                            <span class="receipt-label">vs Current City</span>
+                            <span class="receipt-value" id="deltaPercentValue">
+                                <span class="rolling-number tabular-nums delta-percent"
+                                      th:attr="data-target=${result?.deltaPercent != null ? #numbers.formatDecimal(result.deltaPercent, 1, 1) : 0}"
+                                      th:text="${result?.deltaPercent != null ? (#numbers.formatDecimal(result.deltaPercent, 1, 1) + '%') : '0%'}">0%</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 3-Year Projection (Compact) -->
+                <div class="projection-compact">
+                    <div class="projection-header">3-YEAR SAVINGS</div>
+                    <div class="projection-bar-wrapper">
+                        <div class="projection-bar" id="compactProjectionBar">
+                            <span class="projection-amount" id="compact3YearValue" th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual * 36, 1, 0)) : '$0'}">$0</span>
+                        </div>
+                    </div>
+                    <div class="projection-subtitle" id="dreamTextCompact">Building wealth...</div>
                 </div>
             </div>
         </section>
@@ -109,6 +160,53 @@
 
         <!-- RIGHT SCROLLABLE COLUMN: "Lab" (60%) -->
         <div class="lab-controls">
+        
+        <!-- The Numbers Section: Waterfall Chart (Moved from Left) -->
+        <section class="evidence-section">
+            <h2 class="section-title">📊 The Numbers</h2>
+            <p class="section-subtitle" style="text-align: center; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+                Hover over each bar to see detailed breakdown
+            </p>
+            <div class="waterfall-chart" id="waterfallChart">
+                <div class="waterfall-item">
+                    <div class="waterfall-label">Gross</div>
+                    <div class="waterfall-bar waterfall-positive" id="waterfallGross" 
+                         th:attr="data-value=${offerTaxBreakdown?.grossIncome != null ? (offerTaxBreakdown.grossIncome / 12) : 0}"
+                         style="height: 100%">
+                        <span class="waterfall-value" id="waterfallGrossValue" 
+                              th:text="${offerTaxBreakdown?.grossIncome != null ? ('$' + #numbers.formatDecimal(offerTaxBreakdown.grossIncome / 12, 1, 0)) : '$0'}">$0</span>
+                    </div>
+                </div>
+                <div class="waterfall-item">
+                    <div class="waterfall-label">Taxes</div>
+                    <div class="waterfall-bar waterfall-negative" id="waterfallTaxes"
+                         th:attr="data-value=${offerTaxBreakdown?.totalTax != null ? (offerTaxBreakdown.totalTax / 12) : 0}"
+                         style="height: 0%">
+                        <span class="waterfall-value" id="waterfallTaxesValue"
+                              th:text="${offerTaxBreakdown?.totalTax != null ? ('$' + #numbers.formatDecimal(offerTaxBreakdown.totalTax / 12, 1, 0)) : '$0'}">$0</span>
+                    </div>
+                </div>
+                <div class="waterfall-item">
+                    <div class="waterfall-label">Housing</div>
+                    <div class="waterfall-bar waterfall-negative" id="waterfallHousing"
+                         th:attr="data-value=${result?.offer?.rent ?: 0}"
+                         style="height: 0%">
+                        <span class="waterfall-value" id="waterfallHousingValue"
+                              th:text="${result?.offer?.rent != null ? ('$' + #numbers.formatDecimal(result.offer.rent, 1, 0)) : '$0'}">$0</span>
+                    </div>
+                </div>
+                <div class="waterfall-item">
+                    <div class="waterfall-label">Residual</div>
+                    <div class="waterfall-bar waterfall-positive" id="waterfallResidual"
+                         th:attr="data-value=${result?.offer?.residual ?: 0}"
+                         style="height: 0%">
+                        <span class="waterfall-value" id="waterfallResidualValue"
+                              th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0)) : '$0'}">$0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
         <!-- Life Simulator Section -->
         <section class="simulator-section" id="lifeSimulator">
             <div class="section-header">
@@ -193,88 +291,48 @@
             </div>
         </section>
 
-        <!-- Evidence Section: Waterfall Chart -->
-        <section class="evidence-section">
-            <h2 class="section-title">The Numbers</h2>
-            <div class="waterfall-chart" id="waterfallChart">
-                <div class="waterfall-item">
-                    <div class="waterfall-label">Gross Income</div>
-                    <div class="waterfall-bar waterfall-positive" id="waterfallGross" 
-                         th:attr="data-value=${result?.offer?.netMonthly != null ? (result.offer.netMonthly * 12 / (1 - 0.0765)) : 0}"
-                         style="height: 100%">
-                        <span class="waterfall-value" id="waterfallGrossValue" 
-                              th:text="${result?.offer?.netMonthly != null ? ('$' + #numbers.formatDecimal(result.offer.netMonthly * 12 / (1 - 0.0765), 1, 0)) : '$0'}">$0</span>
-                    </div>
-                </div>
-                <div class="waterfall-item">
-                    <div class="waterfall-label">(-) Taxes</div>
-                    <div class="waterfall-bar waterfall-negative" id="waterfallTaxes"
-                         th:attr="data-value=${result?.offer?.netMonthly != null ? ((result.offer.netMonthly * 12 / (1 - 0.0765)) - (result.offer.netMonthly * 12)) : 0}"
-                         style="height: 0%">
-                        <span class="waterfall-value" id="waterfallTaxesValue"
-                              th:text="${result?.offer?.netMonthly != null ? ('$' + #numbers.formatDecimal((result.offer.netMonthly * 12 / (1 - 0.0765)) - (result.offer.netMonthly * 12), 1, 0)) : '$0'}">$0</span>
-                    </div>
-                </div>
-                <div class="waterfall-item">
-                    <div class="waterfall-label">(-) Housing</div>
-                    <div class="waterfall-bar waterfall-negative" id="waterfallHousing"
-                         th:attr="data-value=${result?.offer?.rent ?: 0}"
-                         style="height: 0%">
-                        <span class="waterfall-value" id="waterfallHousingValue"
-                              th:text="${result?.offer?.rent != null ? ('$' + #numbers.formatDecimal(result.offer.rent, 1, 0)) : '$0'}">$0</span>
-                    </div>
-                </div>
-                <div class="waterfall-item">
-                    <div class="waterfall-label">(=) Residual</div>
-                    <div class="waterfall-bar waterfall-positive" id="waterfallResidual"
-                         th:attr="data-value=${result?.offer?.residual ?: 0}"
-                         style="height: 0%">
-                        <span class="waterfall-value" id="waterfallResidualValue"
-                              th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0)) : '$0'}">$0</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Ad Placeholder 1 (Between Housing and Lifestyle) -->
+        <!-- Ad Placeholder 1 -->
         <div class="ad-placeholder">
             📢 Ad Space (Hidden in Production)
         </div>
 
         <!-- Lifestyle Multiplier -->
         <section class="lifestyle-section">
-            <h2 class="section-title">What that money really means</h2>
+            <h2 class="section-title">☕ What that money really means</h2>
+            <p class="section-subtitle" style="text-align: center; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+                Your monthly residual can buy...
+            </p>
             <div class="lifestyle-scroll">
                 <div class="lifestyle-item">
                     <div class="lifestyle-icon">☕</div>
                     <div class="lifestyle-value tabular-nums" th:text="${result?.offerLifestyle?.starbucksCoffees != null ? #numbers.formatDecimal(result.offerLifestyle.starbucksCoffees, 0, 0) : 0}">0</div>
-                    <div class="lifestyle-label">Starbucks</div>
+                    <div class="lifestyle-label">Starbucks<span class="unit">/mo</span></div>
                 </div>
                 <div class="lifestyle-item">
                     <div class="lifestyle-icon">📺</div>
                     <div class="lifestyle-value tabular-nums" th:text="${result?.offerLifestyle?.netflixSubscriptions != null ? #numbers.formatDecimal(result.offerLifestyle.netflixSubscriptions, 0, 0) : 0}">0</div>
-                    <div class="lifestyle-label">Netflix</div>
+                    <div class="lifestyle-label">Netflix<span class="unit">/mo</span></div>
                 </div>
                 <div class="lifestyle-item">
                     <div class="lifestyle-icon">🍔</div>
                     <div class="lifestyle-value tabular-nums" th:text="${result?.offerLifestyle?.uberEatsOrders != null ? #numbers.formatDecimal(result.offerLifestyle.uberEatsOrders, 0, 0) : 0}">0</div>
-                    <div class="lifestyle-label">Uber Eats</div>
+                    <div class="lifestyle-label">Uber Eats<span class="unit">/mo</span></div>
                 </div>
                 <div class="lifestyle-item">
                     <div class="lifestyle-icon">✈️</div>
                     <div class="lifestyle-value tabular-nums" th:text="${result?.offerLifestyle?.weekendGetaways != null ? #numbers.formatDecimal(result.offerLifestyle.weekendGetaways, 1, 1) : 0}">0</div>
-                    <div class="lifestyle-label">Weekends</div>
+                    <div class="lifestyle-label">Weekend Trips<span class="unit">/yr</span></div>
                 </div>
             </div>
         </section>
 
         <!-- 3-Year Asset Projection - "The Race Track" -->
         <section class="dream-section">
-            <h2 class="section-title">🏁 3-Year Asset Projection</h2>
+            <h2 class="section-title">🏁 3-Year Savings Race</h2>
             <div class="asset-projection">
                 <!-- Current City Progress Bar -->
                 <div class="projection-card">
-                    <div class="projection-label" th:text="|${cityA?.city ?: 'City A'} - Current|">Current City</div>
+                    <div class="projection-label" th:text="|${cityA?.city ?: 'City A'} (Current)|">Current City</div>
                     <div class="projection-progress">
                         <div class="projection-progress-fill" id="currentCityProgress" style="width: 0%">
                             <div class="projection-value tabular-nums" id="currentCityProjection"
@@ -282,12 +340,15 @@
                                  th:text="${result?.current?.residual != null ? ('$' + #numbers.formatDecimal(result.current.residual * 36, 1, 0)) : '$0'}">$0</div>
                         </div>
                     </div>
-                    <div class="projection-subtitle">36 months of saving</div>
+                    <div class="projection-subtitle">
+                        <span th:text="${result?.current?.residual != null ? ('$' + #numbers.formatDecimal(result.current.residual, 1, 0) + '/mo') : '$0/mo'}">$0/mo</span>
+                        <span style="opacity: 0.6;"> × 36 months</span>
+                    </div>
                 </div>
                 
                 <!-- New City Progress Bar -->
                 <div class="projection-card">
-                    <div class="projection-label" th:text="|${cityB?.city ?: 'City B'} - New Offer|">New City</div>
+                    <div class="projection-label" th:text="|${cityB?.city ?: 'City B'} (New Offer)|">New City</div>
                     <div class="projection-progress">
                         <div class="projection-progress-fill" id="newCityProgress" style="width: 0%">
                             <div class="projection-value tabular-nums" id="newCityProjection"
@@ -295,7 +356,10 @@
                                  th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual * 36, 1, 0)) : '$0'}">$0</div>
                         </div>
                     </div>
-                    <div class="projection-subtitle">36 months of saving</div>
+                    <div class="projection-subtitle">
+                        <span th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0) + '/mo') : '$0/mo'}">$0/mo</span>
+                        <span style="opacity: 0.6;"> × 36 months</span>
+                    </div>
                 </div>
             </div>
             

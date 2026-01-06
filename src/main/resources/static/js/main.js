@@ -167,6 +167,13 @@ function recalculateAll() {
         window.appState.adjustedDining + 
         window.appState.baseMisc;
     
+    console.log('[recalculateAll] 💵 Living costs:', {
+        transport: window.appState.adjustedTransport.toFixed(2),
+        dining: window.appState.adjustedDining.toFixed(2),
+        misc: window.appState.baseMisc.toFixed(2),
+        total: window.appState.adjustedLivingCost.toFixed(2)
+    });
+    
     // E. 새로운 잔여 소득(Residual) 계산
     const newResidual = window.appState.netMonthly - window.appState.adjustedHousingCost - window.appState.adjustedLivingCost;
     window.appState.residual = newResidual;
@@ -203,13 +210,19 @@ function recalculateAll() {
 // ============================================
 
 function updateHeroSection() {
-    console.log('[UI] Updating hero section...');
+    console.log('[UI] Updating hero section (Receipt View)...');
     
     const verdictHero = document.getElementById('verdictHero');
     const verdictBadge = document.getElementById('verdictBadge');
     const verdictCopy = document.getElementById('verdictCopy');
     const heroResidualValue = document.getElementById('heroResidualValue');
     const deltaPercentValue = document.getElementById('deltaPercentValue');
+    
+    // Receipt View specific elements
+    const heroHousingValue = document.getElementById('heroHousingValue');
+    const heroLivingValue = document.getElementById('heroLivingValue');
+    const compact3YearValue = document.getElementById('compact3YearValue');
+    const dreamTextCompact = document.getElementById('dreamTextCompact');
     
     const newVerdict = classifyVerdict(window.appState.deltaPercent);
     const verdictText = getVerdictText(newVerdict);
@@ -222,14 +235,26 @@ function updateHeroSection() {
     }
     
     // Hero 배경색 업데이트 (클래스 변경)
+    const verdictClass = 'verdict-' + newVerdict.toLowerCase().replace('_', '-');
+    
     if (verdictHero) {
         // 기존 verdict 클래스 제거
         const oldClasses = Array.from(verdictHero.classList).filter(c => c.startsWith('verdict-'));
         oldClasses.forEach(c => verdictHero.classList.remove(c));
         // 새로운 verdict 클래스 추가
-        const newClass = 'verdict-' + newVerdict.toLowerCase().replace('_', '-');
-        verdictHero.classList.add(newClass);
-        console.log('[UI] ✅ Hero class updated to:', newClass);
+        verdictHero.classList.add(verdictClass);
+        console.log('[UI] ✅ Hero class updated to:', verdictClass);
+    }
+    
+    // Mobile Sticky Header 배경색도 동일하게 업데이트
+    const mobileSticky = document.getElementById('mobileSticky');
+    if (mobileSticky) {
+        // 기존 verdict 클래스 제거
+        const oldClasses = Array.from(mobileSticky.classList).filter(c => c.startsWith('verdict-'));
+        oldClasses.forEach(c => mobileSticky.classList.remove(c));
+        // 새로운 verdict 클래스 추가
+        mobileSticky.classList.add(verdictClass);
+        console.log('[UI] ✅ Mobile sticky class updated to:', verdictClass);
     }
     
     // Verdict Copy 업데이트
@@ -237,19 +262,52 @@ function updateHeroSection() {
         verdictCopy.textContent = verdictCopyText;
     }
     
-    // Residual 값 업데이트
+    // Receipt: Housing 업데이트
+    if (heroHousingValue) {
+        heroHousingValue.textContent = '-' + formatNumber(window.appState.adjustedHousingCost, '$') + '/mo';
+    }
+    
+    // Receipt: Living Costs 업데이트
+    if (heroLivingValue) {
+        heroLivingValue.textContent = '-' + formatNumber(window.appState.adjustedLivingCost, '$') + '/mo';
+    }
+    
+    // Receipt: Residual 값 업데이트
     if (heroResidualValue) {
         const span = heroResidualValue.querySelector('.rolling-number');
         if (span) {
             animateRollingNumber(span, Math.round(window.appState.residual), '$');
-} else {
-            heroResidualValue.textContent = formatNumber(window.appState.residual, '$');
+        } else {
+            heroResidualValue.innerHTML = formatNumber(window.appState.residual, '$') + '<span class="unit">/mo</span>';
         }
     }
     
-    // Delta Percent 업데이트
+    // Receipt: Delta Percent 업데이트
     if (deltaPercentValue) {
-        animateRollingNumber(deltaPercentValue, window.appState.deltaPercent, '', true);
+        const span = deltaPercentValue.querySelector('.rolling-number');
+        if (span) {
+            animateRollingNumber(span, window.appState.deltaPercent, '', true);
+        }
+    }
+    
+    // Compact 3-Year Projection
+    if (compact3YearValue) {
+        const threeYearTotal = window.appState.residual * 36;
+        compact3YearValue.textContent = formatNumber(threeYearTotal, '$');
+    }
+    
+    // Compact Dream Text
+    if (dreamTextCompact && window.appState.residual > 0) {
+        const monthsToTesla = Math.ceil(45000 / window.appState.residual);
+        if (monthsToTesla <= 24) {
+            dreamTextCompact.textContent = `🚗 Tesla Model 3 in ${monthsToTesla} months`;
+        } else if (monthsToTesla <= 60) {
+            dreamTextCompact.textContent = `🏠 House down payment in ${Math.ceil(50000 / window.appState.residual)} months`;
+        } else {
+            dreamTextCompact.textContent = `💰 Saving ${formatNumber(window.appState.residual * 12, '$')}/year`;
+        }
+    } else if (dreamTextCompact) {
+        dreamTextCompact.textContent = '⚠️ Optimize to start saving';
     }
 }
 
@@ -431,21 +489,42 @@ function initEditPanel() {
         e.preventDefault();
         e.stopPropagation();
         
-        const isOpen = editPanel.classList.contains('open');
+            const isOpen = editPanel.classList.contains('open');
         console.log('[Edit Panel] 🔄 Toggling, current state:', isOpen);
         
         if (isOpen) {
             editPanel.classList.remove('open');
             editBtn.innerHTML = '<span>✏️</span> Edit Inputs';
+            editBtn.classList.remove('pulse');
             console.log('[Edit Panel] ✅ Panel closed');
         } else {
             editPanel.classList.add('open');
             editBtn.innerHTML = '<span>✏️</span> Close';
+            editBtn.classList.remove('pulse');
             console.log('[Edit Panel] ✅ Panel opened');
+            
+            // Auto-scroll to panel with smooth animation
+            setTimeout(() => {
+                editPanel.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest',
+                    inline: 'nearest'
+                });
+            }, 150); // Wait for accordion animation to start
         }
     });
     
-    console.log('[Edit Panel] ✅ Event listener bound successfully');
+    // Add pulse animation on first load to draw attention
+    setTimeout(() => {
+        editBtn.classList.add('pulse');
+    }, 1000);
+    
+    // Remove pulse after first hover
+    editBtn.addEventListener('mouseenter', () => {
+        editBtn.classList.remove('pulse');
+    }, { once: true });
+    
+    console.log('[Edit Panel] ✅ Event listener bound with auto-scroll');
 }
 
 function initLifeSimulator() {

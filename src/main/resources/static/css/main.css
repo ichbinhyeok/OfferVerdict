@@ -145,21 +145,52 @@ h3 {
 }
 
 .page-header {
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border-subtle);
-  padding: var(--space-md) var(--space-xl);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 1rem 1.5rem;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .header-content {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+}
+
+/* Logo */
+.logo {
+  font-size: 1.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+/* Responsive Header */
+@media (max-width: 640px) {
+  .page-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .logo {
+    font-size: 1.25rem;
+  }
 }
 
 .logo {
@@ -174,20 +205,58 @@ h3 {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  padding: var(--space-sm) var(--space-lg);
-  background: var(--bg-subtle);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-secondary);
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: white;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-edit-inputs::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .btn-edit-inputs:hover {
-  background: var(--zinc-200);
-  color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-edit-inputs:hover::before {
+  opacity: 1;
+}
+
+.btn-edit-inputs:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Pulse animation to draw attention */
+@keyframes editPulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
+  }
+}
+
+.btn-edit-inputs.pulse {
+  animation: editPulse 2s infinite;
 }
 
 /* Edit Panel Accordion - "The Glass Lab" Style */
@@ -617,5 +686,80 @@ h3 {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ============================================
+   FOOTER - Glass Lab Style
+   ============================================ */
+
+.site-footer {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 2rem 1.5rem;
+  margin-top: 4rem;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.footer-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.trust-badges {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.trust-badge {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.trust-badge:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsive Footer */
+@media (max-width: 640px) {
+  .site-footer {
+    padding: 1.5rem 1rem;
+    margin-top: 2rem;
+  }
+  
+  .footer-text {
+    font-size: 0.8125rem;
+  }
+  
+  .trust-badges {
+    gap: 0.75rem;
+  }
+  
+  .trust-badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
   }
 }
