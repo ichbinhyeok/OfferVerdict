@@ -8,7 +8,6 @@ import com.offerverdict.model.ComparisonResult;
 import com.offerverdict.model.HouseholdType;
 import com.offerverdict.model.HousingType;
 import com.offerverdict.model.JobInfo;
-import com.offerverdict.model.Verdict;
 import com.offerverdict.service.ComparisonService;
 import com.offerverdict.util.MetaDescriptionUtil;
 import com.offerverdict.util.SlugNormalizer;
@@ -56,8 +55,6 @@ public class ComparisonController {
                        @RequestParam(required = false) String cityB,
                        @RequestParam(required = false) Double currentSalary,
                        @RequestParam(required = false) Double offerSalary,
-                       @RequestParam(required = false, defaultValue = "SINGLE") String householdType,
-                       @RequestParam(required = false, defaultValue = "RENT") String housingType,
                        RedirectAttributes redirectAttributes,
                        Model model) {
 
@@ -83,10 +80,12 @@ public class ComparisonController {
                                 cityMatchA.get().getSlug(),
                                 cityMatchB.get().getSlug());
 
-                        RedirectView redirectView = new RedirectView(targetPath, true);
-                        redirectView.setStatusCode(HttpStatus.FOUND);
-                        addRedirectParams(redirectAttributes, currentSalary, offerSalary, householdType, housingType);
-                        return redirectView;
+                        if (targetPath != null) {
+                            RedirectView redirectView = new RedirectView(targetPath, true);
+                            redirectView.setStatusCode(HttpStatus.FOUND);
+                            addRedirectParams(redirectAttributes, currentSalary, offerSalary);
+                            return redirectView;
+                        }
                     }
                 } else {
                     model.addAttribute("validationMessage", 
@@ -113,8 +112,6 @@ public class ComparisonController {
                           @PathVariable String cityB,
                           @RequestParam double currentSalary,
                           @RequestParam double offerSalary,
-                          @RequestParam(required = false, defaultValue = "SINGLE") String householdType,
-                          @RequestParam(required = false, defaultValue = "RENT") String housingType,
                           RedirectAttributes redirectAttributes,
                           Model model) {
 
@@ -130,13 +127,14 @@ public class ComparisonController {
         if (!job.equals(jobInfo.getSlug()) || !cityA.equals(cityEntryA.getSlug()) || !cityB.equals(cityEntryB.getSlug())
                 || !SlugNormalizer.isCanonicalCitySlug(cityEntryA.getSlug()) || !SlugNormalizer.isCanonicalCitySlug(cityEntryB.getSlug())) {
             RedirectView redirectView = new RedirectView(canonicalPath, true);
-            addRedirectParams(redirectAttributes, currentSalary, offerSalary, householdType, housingType);
+            addRedirectParams(redirectAttributes, currentSalary, offerSalary);
             redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
             return redirectView;
         }
 
-        HouseholdType parsedHouseholdType = normalizeHouseholdType(householdType);
-        HousingType parsedHousingType = normalizeHousingType(housingType);
+        // Always use default values - user can adjust in Life Simulator
+        HouseholdType parsedHouseholdType = HouseholdType.SINGLE;
+        HousingType parsedHousingType = HousingType.RENT;
 
         String validationMessage = validateSalary(currentSalary).orElse(null);
         validationMessage = validationMessage == null ? validateSalary(offerSalary).orElse(null) : validationMessage;
@@ -144,7 +142,16 @@ public class ComparisonController {
         double safeCurrentSalary = clampSalary(currentSalary);
         double safeOfferSalary = clampSalary(offerSalary);
 
+        // Execute comparison and ensure result is not null
         ComparisonResult result = comparisonService.compare(cityEntryA.getSlug(), cityEntryB.getSlug(), safeCurrentSalary, safeOfferSalary, parsedHouseholdType, parsedHousingType);
+        
+        // Defensive null checks for result components
+        if (result == null) {
+            throw new IllegalStateException("ComparisonResult cannot be null");
+        }
+        if (result.getCurrent() == null || result.getOffer() == null) {
+            throw new IllegalStateException("ComparisonResult.current and ComparisonResult.offer cannot be null");
+        }
 
         String title = "Is $" + Math.round(offerSalary) + " in " + comparisonService.formatCityName(cityEntryB)
                 + " better than $" + Math.round(currentSalary) + " in " + comparisonService.formatCityName(cityEntryA)
@@ -158,6 +165,7 @@ public class ComparisonController {
         String canonicalUrl = comparisonService.buildCanonicalUrl(canonicalPath);
         String ogImageUrl = comparisonService.buildCanonicalUrl("/share/" + jobInfo.getSlug() + "-salary-" + cityEntryA.getSlug() + "-vs-" + cityEntryB.getSlug() + ".png?currentSalary=" + Math.round(safeCurrentSalary) + "&offerSalary=" + Math.round(safeOfferSalary) + "&delta=" + Math.round(result.getDeltaPercent()) + "&verdict=" + result.getVerdict().name());
 
+        // Safely add all attributes with guaranteed non-null values
         model.addAttribute("title", title);
         model.addAttribute("metaDescription", metaDescription);
         model.addAttribute("canonicalUrl", canonicalUrl);
@@ -176,8 +184,8 @@ public class ComparisonController {
         model.addAttribute("validationMessage", validationMessage);
         model.addAttribute("cities", repository.getCities());
         model.addAttribute("jobs", repository.getJobs());
-        model.addAttribute("otherJobLinks", comparisonService.relatedJobComparisons(cityEntryA.getSlug(), cityEntryB.getSlug(), buildQueryString(currentSalary, offerSalary, parsedHouseholdType, parsedHousingType)));
-        model.addAttribute("otherCityLinks", comparisonService.relatedCityComparisons(jobInfo.getSlug(), cityEntryA.getSlug(), cityEntryB.getSlug(), buildQueryString(currentSalary, offerSalary, parsedHouseholdType, parsedHousingType)));
+        model.addAttribute("otherJobLinks", comparisonService.relatedJobComparisons(cityEntryA.getSlug(), cityEntryB.getSlug(), buildQueryString(currentSalary, offerSalary)));
+        model.addAttribute("otherCityLinks", comparisonService.relatedCityComparisons(jobInfo.getSlug(), cityEntryA.getSlug(), cityEntryB.getSlug(), buildQueryString(currentSalary, offerSalary)));
         model.addAttribute("structuredDataJson", toJson(buildStructuredData(title, metaDescription, canonicalUrl, result)));
 
         return "result";
@@ -237,38 +245,15 @@ public class ComparisonController {
         }
     }
 
-    private HouseholdType normalizeHouseholdType(String householdType) {
-        try {
-            return HouseholdType.valueOf(householdType.toUpperCase());
-        } catch (Exception e) {
-            return HouseholdType.SINGLE;
-        }
-    }
-
-    private HousingType normalizeHousingType(String housingType) {
-        try {
-            return HousingType.valueOf(housingType.toUpperCase());
-        } catch (Exception e) {
-            return HousingType.RENT;
-        }
-    }
-
     private void addRedirectParams(RedirectAttributes redirectAttributes,
                                    double currentSalary,
-                                   double offerSalary,
-                                   String householdType,
-                                   String housingType) {
+                                   double offerSalary) {
         redirectAttributes.addAttribute("currentSalary", currentSalary);
         redirectAttributes.addAttribute("offerSalary", offerSalary);
-        redirectAttributes.addAttribute("householdType", normalizeHouseholdType(householdType).name());
-        redirectAttributes.addAttribute("housingType", normalizeHousingType(housingType).name());
     }
 
-    private String buildQueryString(double currentSalary, double offerSalary, HouseholdType householdType, HousingType housingType) {
-        return "?currentSalary=" + currentSalary
-                + "&offerSalary=" + offerSalary
-                + "&householdType=" + householdType.name()
-                + "&housingType=" + housingType.name();
+    private String buildQueryString(double currentSalary, double offerSalary) {
+        return "?currentSalary=" + currentSalary + "&offerSalary=" + offerSalary;
     }
 
     @GetMapping("/admin/reload-data")

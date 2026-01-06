@@ -30,7 +30,6 @@
                     <div class="step-dot active" data-step="1">1</div>
                     <div class="step-dot" data-step="2">2</div>
                     <div class="step-dot" data-step="3">3</div>
-                    <div class="step-dot" data-step="4">4</div>
                 </div>
 
                 <!-- Step 1: Job & Cities -->
@@ -78,38 +77,12 @@
                     
                     <div class="step-buttons">
                         <button type="button" class="btn btn-secondary" onclick="prevStep(1)">← Back</button>
-                        <button type="button" class="btn btn-primary" onclick="nextStep(3)">Continue →</button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(3)">Review →</button>
                     </div>
                 </div>
 
-                <!-- Step 3: Household & Housing -->
+                <!-- Step 3: Review & Submit -->
                 <div class="step-group" data-step="3">
-                    <h3 style="margin-bottom: var(--space-xl); font-size: var(--text-2xl);">Tell us about your situation</h3>
-                    
-                    <div class="input-group">
-                        <label class="input-label">Household Type</label>
-                        <select name="householdType" id="householdSelect" class="minimal-select">
-                            <option value="SINGLE">Single</option>
-                            <option value="FAMILY">Family</option>
-                        </select>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label class="input-label">Housing Type</label>
-                        <select name="housingType" id="housingSelect" class="minimal-select">
-                            <option value="RENT">Rent</option>
-                            <option value="OWN">Own</option>
-                        </select>
-                    </div>
-                    
-                    <div class="step-buttons">
-                        <button type="button" class="btn btn-secondary" onclick="prevStep(2)">← Back</button>
-                        <button type="button" class="btn btn-primary" onclick="nextStep(4)">Review →</button>
-                    </div>
-                </div>
-
-                <!-- Step 4: Review & Submit -->
-                <div class="step-group" data-step="4">
                     <h3 style="margin-bottom: var(--space-xl); font-size: var(--text-2xl);">Review your comparison</h3>
                     
                     <div class="glass-card" style="margin-bottom: var(--space-xl); padding: var(--space-xl);">
@@ -128,15 +101,11 @@
                                     <p id="reviewOffer" style="font-size: var(--text-xl); font-weight: 600; margin-top: var(--space-xs); color: var(--text-primary);">-</p>
                                 </div>
                             </div>
-                            <div>
-                                <span class="hero-eyebrow">Household & Housing</span>
-                                <p id="reviewHousehold" style="font-size: var(--text-xl); font-weight: 600; margin-top: var(--space-xs); color: var(--text-primary);">-</p>
-                            </div>
                         </div>
                     </div>
                     
                     <div class="step-buttons">
-                        <button type="button" class="btn btn-secondary" onclick="prevStep(3)">← Back</button>
+                        <button type="button" class="btn btn-secondary" onclick="prevStep(2)">← Back</button>
                         <button type="submit" class="btn btn-primary">Get Verdict →</button>
                     </div>
                 </div>

@@ -69,48 +69,28 @@
     <!-- Main Content: Top-Down Layout -->
     <main class="main-content">
         <!-- Hero Verdict Section (Top Center) -->
-        <section class="verdict-hero" th:classappend="'verdict-' + ${result.verdict.name().toLowerCase().replace('_','-')}" id="verdictHero">
+        <section class="verdict-hero" th:classappend="'verdict-' + ${result?.verdict?.name()?.toLowerCase()?.replace('_','-') ?: 'go'}" id="verdictHero">
             <div class="verdict-hero-content">
-                <p class="verdict-route" th:text="|${cityA.city}, ${cityA.state} → ${cityB.city}, ${cityB.state}|">Route</p>
-                <div class="verdict-badge-container">
-                    <h1 class="verdict-badge" id="verdictBadge" th:text="${result.verdict}">GO</h1>
-                    <!-- Quick Correction Toggles -->
-                    <div class="quick-correction-toggles">
-                        <label class="correction-toggle">
-                            <input type="checkbox" id="ownHomeToggle"/>
-                            <span class="toggle-switch"></span>
-                            <span class="toggle-text">I Own a Home</span>
-                        </label>
-                        <label class="correction-toggle">
-                            <input type="checkbox" id="parentsToggle"/>
-                            <span class="toggle-switch"></span>
-                            <span class="toggle-text">Living with Parents</span>
-                        </label>
-                        <label class="correction-toggle">
-                            <input type="checkbox" id="splitRentToggle"/>
-                            <span class="toggle-switch"></span>
-                            <span class="toggle-text">Split Rent (Partner)</span>
-                        </label>
-                    </div>
-                </div>
-                <p class="verdict-copy" id="verdictCopy" th:text="${result.verdictCopy}">Punchy copy</p>
+                <p class="verdict-route" th:text="|${cityA?.city ?: 'City A'}, ${cityA?.state ?: 'ST'} → ${cityB?.city ?: 'City B'}, ${cityB?.state ?: 'ST'}|">Route</p>
+                <h1 class="verdict-badge" id="verdictBadge" th:text="${result?.verdict ?: 'GO'}">GO</h1>
+                <p class="verdict-copy" id="verdictCopy" th:text="${result?.verdictCopy ?: 'Calculating...'}">Punchy copy</p>
                 
                 <div class="verdict-metrics">
                     <div class="metric-item">
                         <div class="metric-label">Monthly Residual</div>
                         <div class="metric-value" id="heroResidualValue">
                             <span class="rolling-number tabular-nums" 
-                                  th:attr="data-target=${#numbers.formatDecimal(result.offer.residual, 1, 0)}" 
+                                  th:attr="data-target=${result?.offer?.residual != null ? #numbers.formatDecimal(result.offer.residual, 1, 0) : 0}" 
                                   data-prefix="$"
-                                  th:text="${'$' + #numbers.formatDecimal(result.offer.residual, 1, 0)}">$0</span>
+                                  th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0)) : '$0'}">$0</span>
                         </div>
                     </div>
                     <div class="metric-item">
                         <div class="metric-label">vs Current</div>
                         <div class="metric-value">
                             <span class="rolling-number tabular-nums delta-percent" id="deltaPercentValue"
-                                  th:attr="data-target=${#numbers.formatDecimal(result.deltaPercent, 1, 1)}"
-                                  th:text="|${#numbers.formatDecimal(result.deltaPercent, 1, 1)}%|">0%</span>
+                                  th:attr="data-target=${result?.deltaPercent != null ? #numbers.formatDecimal(result.deltaPercent, 1, 1) : 0}"
+                                  th:text="${result?.deltaPercent != null ? (#numbers.formatDecimal(result.deltaPercent, 1, 1) + '%') : '0%'}">0%</span>
                         </div>
                     </div>
                 </div>
@@ -121,53 +101,64 @@
         <section class="simulator-section" id="lifeSimulator">
             <div class="section-header">
                 <h2>🛠️ Can I survive there?</h2>
-                <p class="section-subtitle">Adjust your lifestyle to see if you can make it work</p>
+                <p class="section-subtitle">Adjust your lifestyle scenarios and watch the numbers change in real-time</p>
             </div>
 
             <div class="simulator-controls">
-                <!-- Housing Controls -->
+                <!-- Housing Scenario -->
                 <div class="control-group">
-                    <label class="control-label">Housing</label>
+                    <label class="control-label">🏠 Housing Scenario</label>
                     <div class="control-inputs">
-                        <div class="slider-control">
-                            <label>Monthly Rent</label>
-                            <div class="slider-wrapper">
-                                <input type="range" id="rentSlider" 
-                                       th:attr="data-base=${result.offer.rent}"
-                                       min="0" max="10000" step="50" 
-                                       th:value="${result.offer.rent}"/>
-                                <span class="slider-value" id="rentValue" th:text="${'$' + #numbers.formatDecimal(result.offer.rent, 1, 0)}">$0</span>
-                            </div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="housingScenario" value="RENT" id="housingRent" checked/>
+                                <span>💰 Renting (Default)</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="housingScenario" value="OWN" id="housingOwn"/>
+                                <span>🏡 Own Home (No rent, but property tax/maintenance)</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="housingScenario" value="PARENTS" id="housingParents"/>
+                                <span>👨‍👩‍👦 Living with Parents ($0 rent, +$300 social cost)</span>
+                            </label>
                         </div>
-                        <div class="toggle-control">
+                        
+                        <!-- Roommate Toggle -->
+                        <div class="toggle-control" style="margin-top: 1rem;">
                             <label class="toggle-label">
                                 <input type="checkbox" id="roommateToggle"/>
                                 <span class="toggle-slider"></span>
-                                <span class="toggle-text">Roommate (-40% rent)</span>
+                                <span class="toggle-text">💑 Split Rent with Partner/Roommate (-50%)</span>
                             </label>
                         </div>
-                        <div class="toggle-control">
-                            <label class="toggle-label">
-                                <input type="checkbox" id="parentsToggle"/>
-                                <span class="toggle-slider"></span>
-                                <span class="toggle-text">Live with Parents ($0 rent, +$200 social cost)</span>
-                            </label>
+                        
+                        <!-- Rent Slider (only visible when RENT is selected) -->
+                        <div class="slider-control" id="rentSliderGroup" style="margin-top: 1rem;">
+                            <label>Adjust Monthly Rent</label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="rentSlider" 
+                                       th:attr="data-base=${result?.offer?.rent ?: 0}"
+                                       min="0" max="10000" step="50" 
+                                       th:value="${result?.offer?.rent ?: 0}"/>
+                                <span class="slider-value" id="rentValue" th:text="${result?.offer?.rent != null ? ('$' + #numbers.formatDecimal(result.offer.rent, 1, 0)) : '$0'}">$0</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Transport Controls -->
                 <div class="control-group">
-                    <label class="control-label">Transport</label>
+                    <label class="control-label">🚗 Transportation</label>
                     <div class="control-inputs">
                         <div class="radio-group">
                             <label class="radio-label">
                                 <input type="radio" name="transport" value="car" id="transportCar" checked/>
-                                <span>Car Owner (Default)</span>
+                                <span>🚗 Car Owner (Default)</span>
                             </label>
                             <label class="radio-label">
                                 <input type="radio" name="transport" value="transit" id="transportTransit"/>
-                                <span>Public Transit Only (Save gas/insurance, Add pass cost)</span>
+                                <span>🚇 Public Transit Only (Save on gas/insurance)</span>
                             </label>
                         </div>
                     </div>
@@ -175,7 +166,7 @@
 
                 <!-- Dining Controls -->
                 <div class="control-group">
-                    <label class="control-label">Dining</label>
+                    <label class="control-label">🍽️ Dining & Lifestyle</label>
                     <div class="control-inputs">
                         <div class="slider-control">
                             <label>Home Cook ↔ Foodie</label>
@@ -183,17 +174,9 @@
                                 <input type="range" id="diningSlider" min="0" max="100" step="5" value="50"/>
                                 <span class="slider-value" id="diningValue">50%</span>
                             </div>
+                            <p style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.5rem;">0% = Cook every meal | 100% = Eat out frequently</p>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Simulator Result -->
-            <div class="simulator-result" id="simulatorResult">
-                <div class="result-preview">
-                    <div class="preview-label">New Residual</div>
-                    <div class="preview-value" id="newResidualValue">$0</div>
-                    <div class="preview-verdict" id="newVerdictBadge"></div>
                 </div>
             </div>
         </section>
@@ -205,37 +188,37 @@
                 <div class="waterfall-item">
                     <div class="waterfall-label">Gross Income</div>
                     <div class="waterfall-bar waterfall-positive" id="waterfallGross" 
-                         th:attr="data-value=${result.offer.netMonthly * 12 / (1 - 0.0765)}"
+                         th:attr="data-value=${result?.offer?.netMonthly != null ? (result.offer.netMonthly * 12 / (1 - 0.0765)) : 0}"
                          style="height: 100%">
                         <span class="waterfall-value" id="waterfallGrossValue" 
-                              th:text="${'$' + #numbers.formatDecimal(result.offer.netMonthly * 12 / (1 - 0.0765), 1, 0)}">$0</span>
+                              th:text="${result?.offer?.netMonthly != null ? ('$' + #numbers.formatDecimal(result.offer.netMonthly * 12 / (1 - 0.0765), 1, 0)) : '$0'}">$0</span>
                     </div>
                 </div>
                 <div class="waterfall-item">
                     <div class="waterfall-label">(-) Taxes</div>
                     <div class="waterfall-bar waterfall-negative" id="waterfallTaxes"
-                         th:attr="data-value=${(result.offer.netMonthly * 12 / (1 - 0.0765)) - (result.offer.netMonthly * 12)}"
+                         th:attr="data-value=${result?.offer?.netMonthly != null ? ((result.offer.netMonthly * 12 / (1 - 0.0765)) - (result.offer.netMonthly * 12)) : 0}"
                          style="height: 0%">
                         <span class="waterfall-value" id="waterfallTaxesValue"
-                              th:text="${'$' + #numbers.formatDecimal((result.offer.netMonthly * 12 / (1 - 0.0765)) - (result.offer.netMonthly * 12), 1, 0)}">$0</span>
+                              th:text="${result?.offer?.netMonthly != null ? ('$' + #numbers.formatDecimal((result.offer.netMonthly * 12 / (1 - 0.0765)) - (result.offer.netMonthly * 12), 1, 0)) : '$0'}">$0</span>
                     </div>
                 </div>
                 <div class="waterfall-item">
                     <div class="waterfall-label">(-) Housing</div>
                     <div class="waterfall-bar waterfall-negative" id="waterfallHousing"
-                         th:attr="data-value=${result.offer.rent}"
+                         th:attr="data-value=${result?.offer?.rent ?: 0}"
                          style="height: 0%">
                         <span class="waterfall-value" id="waterfallHousingValue"
-                              th:text="${'$' + #numbers.formatDecimal(result.offer.rent, 1, 0)}">$0</span>
+                              th:text="${result?.offer?.rent != null ? ('$' + #numbers.formatDecimal(result.offer.rent, 1, 0)) : '$0'}">$0</span>
                     </div>
                 </div>
                 <div class="waterfall-item">
                     <div class="waterfall-label">(=) Residual</div>
                     <div class="waterfall-bar waterfall-positive" id="waterfallResidual"
-                         th:attr="data-value=${result.offer.residual}"
+                         th:attr="data-value=${result?.offer?.residual ?: 0}"
                          style="height: 0%">
                         <span class="waterfall-value" id="waterfallResidualValue"
-                              th:text="${'$' + #numbers.formatDecimal(result.offer.residual, 1, 0)}">$0</span>
+                              th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0)) : '$0'}">$0</span>
                     </div>
                 </div>
             </div>
@@ -247,22 +230,22 @@
             <div class="lifestyle-scroll">
                 <div class="lifestyle-item">
                     <div class="lifestyle-icon">☕</div>
-                    <div class="lifestyle-value tabular-nums" th:text="${#numbers.formatDecimal(result.offerLifestyle.starbucksCoffees, 0, 0)}">0</div>
+                    <div class="lifestyle-value tabular-nums" th:text="${result?.offerLifestyle?.starbucksCoffees != null ? #numbers.formatDecimal(result.offerLifestyle.starbucksCoffees, 0, 0) : 0}">0</div>
                     <div class="lifestyle-label">Starbucks</div>
                 </div>
                 <div class="lifestyle-item">
                     <div class="lifestyle-icon">📺</div>
-                    <div class="lifestyle-value tabular-nums" th:text="${#numbers.formatDecimal(result.offerLifestyle.netflixSubscriptions, 0, 0)}">0</div>
+                    <div class="lifestyle-value tabular-nums" th:text="${result?.offerLifestyle?.netflixSubscriptions != null ? #numbers.formatDecimal(result.offerLifestyle.netflixSubscriptions, 0, 0) : 0}">0</div>
                     <div class="lifestyle-label">Netflix</div>
                 </div>
                 <div class="lifestyle-item">
                     <div class="lifestyle-icon">🍔</div>
-                    <div class="lifestyle-value tabular-nums" th:text="${#numbers.formatDecimal(result.offerLifestyle.uberEatsOrders, 0, 0)}">0</div>
+                    <div class="lifestyle-value tabular-nums" th:text="${result?.offerLifestyle?.uberEatsOrders != null ? #numbers.formatDecimal(result.offerLifestyle.uberEatsOrders, 0, 0) : 0}">0</div>
                     <div class="lifestyle-label">Uber Eats</div>
                 </div>
                 <div class="lifestyle-item">
                     <div class="lifestyle-icon">✈️</div>
-                    <div class="lifestyle-value tabular-nums" th:text="${#numbers.formatDecimal(result.offerLifestyle.weekendGetaways, 1, 1)}">0</div>
+                    <div class="lifestyle-value tabular-nums" th:text="${result?.offerLifestyle?.weekendGetaways != null ? #numbers.formatDecimal(result.offerLifestyle.weekendGetaways, 1, 1) : 0}">0</div>
                     <div class="lifestyle-label">Weekends</div>
                 </div>
             </div>
@@ -275,16 +258,16 @@
                 <div class="projection-card">
                     <div class="projection-label">Current City</div>
                     <div class="projection-value tabular-nums" id="currentCityProjection"
-                         th:attr="data-value=${result.current.residual * 36}"
-                         th:text="${'$' + #numbers.formatDecimal(result.current.residual * 36, 1, 0)}">$0</div>
-                    <div class="projection-subtitle" th:text="|${cityA.city} (36 months)|">City A (36 months)</div>
+                         th:attr="data-value=${result?.current?.residual != null ? (result.current.residual * 36) : 0}"
+                         th:text="${result?.current?.residual != null ? ('$' + #numbers.formatDecimal(result.current.residual * 36, 1, 0)) : '$0'}">$0</div>
+                    <div class="projection-subtitle" th:text="|${cityA?.city ?: 'City A'} (36 months)|">City A (36 months)</div>
                 </div>
                 <div class="projection-card">
                     <div class="projection-label">New City</div>
                     <div class="projection-value tabular-nums" id="newCityProjection"
-                         th:attr="data-value=${result.offer.residual * 36}"
-                         th:text="${'$' + #numbers.formatDecimal(result.offer.residual * 36, 1, 0)}">$0</div>
-                    <div class="projection-subtitle" th:text="|${cityB.city} (36 months)|">City B (36 months)</div>
+                         th:attr="data-value=${result?.offer?.residual != null ? (result.offer.residual * 36) : 0}"
+                         th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual * 36, 1, 0)) : '$0'}">$0</div>
+                    <div class="projection-subtitle" th:text="|${cityB?.city ?: 'City B'} (36 months)|">City B (36 months)</div>
                 </div>
             </div>
         </section>
@@ -294,13 +277,13 @@
             <h2 class="section-title">Quick Compare</h2>
             <div class="compare-card">
                 <div class="input-group">
-                    <label class="input-label">Compare <span th:text="${cityB.city}">City B</span> with:</label>
+                    <label class="input-label">Compare <span th:text="${cityB?.city ?: 'City B'}">City B</span> with:</label>
                     <select id="city-swap" class="minimal-select">
                         <option value="">Select a city...</option>
                         <option th:each="city : ${cities}"
-                                th:value="${city.slug}"
-                                th:text="|${city.city}, ${city.state}|"
-                                th:disabled="${city.slug == cityB.slug}"></option>
+                                th:value="${city?.slug ?: ''}"
+                                th:text="|${city?.city ?: 'Unknown'}, ${city?.state ?: ''}|"
+                                th:disabled="${city?.slug == cityB?.slug}"></option>
                     </select>
                 </div>
             </div>
@@ -316,23 +299,23 @@
 <!-- Initialize Simulator with Server Data (BEFORE main.js) -->
 <script th:inline="javascript">
     window.INITIAL_DATA = {
-        currentResidual: /*[[${result.current.residual}]]*/ 0,
-        offerResidual: /*[[${result.offer.residual}]]*/ 0,
-        offerNetMonthly: /*[[${result.offer.netMonthly}]]*/ 0,
-        offerRent: /*[[${result.offer.rent}]]*/ 0,
-        offerLivingCost: /*[[${result.offer.livingCost}]]*/ 0,
-        offerTransport: /*[[${result.offer.transport}]]*/ 0,
-        offerGroceries: /*[[${result.offer.groceries}]]*/ 0,
-        offerMisc: /*[[${result.offer.misc}]]*/ 0,
-        deltaPercent: /*[[${result.deltaPercent}]]*/ 0,
-        currentResidualAbs: /*[[${#numbers.formatDecimal(Math.abs(result.current.residual), 1, 0)}]]*/ 0,
-        currentResidual: /*[[${result.current.residual}]]*/ 0,
-        cityAAvgHousePrice: /*[[${cityA.avgHousePrice}]]*/ 0,
-        cityBAvgHousePrice: /*[[${cityB.avgHousePrice}]]*/ 0,
-        grossIncome: /*[[${result.offer.netMonthly * 12 / (1 - 0.0765)}]]*/ 0,
-        taxes: /*[[${(result.offer.netMonthly * 12 / (1 - 0.0765)) - (result.offer.netMonthly * 12)}]]*/ 0,
-        housingType: /*[[${housingType.name()}]]*/ 'RENT',
-        householdType: /*[[${householdType.name()}]]*/ 'SINGLE'
+        currentResidual: /*[[${result?.current?.residual ?: 0}]]*/ 0,
+        offerResidual: /*[[${result?.offer?.residual ?: 0}]]*/ 0,
+        offerNetMonthly: /*[[${result?.offer?.netMonthly ?: 0}]]*/ 0,
+        offerRent: /*[[${result?.offer?.rent ?: 0}]]*/ 0,
+        offerLivingCost: /*[[${result?.offer?.livingCost ?: 0}]]*/ 0,
+        offerTransport: /*[[${result?.offer?.transport ?: 0}]]*/ 0,
+        offerGroceries: /*[[${result?.offer?.groceries ?: 0}]]*/ 0,
+        offerMisc: /*[[${result?.offer?.misc ?: 0}]]*/ 0,
+        deltaPercent: /*[[${result?.deltaPercent ?: 0}]]*/ 0,
+        currentResidualAbs: /*[[${result?.current?.residual != null ? #numbers.formatDecimal(T(java.lang.Math).abs(result.current.residual), 1, 0) : 0}]]*/ 0,
+        currentResidual: /*[[${result?.current?.residual ?: 0}]]*/ 0,
+        cityAAvgHousePrice: /*[[${cityA?.avgHousePrice ?: 0}]]*/ 0,
+        cityBAvgHousePrice: /*[[${cityB?.avgHousePrice ?: 0}]]*/ 0,
+        grossIncome: /*[[${result?.offer?.netMonthly != null ? (result.offer.netMonthly * 12 / (1 - 0.0765)) : 0}]]*/ 0,
+        taxes: /*[[${result?.offer?.netMonthly != null ? ((result.offer.netMonthly * 12 / (1 - 0.0765)) - (result.offer.netMonthly * 12)) : 0}]]*/ 0,
+        housingType: /*[[${housingType?.name() ?: 'RENT'}]]*/ 'RENT',
+        householdType: /*[[${householdType?.name() ?: 'SINGLE'}]]*/ 'SINGLE'
     };
     console.log('INITIAL_DATA set:', window.INITIAL_DATA);
 </script>
