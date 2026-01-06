@@ -47,6 +47,7 @@
                         <select name="housingType" class="minimal-select" th:value="${housingType}">
                             <option value="RENT" th:selected="${housingType.name() == 'RENT'}">Renting</option>
                             <option value="OWN" th:selected="${housingType.name() == 'OWN'}">Own home</option>
+                            <option value="PARENTS" th:selected="${housingType.name() == 'PARENTS'}">Living with parents</option>
                         </select>
                     </div>
                     <div class="input-group">
@@ -68,11 +69,31 @@
     <!-- Main Content: Top-Down Layout -->
     <main class="main-content">
         <!-- Hero Verdict Section (Top Center) -->
-        <section class="verdict-hero" th:classappend="'verdict-' + ${result.verdict.name().toLowerCase().replace('_','-')}">
+        <section class="verdict-hero" th:classappend="'verdict-' + ${result.verdict.name().toLowerCase().replace('_','-')}" id="verdictHero">
             <div class="verdict-hero-content">
                 <p class="verdict-route" th:text="|${cityA.city}, ${cityA.state} → ${cityB.city}, ${cityB.state}|">Route</p>
-                <h1 class="verdict-badge" th:text="${result.verdict}">GO</h1>
-                <p class="verdict-copy" th:text="${result.verdictCopy}">Punchy copy</p>
+                <div class="verdict-badge-container">
+                    <h1 class="verdict-badge" id="verdictBadge" th:text="${result.verdict}">GO</h1>
+                    <!-- Quick Correction Toggles -->
+                    <div class="quick-correction-toggles">
+                        <label class="correction-toggle">
+                            <input type="checkbox" id="ownHomeToggle"/>
+                            <span class="toggle-switch"></span>
+                            <span class="toggle-text">I Own a Home</span>
+                        </label>
+                        <label class="correction-toggle">
+                            <input type="checkbox" id="parentsToggle"/>
+                            <span class="toggle-switch"></span>
+                            <span class="toggle-text">Living with Parents</span>
+                        </label>
+                        <label class="correction-toggle">
+                            <input type="checkbox" id="splitRentToggle"/>
+                            <span class="toggle-switch"></span>
+                            <span class="toggle-text">Split Rent (Partner)</span>
+                        </label>
+                    </div>
+                </div>
+                <p class="verdict-copy" id="verdictCopy" th:text="${result.verdictCopy}">Punchy copy</p>
                 
                 <div class="verdict-metrics">
                     <div class="metric-item">
@@ -87,7 +108,7 @@
                     <div class="metric-item">
                         <div class="metric-label">vs Current</div>
                         <div class="metric-value">
-                            <span class="rolling-number tabular-nums delta-percent" 
+                            <span class="rolling-number tabular-nums delta-percent" id="deltaPercentValue"
                                   th:attr="data-target=${#numbers.formatDecimal(result.deltaPercent, 1, 1)}"
                                   th:text="|${#numbers.formatDecimal(result.deltaPercent, 1, 1)}%|">0%</span>
                         </div>
@@ -177,24 +198,45 @@
             </div>
         </section>
 
-        <!-- Evidence Sections -->
+        <!-- Evidence Section: Waterfall Chart -->
         <section class="evidence-section">
             <h2 class="section-title">The Numbers</h2>
-            <div class="evidence-grid">
-                <div class="evidence-card">
-                    <div class="evidence-label">Net Monthly</div>
-                    <div class="evidence-value tabular-nums" th:text="${'$' + #numbers.formatDecimal(result.offer.netMonthly, 1, 0)}">$0</div>
-                    <div class="evidence-city" th:text="${cityB.city}">City B</div>
+            <div class="waterfall-chart" id="waterfallChart">
+                <div class="waterfall-item">
+                    <div class="waterfall-label">Gross Income</div>
+                    <div class="waterfall-bar waterfall-positive" id="waterfallGross" 
+                         th:attr="data-value=${result.offer.netMonthly * 12 / (1 - 0.0765)}"
+                         style="height: 100%">
+                        <span class="waterfall-value" id="waterfallGrossValue" 
+                              th:text="${'$' + #numbers.formatDecimal(result.offer.netMonthly * 12 / (1 - 0.0765), 1, 0)}">$0</span>
+                    </div>
                 </div>
-                <div class="evidence-card">
-                    <div class="evidence-label">Rent</div>
-                    <div class="evidence-value tabular-nums" th:text="${'$' + #numbers.formatDecimal(result.offer.rent, 1, 0)}">$0</div>
-                    <div class="evidence-city" th:text="${cityB.city}">City B</div>
+                <div class="waterfall-item">
+                    <div class="waterfall-label">(-) Taxes</div>
+                    <div class="waterfall-bar waterfall-negative" id="waterfallTaxes"
+                         th:attr="data-value=${(result.offer.netMonthly * 12 / (1 - 0.0765)) - (result.offer.netMonthly * 12)}"
+                         style="height: 0%">
+                        <span class="waterfall-value" id="waterfallTaxesValue"
+                              th:text="${'$' + #numbers.formatDecimal((result.offer.netMonthly * 12 / (1 - 0.0765)) - (result.offer.netMonthly * 12), 1, 0)}">$0</span>
+                    </div>
                 </div>
-                <div class="evidence-card">
-                    <div class="evidence-label">Living Cost</div>
-                    <div class="evidence-value tabular-nums" th:text="${'$' + #numbers.formatDecimal(result.offer.livingCost, 1, 0)}">$0</div>
-                    <div class="evidence-city" th:text="${cityB.city}">City B</div>
+                <div class="waterfall-item">
+                    <div class="waterfall-label">(-) Housing</div>
+                    <div class="waterfall-bar waterfall-negative" id="waterfallHousing"
+                         th:attr="data-value=${result.offer.rent}"
+                         style="height: 0%">
+                        <span class="waterfall-value" id="waterfallHousingValue"
+                              th:text="${'$' + #numbers.formatDecimal(result.offer.rent, 1, 0)}">$0</span>
+                    </div>
+                </div>
+                <div class="waterfall-item">
+                    <div class="waterfall-label">(=) Residual</div>
+                    <div class="waterfall-bar waterfall-positive" id="waterfallResidual"
+                         th:attr="data-value=${result.offer.residual}"
+                         style="height: 0%">
+                        <span class="waterfall-value" id="waterfallResidualValue"
+                              th:text="${'$' + #numbers.formatDecimal(result.offer.residual, 1, 0)}">$0</span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -226,25 +268,23 @@
             </div>
         </section>
 
-        <!-- Time to Dream -->
+        <!-- 3-Year Asset Projection -->
         <section class="dream-section">
-            <h2 class="section-title">Time to Dream</h2>
-            <div class="dream-grid">
-                <div class="dream-card">
-                    <div class="dream-icon">🏠</div>
-                    <div class="dream-title" th:text="|${cityB.city} → Home|">City B → Home</div>
-                    <div class="dream-value rolling-number tabular-nums" 
-                         th:attr="data-target=${result.offer.yearsToBuyHouse >= 999 ? 0 : #numbers.formatDecimal(result.offer.yearsToBuyHouse, 1, 1)}"
-                         th:text="${result.offer.yearsToBuyHouse >= 999 ? '∞' : ''}">0</div>
-                    <div class="dream-label">Years (20% down)</div>
+            <h2 class="section-title">3-Year Asset Projection</h2>
+            <div class="asset-projection">
+                <div class="projection-card">
+                    <div class="projection-label">Current City</div>
+                    <div class="projection-value tabular-nums" id="currentCityProjection"
+                         th:attr="data-value=${result.current.residual * 36}"
+                         th:text="${'$' + #numbers.formatDecimal(result.current.residual * 36, 1, 0)}">$0</div>
+                    <div class="projection-subtitle" th:text="|${cityA.city} (36 months)|">City A (36 months)</div>
                 </div>
-                <div class="dream-card">
-                    <div class="dream-icon">🚗</div>
-                    <div class="dream-title" th:text="|${cityB.city} → Tesla|">City B → Tesla</div>
-                    <div class="dream-value rolling-number tabular-nums"
-                         th:attr="data-target=${result.offer.monthsToBuyTesla >= 999 ? 0 : #numbers.formatDecimal(result.offer.monthsToBuyTesla, 1, 1)}"
-                         th:text="${result.offer.monthsToBuyTesla >= 999 ? '∞' : ''}">0</div>
-                    <div class="dream-label">Months</div>
+                <div class="projection-card">
+                    <div class="projection-label">New City</div>
+                    <div class="projection-value tabular-nums" id="newCityProjection"
+                         th:attr="data-value=${result.offer.residual * 36}"
+                         th:text="${'$' + #numbers.formatDecimal(result.offer.residual * 36, 1, 0)}">$0</div>
+                    <div class="projection-subtitle" th:text="|${cityB.city} (36 months)|">City B (36 months)</div>
                 </div>
             </div>
         </section>
@@ -285,7 +325,14 @@
         offerGroceries: /*[[${result.offer.groceries}]]*/ 0,
         offerMisc: /*[[${result.offer.misc}]]*/ 0,
         deltaPercent: /*[[${result.deltaPercent}]]*/ 0,
-        currentResidualAbs: /*[[${#numbers.formatDecimal(Math.abs(result.current.residual), 1, 0)}]]*/ 0
+        currentResidualAbs: /*[[${#numbers.formatDecimal(Math.abs(result.current.residual), 1, 0)}]]*/ 0,
+        currentResidual: /*[[${result.current.residual}]]*/ 0,
+        cityAAvgHousePrice: /*[[${cityA.avgHousePrice}]]*/ 0,
+        cityBAvgHousePrice: /*[[${cityB.avgHousePrice}]]*/ 0,
+        grossIncome: /*[[${result.offer.netMonthly * 12 / (1 - 0.0765)}]]*/ 0,
+        taxes: /*[[${(result.offer.netMonthly * 12 / (1 - 0.0765)) - (result.offer.netMonthly * 12)}]]*/ 0,
+        housingType: /*[[${housingType.name()}]]*/ 'RENT',
+        householdType: /*[[${householdType.name()}]]*/ 'SINGLE'
     };
     console.log('INITIAL_DATA set:', window.INITIAL_DATA);
 </script>

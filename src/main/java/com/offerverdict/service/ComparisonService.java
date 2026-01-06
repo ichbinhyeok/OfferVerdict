@@ -78,8 +78,29 @@ public class ComparisonService {
         double netAnnual = taxCalculatorService.calculateNetAnnual(salary, city.getState());
         double netMonthly = netAnnual / 12.0;
         double householdMultiplier = householdType == HouseholdType.FAMILY ? 1.4 : 1.0;
-        double rentBaseline = housingType == HousingType.OWN ? city.getAvgRent() * 0.6 : city.getAvgRent();
-        double rent = rentBaseline;
+        
+        // Housing Mode Logic: RENT, OWN, PARENTS
+        double rent;
+        double housingCost = 0.0; // Additional housing-related costs
+        
+        switch (housingType) {
+            case RENT:
+                rent = city.getAvgRent();
+                break;
+            case OWN:
+                rent = 0.0;
+                // Property Tax/Maintenance: 1.5% of property value / 12 months
+                housingCost = (city.getAvgHousePrice() * 0.015) / 12.0;
+                break;
+            case PARENTS:
+                rent = 0.0;
+                // Social Cost (Guilt Money): $300/month
+                housingCost = 300.0;
+                break;
+            default:
+                rent = city.getAvgRent();
+        }
+        
         double livingCost = costCalculatorService.calculateLivingCost(city, householdType);
         double groceries;
         double transport;
@@ -99,14 +120,16 @@ public class ComparisonService {
             misc = livingCost - (groceries + transport + utilities);
         }
 
-        double residual = netMonthly - (rent + livingCost);
+        // Total housing cost = rent + additional housing costs (property tax/maintenance or social cost)
+        double totalHousingCost = rent + housingCost;
+        double residual = netMonthly - (totalHousingCost + livingCost);
         double monthlyResidual = residual;
         double yearsToBuyHouse = monthlyResidual > 0 ? (city.getAvgHousePrice() * 0.20) / (monthlyResidual * 12) : 999.0;
         double monthsToBuyTesla = monthlyResidual > 0 ? 50000.0 / monthlyResidual : 999.0;
 
         ComparisonBreakdown breakdown = new ComparisonBreakdown();
         breakdown.setNetMonthly(netMonthly);
-        breakdown.setRent(rent);
+        breakdown.setRent(totalHousingCost); // Store total housing cost in rent field for backward compatibility
         breakdown.setLivingCost(livingCost);
         breakdown.setResidual(residual);
         breakdown.setGroceries(groceries);

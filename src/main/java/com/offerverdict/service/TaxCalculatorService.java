@@ -22,8 +22,13 @@ public class TaxCalculatorService {
     public double calculateNetAnnual(double salary, String stateCode) {
         TaxData taxData = repository.getTaxData();
         Map<String, StateTax> stateTaxMap = repository.stateTaxMap();
-        double federalTax = computeTax(salary, taxData.getFederal().getBrackets());
-        double stateTax = computeTax(salary, stateTaxMap.getOrDefault(stateCode.toUpperCase(Locale.US), defaultZeroState()).getBrackets());
+        
+        // Apply Standard Deduction ($14,600 for Single filer 2025)
+        double standardDeduction = 14600.0;
+        double taxableIncome = Math.max(0, salary - standardDeduction);
+        
+        double federalTax = computeTax(taxableIncome, taxData.getFederal().getBrackets());
+        double stateTax = computeTax(taxableIncome, stateTaxMap.getOrDefault(stateCode.toUpperCase(Locale.US), defaultZeroState()).getBrackets());
         double ficaTax = computeFica(salary, taxData.getFica());
         double totalTax = federalTax + stateTax + ficaTax;
         return Math.max(0, salary - totalTax);

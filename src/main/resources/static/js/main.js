@@ -1,9 +1,10 @@
 // ============================================
-// OFFERVERDICT V3.0 - Fully Working
+// OFFERVERDICT V3.0 - Correction-First UX
+// Robust Event Binding & Data Persistence
 // ============================================
 
 // ============================================
-// UTILITY FUNCTIONS - Number Formatting with Comma
+// UTILITY FUNCTIONS
 // ============================================
 
 function formatNumber(num, prefix = '') {
@@ -27,304 +28,426 @@ function formatPercent(num) {
 // GLOBAL STATE
 // ============================================
 
-let simulatorState = {
-    baseRent: 0,
-    baseNetMonthly: 0,
-    baseLivingCost: 0,
-    baseTransport: 0,
-    baseGroceries: 0,
-    baseMisc: 0,
-    baseResidual: 0,
+let currentState = {
+    // Base values from server
+    grossIncome: 0,
+    netMonthly: 0,
+    rent: 0,
+    livingCost: 0,
+    taxes: 0,
+    residual: 0,
     currentResidual: 0,
-    currentDeltaPercent: 0,
-    baseDeltaPercent: 0
+    deltaPercent: 0,
+    // City data
+    cityAAvgHousePrice: 0,
+    cityBAvgHousePrice: 0,
+    // User preferences from Index page
+    housingType: 'RENT',
+    householdType: 'SINGLE'
 };
 
 let previousVerdict = null;
 let confettiActive = false;
+let isInitialized = false;
 
 // ============================================
-// INITIALIZATION
+// INITIALIZATION - Using window.load for Thymeleaf
 // ============================================
 
-// Wait for both DOM and inline scripts to load
 function initializeApp() {
-    console.log('Initializing app...');
-    console.log('INITIAL_DATA available:', !!window.INITIAL_DATA);
+    if (isInitialized) {
+        console.warn('App already initialized, skipping...');
+        return;
+    }
     
-    initEditPanel();
+    console.log('Initializing OfferVerdict V3.0...');
+    console.log('INITIAL_DATA available:', !!window.INITIAL_DATA);
     
     // Load initial data first (if available)
     if (window.INITIAL_DATA) {
         console.log('Loading initial data:', window.INITIAL_DATA);
         loadInitialData(window.INITIAL_DATA);
+    } else {
+        console.error('INITIAL_DATA not found! Make sure Thymeleaf rendered the data.');
     }
     
-    // Then initialize simulator (wait a bit for DOM to be fully ready)
-    setTimeout(() => {
-        initLifeSimulator();
-    }, 100);
-    
-    // Initialize rolling numbers (wait for elements to be ready)
-    setTimeout(() => {
-        initRollingNumbers();
-    }, 200);
-    
-    // Initialize city swapper
-    setTimeout(() => {
-        initCitySwapper();
-    }, 100);
-    
-    // Form validation for index page
+    // Initialize components in order
+    initEditPanel();
+    initQuickCorrectionToggles();
+    initWaterfallChart();
+    initRollingNumbers();
+    initCitySwapper();
     initFormValidation();
+    
+    // Apply initial housing state from server
+    applyInitialHousingState();
+    
+    isInitialized = true;
+    console.log('App initialized successfully');
 }
 
-// Try multiple initialization strategies
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-    // DOM already loaded, but wait for inline scripts
-    setTimeout(initializeApp, 100);
-}
+// Use window.load to ensure all Thymeleaf-rendered data is ready
+window.addEventListener('load', function() {
+    // Small delay to ensure all inline scripts are executed
+    setTimeout(initializeApp, 50);
+});
 
 // ============================================
-// EDIT PANEL ACCORDION
+// EDIT PANEL ACCORDION - Robust Event Binding
 // ============================================
 
 function initEditPanel() {
     const editBtn = document.getElementById('editInputsBtn');
     const editPanel = document.getElementById('editPanel');
     
-    if (editBtn && editPanel) {
-        editBtn.addEventListener('click', () => {
-            editPanel.classList.toggle('open');
-            const isOpen = editPanel.classList.contains('open');
-            editBtn.innerHTML = isOpen ? '<span>✏️</span> Close' : '<span>✏️</span> Edit Inputs';
-        });
-    }
-}
-
-// ============================================
-// LIFE SIMULATOR - FULLY WORKING
-// ============================================
-
-function initLifeSimulator() {
-    console.log('Initializing Life Simulator...');
-    
-    const rentSlider = document.getElementById('rentSlider');
-    const rentValue = document.getElementById('rentValue');
-    const roommateToggle = document.getElementById('roommateToggle');
-    const parentsToggle = document.getElementById('parentsToggle');
-    const transportCar = document.getElementById('transportCar');
-    const transportTransit = document.getElementById('transportTransit');
-    const diningSlider = document.getElementById('diningSlider');
-    const diningValue = document.getElementById('diningValue');
-    
-    if (!rentSlider) {
-        console.log('Rent slider not found, skipping simulator init');
-        console.log('Available elements:', {
-            rentSlider: !!rentSlider,
-            lifeSimulator: !!document.getElementById('lifeSimulator'),
-            allInputs: document.querySelectorAll('input[type="range"]').length
-        });
+    if (!editBtn) {
+        console.error('[Edit Panel] Button #editInputsBtn not found in DOM');
         return;
     }
     
-    console.log('All simulator controls found');
+    if (!editPanel) {
+        console.error('[Edit Panel] Panel #editPanel not found in DOM');
+        return;
+    }
     
-    // Rent Slider - Real-time update with comma
-    rentSlider.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        if (rentValue) {
-            rentValue.textContent = formatNumber(value, '$');
+    console.log('[Edit Panel] Elements found, binding events...');
+    
+    // Use multiple event types for robustness
+    const togglePanel = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const isOpen = editPanel.classList.contains('open');
+        console.log('[Edit Panel] Toggling panel, current state:', isOpen);
+        
+        if (isOpen) {
+            editPanel.classList.remove('open');
+            editBtn.innerHTML = '<span>✏️</span> Edit Inputs';
+        } else {
+            editPanel.classList.add('open');
+            editBtn.innerHTML = '<span>✏️</span> Close';
         }
-        updateSimulator();
-    });
+        
+        // Verify the class was added/removed
+        const verifyOpen = editPanel.classList.contains('open');
+        if (!isOpen && !verifyOpen) {
+            console.error('[Edit Panel] Failed to add "open" class! Panel element:', editPanel);
+        } else if (isOpen && verifyOpen) {
+            console.error('[Edit Panel] Failed to remove "open" class! Panel element:', editPanel);
+        } else {
+            console.log('[Edit Panel] Successfully toggled, new state:', verifyOpen);
+        }
+    };
     
-    // Roommate Toggle
-    if (roommateToggle) {
-        roommateToggle.addEventListener('change', () => {
-            if (roommateToggle.checked && parentsToggle) {
+    // Bind multiple event types
+    editBtn.addEventListener('click', togglePanel);
+    editBtn.addEventListener('touchstart', togglePanel);
+    
+    // Fallback: Check if panel opens after click
+    editBtn.addEventListener('click', function() {
+        setTimeout(function() {
+            const isOpen = editPanel.classList.contains('open');
+            const maxHeight = window.getComputedStyle(editPanel).maxHeight;
+            if (!isOpen && maxHeight === '0px') {
+                console.error('[Edit Panel] Panel did not open after click! maxHeight:', maxHeight);
+            }
+        }, 100);
+    });
+}
+
+// ============================================
+// QUICK CORRECTION TOGGLES
+// ============================================
+
+function initQuickCorrectionToggles() {
+    const ownHomeToggle = document.getElementById('ownHomeToggle');
+    const parentsToggle = document.getElementById('parentsToggle');
+    const splitRentToggle = document.getElementById('splitRentToggle');
+    
+    if (ownHomeToggle) {
+        ownHomeToggle.addEventListener('change', () => {
+            if (ownHomeToggle.checked && parentsToggle) {
                 parentsToggle.checked = false;
             }
-            updateSimulator();
+            recalculateAndUpdate();
         });
     }
     
-    // Parents Toggle
     if (parentsToggle) {
         parentsToggle.addEventListener('change', () => {
-            if (parentsToggle.checked && roommateToggle) {
-                roommateToggle.checked = false;
+            if (parentsToggle.checked && ownHomeToggle) {
+                ownHomeToggle.checked = false;
             }
-            updateSimulator();
+            recalculateAndUpdate();
         });
     }
     
-    // Transport Radio
-    if (transportCar && transportTransit) {
-        transportCar.addEventListener('change', updateSimulator);
-        transportTransit.addEventListener('change', updateSimulator);
-    }
-    
-    // Dining Slider
-    if (diningSlider && diningValue) {
-        diningSlider.addEventListener('input', (e) => {
-            diningValue.textContent = e.target.value + '%';
-            updateSimulator();
+    if (splitRentToggle) {
+        splitRentToggle.addEventListener('change', () => {
+            recalculateAndUpdate();
         });
     }
-    
-    // Initial update
-    updateSimulator();
 }
+
+// ============================================
+// APPLY INITIAL HOUSING STATE FROM SERVER
+// ============================================
+
+function applyInitialHousingState() {
+    const ownHomeToggle = document.getElementById('ownHomeToggle');
+    const parentsToggle = document.getElementById('parentsToggle');
+    
+    console.log('[Initial State] Applying housing type:', currentState.housingType);
+    
+    // Set toggles based on server-side housing type
+    if (currentState.housingType === 'OWN' && ownHomeToggle) {
+        ownHomeToggle.checked = true;
+        console.log('[Initial State] Set "Own Home" toggle to checked');
+    } else if (currentState.housingType === 'PARENTS' && parentsToggle) {
+        parentsToggle.checked = true;
+        console.log('[Initial State] Set "Living with Parents" toggle to checked');
+    }
+    
+    // Recalculate immediately to reflect initial state
+    if (currentState.housingType === 'OWN' || currentState.housingType === 'PARENTS') {
+        console.log('[Initial State] Recalculating with initial housing state...');
+        recalculateAndUpdate();
+    }
+}
+
+// ============================================
+// DATA LOADING & RECALCULATION
+// ============================================
 
 function loadInitialData(data) {
     console.log('Loading initial data:', data);
     
-    simulatorState = {
-        baseRent: data.offerRent || 0,
-        baseNetMonthly: data.offerNetMonthly || 0,
-        baseLivingCost: data.offerLivingCost || 0,
-        baseTransport: data.offerTransport || 0,
-        baseGroceries: data.offerGroceries || 0,
-        baseMisc: data.offerMisc || 0,
-        baseResidual: data.offerResidual || 0,
-        currentResidual: data.offerResidual || 0,
-        currentDeltaPercent: data.deltaPercent || 0,
-        baseDeltaPercent: data.deltaPercent || 0
+    currentState = {
+        grossIncome: data.grossIncome || 0,
+        netMonthly: data.offerNetMonthly || 0,
+        rent: data.offerRent || 0,
+        livingCost: data.offerLivingCost || 0,
+        taxes: data.taxes || 0,
+        residual: data.offerResidual || 0,
+        currentResidual: data.currentResidual || 0,
+        deltaPercent: data.deltaPercent || 0,
+        cityAAvgHousePrice: data.cityAAvgHousePrice || 0,
+        cityBAvgHousePrice: data.cityBAvgHousePrice || 0,
+        housingType: data.housingType || 'RENT',
+        householdType: data.householdType || 'SINGLE'
     };
     
-    console.log('Simulator state initialized:', simulatorState);
-    
-    // Set initial slider value
-    const rentSlider = document.getElementById('rentSlider');
-    if (rentSlider) {
-        rentSlider.value = simulatorState.baseRent;
-        const rentValue = document.getElementById('rentValue');
-        if (rentValue) {
-            rentValue.textContent = formatNumber(simulatorState.baseRent, '$');
-        }
-    }
-    
-    previousVerdict = classifyVerdict(simulatorState.currentDeltaPercent);
+    console.log('State initialized:', currentState);
+    previousVerdict = classifyVerdict(currentState.deltaPercent);
 }
 
-function updateSimulator() {
-    const rentSlider = document.getElementById('rentSlider');
-    const roommateToggle = document.getElementById('roommateToggle');
+function recalculateAndUpdate() {
+    console.log('[Recalculate] Starting recalculation...');
+    
+    const ownHomeToggle = document.getElementById('ownHomeToggle');
     const parentsToggle = document.getElementById('parentsToggle');
-    const transportCar = document.getElementById('transportCar');
-    const transportTransit = document.getElementById('transportTransit');
-    const diningSlider = document.getElementById('diningSlider');
+    const splitRentToggle = document.getElementById('splitRentToggle');
     
-    if (!rentSlider) {
-        console.log('Rent slider not found in updateSimulator');
-        return;
-    }
-    
-    // Calculate adjusted rent
-    let adjustedRent = parseFloat(rentSlider.value);
+    // Calculate adjusted rent based on toggles
+    let adjustedRent = currentState.rent;
+    let housingCost = 0;
     
     if (parentsToggle && parentsToggle.checked) {
+        // PARENTS mode: Rent = 0, Social Cost = $300
         adjustedRent = 0;
-    } else if (roommateToggle && roommateToggle.checked) {
-        adjustedRent = adjustedRent * 0.6; // -40%
+        housingCost = 300;
+        console.log('[Recalculate] PARENTS mode: Rent=0, Social Cost=$300');
+    } else if (ownHomeToggle && ownHomeToggle.checked) {
+        // OWN mode: Rent = 0, Property Tax/Maintenance = 1.5% of property value / 12
+        adjustedRent = 0;
+        housingCost = (currentState.cityBAvgHousePrice * 0.015) / 12.0;
+        console.log('[Recalculate] OWN mode: Rent=0, Property Tax/Maintenance=$' + housingCost.toFixed(2));
     }
     
-    // Calculate transport adjustment
-    let transportAdjustment = 0;
-    if (transportTransit && transportTransit.checked) {
-        // Save: gas + insurance (estimate 60% of transport)
-        // Add: transit pass (estimate $100/month)
-        transportAdjustment = (simulatorState.baseTransport * 0.6) - 100;
+    // Apply split rent (50% reduction)
+    if (splitRentToggle && splitRentToggle.checked) {
+        adjustedRent = adjustedRent * 0.5;
+        console.log('[Recalculate] Split Rent: 50% reduction applied');
     }
-    
-    // Calculate dining adjustment
-    let diningAdjustment = 0;
-    if (diningSlider) {
-        const diningPercent = parseFloat(diningSlider.value);
-        // 0% = Home Cook (save 30% of groceries)
-        // 100% = Foodie (spend 50% more on dining)
-        const diningMultiplier = 1 + ((diningPercent / 100) * 0.8); // 1.0 to 1.8
-        const baseDiningCost = simulatorState.baseGroceries + (simulatorState.baseMisc * 0.3);
-        diningAdjustment = baseDiningCost * (1 - diningMultiplier);
-    }
-    
-    // Social cost for living with parents
-    const socialCost = (parentsToggle && parentsToggle.checked) ? 200 : 0;
     
     // Calculate new residual
-    const adjustedLivingCost = simulatorState.baseLivingCost + transportAdjustment + diningAdjustment;
-    const newResidual = simulatorState.baseNetMonthly - adjustedRent - adjustedLivingCost - socialCost;
-    
-    simulatorState.currentResidual = newResidual;
+    const totalHousingCost = adjustedRent + housingCost;
+    const newResidual = currentState.netMonthly - totalHousingCost - currentState.livingCost;
     
     // Calculate new delta percent
-    const currentResidualAbs = Math.abs(simulatorState.baseResidual);
+    const currentResidualAbs = Math.abs(currentState.currentResidual);
+    let newDeltaPercent = 0;
     if (currentResidualAbs === 0) {
-        simulatorState.currentDeltaPercent = newResidual === 0 ? 0 : newResidual > 0 ? 100 : -100;
+        newDeltaPercent = newResidual === 0 ? 0 : newResidual > 0 ? 100 : -100;
     } else {
-        simulatorState.currentDeltaPercent = ((newResidual - simulatorState.baseResidual) / currentResidualAbs) * 100;
+        newDeltaPercent = ((newResidual - currentState.currentResidual) / currentResidualAbs) * 100;
     }
     
-    console.log('Updated residual:', newResidual, 'Delta:', simulatorState.currentDeltaPercent);
+    // Update global state
+    currentState.residual = newResidual;
+    currentState.deltaPercent = newDeltaPercent;
     
-    // Update UI immediately with formatted numbers
-    updateResidualDisplay(newResidual);
+    console.log('[Recalculate] Results:', {
+        adjustedRent,
+        housingCost,
+        totalHousingCost,
+        newResidual,
+        newDeltaPercent
+    });
+    
+    // Chain reaction: Update all UI components
     updateVerdictDisplay();
-    
-    // Check for gamification trigger
+    updateResidualDisplay();
+    updateWaterfallChart(adjustedRent + housingCost, newResidual);
+    updateAssetProjection();
     checkGamification();
 }
 
-function updateResidualDisplay(newResidual) {
-    const heroResidualValue = document.getElementById('heroResidualValue');
-    const newResidualValue = document.getElementById('newResidualValue');
+// ============================================
+// UI UPDATES - Complete Chain Reaction
+// ============================================
+
+function updateVerdictDisplay() {
+    console.log('[UI Update] Updating verdict display...');
     
-    // Update hero residual (with rolling animation)
-    if (heroResidualValue) {
-        const span = heroResidualValue.querySelector('.rolling-number');
-        if (span) {
-            const target = Math.round(newResidual);
-            animateRollingNumber(span, target, '$');
-        } else {
-            // If no rolling number element, update directly with comma
-            heroResidualValue.textContent = formatNumber(newResidual, '$');
-        }
+    const verdictHero = document.getElementById('verdictHero');
+    const verdictBadge = document.getElementById('verdictBadge');
+    const verdictCopy = document.getElementById('verdictCopy');
+    
+    const newVerdict = classifyVerdict(currentState.deltaPercent);
+    const verdictText = getVerdictText(newVerdict);
+    const verdictCopyText = generateVerdictCopy(newVerdict, currentState.deltaPercent);
+    
+    // Update badge
+    if (verdictBadge) {
+        verdictBadge.textContent = verdictText;
+        console.log('[UI Update] Verdict badge updated to:', verdictText);
+    } else {
+        console.error('[UI Update] Verdict badge element not found!');
     }
     
-    // Update simulator result (with rolling animation)
-    if (newResidualValue) {
-        const target = Math.round(newResidual);
-        animateRollingNumber(newResidualValue, target, '$');
+    // Update hero class (this changes the background color)
+    if (verdictHero) {
+        // Remove old verdict class
+        const oldClasses = Array.from(verdictHero.classList).filter(c => c.startsWith('verdict-'));
+        oldClasses.forEach(c => verdictHero.classList.remove(c));
+        // Add new verdict class
+        const newClass = 'verdict-' + newVerdict.toLowerCase().replace('_', '-');
+        verdictHero.classList.add(newClass);
+        console.log('[UI Update] Verdict hero class updated to:', newClass);
+    } else {
+        console.error('[UI Update] Verdict hero element not found!');
+    }
+    
+    // Update copy
+    if (verdictCopy) {
+        verdictCopy.textContent = verdictCopyText;
+        console.log('[UI Update] Verdict copy updated');
+    } else {
+        console.error('[UI Update] Verdict copy element not found!');
     }
 }
 
-function updateVerdictDisplay() {
-    const newVerdictBadge = document.getElementById('newVerdictBadge');
-    const verdictHero = document.querySelector('.verdict-hero');
-    const verdictBadge = verdictHero?.querySelector('.verdict-badge');
+function updateResidualDisplay() {
+    const heroResidualValue = document.getElementById('heroResidualValue');
+    const deltaPercentValue = document.getElementById('deltaPercentValue');
     
-    const newVerdict = classifyVerdict(simulatorState.currentDeltaPercent);
-    const verdictText = getVerdictText(newVerdict);
-    
-    // Update simulator result badge
-    if (newVerdictBadge) {
-        newVerdictBadge.textContent = verdictText;
-        newVerdictBadge.className = 'preview-verdict verdict-' + newVerdict.toLowerCase().replace('_', '-');
+    if (heroResidualValue) {
+        const span = heroResidualValue.querySelector('.rolling-number');
+        if (span) {
+            animateRollingNumber(span, Math.round(currentState.residual), '$');
+        } else {
+            heroResidualValue.textContent = formatNumber(currentState.residual, '$');
+        }
     }
     
-    // Update main hero verdict if changed significantly
-    if (verdictHero && verdictBadge) {
-        const oldVerdictClass = Array.from(verdictHero.classList).find(c => c.startsWith('verdict-'));
-        if (oldVerdictClass) {
-            verdictHero.classList.remove(oldVerdictClass);
-        }
-        verdictHero.classList.add('verdict-' + newVerdict.toLowerCase().replace('_', '-'));
-        verdictBadge.textContent = verdictText;
+    if (deltaPercentValue) {
+        animateRollingNumber(deltaPercentValue, currentState.deltaPercent, '', true);
     }
 }
+
+function updateAssetProjection() {
+    const currentCityProjection = document.getElementById('currentCityProjection');
+    const newCityProjection = document.getElementById('newCityProjection');
+    
+    const currentProjection = currentState.currentResidual * 36;
+    const newProjection = currentState.residual * 36;
+    
+    if (currentCityProjection) {
+        currentCityProjection.textContent = formatNumber(currentProjection, '$');
+        currentCityProjection.setAttribute('data-value', currentProjection);
+    }
+    
+    if (newCityProjection) {
+        newCityProjection.textContent = formatNumber(newProjection, '$');
+        newCityProjection.setAttribute('data-value', newProjection);
+    }
+}
+
+// ============================================
+// WATERFALL CHART
+// ============================================
+
+function initWaterfallChart() {
+    // Initial render
+    updateWaterfallChart(currentState.rent, currentState.residual);
+}
+
+function updateWaterfallChart(housingCost, residual) {
+    const grossBar = document.getElementById('waterfallGross');
+    const taxesBar = document.getElementById('waterfallTaxes');
+    const housingBar = document.getElementById('waterfallHousing');
+    const residualBar = document.getElementById('waterfallResidual');
+    
+    const grossValue = document.getElementById('waterfallGrossValue');
+    const taxesValue = document.getElementById('waterfallTaxesValue');
+    const housingValue = document.getElementById('waterfallHousingValue');
+    const residualValue = document.getElementById('waterfallResidualValue');
+    
+    if (!grossBar || !taxesBar || !housingBar || !residualBar) {
+        console.error('[Waterfall] Chart elements not found!');
+        return;
+    }
+    
+    // Get base values
+    const gross = currentState.grossIncome / 12; // Monthly gross
+    const taxes = currentState.taxes / 12; // Monthly taxes
+    const net = currentState.netMonthly;
+    
+    // Calculate percentages (relative to gross)
+    const grossPercent = 100;
+    const taxesPercent = (taxes / gross) * 100;
+    const housingPercent = (housingCost / gross) * 100;
+    const residualPercent = (residual / gross) * 100;
+    
+    // Update bar heights with CSS transition
+    grossBar.style.height = grossPercent + '%';
+    taxesBar.style.height = taxesPercent + '%';
+    housingBar.style.height = housingPercent + '%';
+    residualBar.style.height = residualPercent + '%';
+    
+    // Update values
+    if (grossValue) grossValue.textContent = formatNumber(gross, '$');
+    if (taxesValue) taxesValue.textContent = formatNumber(taxes, '$');
+    if (housingValue) housingValue.textContent = formatNumber(housingCost, '$');
+    if (residualValue) residualValue.textContent = formatNumber(residual, '$');
+    
+    // Update data attributes
+    grossBar.setAttribute('data-value', gross);
+    taxesBar.setAttribute('data-value', taxes);
+    housingBar.setAttribute('data-value', housingCost);
+    residualBar.setAttribute('data-value', residual);
+    
+    console.log('[Waterfall] Chart updated with heights:', {
+        taxes: taxesPercent.toFixed(1) + '%',
+        housing: housingPercent.toFixed(1) + '%',
+        residual: residualPercent.toFixed(1) + '%'
+    });
+}
+
+// ============================================
+// VERDICT CLASSIFICATION
+// ============================================
 
 function classifyVerdict(deltaPercent) {
     if (deltaPercent >= 10) return 'GO';
@@ -343,15 +466,35 @@ function getVerdictText(verdict) {
     return map[verdict] || 'UNKNOWN';
 }
 
+function generateVerdictCopy(verdict, deltaPercent) {
+    const magnitude = Math.abs(deltaPercent);
+    switch (verdict) {
+        case 'GO':
+            return magnitude > 20
+                ? "You unlock " + Math.round(deltaPercent) + "% more life. Take the win."
+                : "You gain " + Math.round(deltaPercent) + "% more breathing room. Take it.";
+        case 'CONDITIONAL':
+            return "Slight edge at +" + Math.round(deltaPercent) + "%. Negotiate perks then go.";
+        case 'WARNING':
+            return "This move squeezes you by " + Math.abs(Math.round(deltaPercent)) + "%. Push back hard.";
+        case 'NO_GO':
+            return "This offer makes you " + Math.abs(Math.round(deltaPercent)) + "% poorer. Walk away.";
+        default:
+            return "Calculating...";
+    }
+}
+
+// ============================================
+// GAMIFICATION
+// ============================================
+
 function checkGamification() {
-    const newVerdict = classifyVerdict(simulatorState.currentDeltaPercent);
+    const newVerdict = classifyVerdict(currentState.deltaPercent);
     
     // Check if verdict improved from negative to positive
     if (previousVerdict && 
         (previousVerdict === 'NO_GO' || previousVerdict === 'WARNING') &&
         (newVerdict === 'GO' || newVerdict === 'CONDITIONAL')) {
-        
-        // Trigger celebration
         triggerCelebration();
     }
     
@@ -404,13 +547,10 @@ function showConfetti() {
 }
 
 function showSuccessMessage() {
-    const simulatorResult = document.getElementById('simulatorResult');
-    if (!simulatorResult) return;
-    
     const message = document.createElement('div');
     message.className = 'success-message';
     message.style.cssText = `
-        position: absolute;
+        position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -435,34 +575,25 @@ function showSuccessMessage() {
 }
 
 // ============================================
-// ROLLING NUMBER ANIMATION (with comma formatting)
+// ROLLING NUMBER ANIMATION
 // ============================================
 
 function initRollingNumbers() {
     const elements = document.querySelectorAll('.rolling-number');
-    console.log('Found rolling number elements:', elements.length);
-    console.log('Elements:', Array.from(elements).map(el => ({
-        id: el.id,
-        target: el.getAttribute('data-target'),
-        prefix: el.getAttribute('data-prefix')
-    })));
     
-    elements.forEach((el, index) => {
+    elements.forEach((el) => {
         const target = parseFloat(el.getAttribute('data-target'));
         if (!isNaN(target)) {
             const prefix = el.getAttribute('data-prefix') || '';
-            console.log(`Animating element ${index}:`, target, prefix);
-            animateRollingNumber(el, target, prefix);
-        } else {
-            console.log(`Skipping element ${index}: invalid target`, el.getAttribute('data-target'));
+            const isPercent = el.classList.contains('delta-percent');
+            animateRollingNumber(el, target, prefix, isPercent);
         }
     });
 }
 
-function animateRollingNumber(element, target, prefix = '') {
+function animateRollingNumber(element, target, prefix = '', isPercent = false) {
     if (!element) return;
     
-    // Get current value from element text
     const currentText = element.textContent.replace(/[^0-9.-]/g, '');
     const start = parseFloat(currentText) || 0;
     const duration = 1500;
@@ -473,25 +604,23 @@ function animateRollingNumber(element, target, prefix = '') {
         const progress = Math.min(elapsed / duration, 1);
         const easeOutCubic = 1 - Math.pow(1 - progress, 3);
         const current = start + (target - start) * easeOutCubic;
-        const rounded = Math.round(current);
         
-        // Format with comma - ALWAYS use formatNumber
-        if (prefix === '$') {
-            element.textContent = formatNumber(rounded, '$');
-        } else if (prefix === '%') {
+        if (isPercent) {
             element.textContent = formatPercent(current);
+        } else if (prefix === '$') {
+            element.textContent = formatNumber(Math.round(current), '$');
         } else {
-            element.textContent = formatNumber(rounded, prefix);
+            element.textContent = formatNumber(Math.round(current), prefix);
         }
         
         if (progress < 1) {
             requestAnimationFrame(animate);
         } else {
-            // Final value with proper formatting
-            if (prefix === '$') {
-                element.textContent = formatNumber(Math.round(target), '$');
-            } else if (prefix === '%') {
+            // Final value
+            if (isPercent) {
                 element.textContent = formatPercent(target);
+            } else if (prefix === '$') {
+                element.textContent = formatNumber(Math.round(target), '$');
             } else {
                 element.textContent = formatNumber(Math.round(target), prefix);
             }
@@ -507,13 +636,8 @@ function animateRollingNumber(element, target, prefix = '') {
 
 function initCitySwapper() {
     const citySwap = document.getElementById('city-swap');
-    if (!citySwap) {
-        console.log('City swapper not found');
-        console.log('Available selects:', document.querySelectorAll('select').length);
-        return;
-    }
+    if (!citySwap) return;
     
-    console.log('City swapper found, attaching listener');
     citySwap.addEventListener('change', (e) => {
         const newCity = e.target.value;
         if (newCity) {
@@ -528,7 +652,7 @@ function initCitySwapper() {
 }
 
 // ============================================
-// STEP FORM NAVIGATION (for index.html)
+// FORM VALIDATION (for index.html)
 // ============================================
 
 let currentStep = 1;
