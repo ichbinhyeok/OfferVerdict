@@ -168,3 +168,19 @@ function updateLayer3_Feeling(result) {
     if (wealthVal) wealthVal.textContent = result.wealthBufferMsg;
     if (investmentB) investmentB.textContent = fmt(result.investmentB);
 }
+
+// 5. Monetization & Traffic Tools
+function shareOnX() {
+    const text = encodeURIComponent(`My OfferVerdict for this move: ${document.querySelector('.verdict-text').textContent}. ${document.querySelector('.verdict-sub').textContent} #OfferVerdict #Career`);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+}
+
+function shareOnLinkedIn() {
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`, '_blank');
+}
+
+function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+        alert("Link copied! Share the truth.");
+    });
+}

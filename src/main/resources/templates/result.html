@@ -21,10 +21,13 @@
     <meta name="description" th:content="${metaDescription}">
     <link rel="canonical" th:href="${canonicalUrl}">
 
-    <!-- Open Graph -->
+    <!-- Open Graph / Viral Meta -->
     <meta property="og:title" th:content="${ogTitle}" />
     <meta property="og:description" th:content="${ogDescription}" />
     <meta property="og:image" th:content="${ogImageUrl}" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" th:content="${ogTitle}">
+    <meta name="twitter:description" th:content="${ogDescription}">
 </head>
 
 <body class="theme-lucid">
@@ -84,6 +87,24 @@
                     <div class="impact-label">Monthly Cash Flow Impact</div>
                     <div class="impact-value" th:text="${result.monthlyGainStr != null ? result.monthlyGainStr : '$0'}">
                         -$1,200</div>
+                </div>
+
+                <!-- Ad Slot: Primary High-CTR (Financial Offer) -->
+                <div class="ad-container-top" id="ad-top-verdict">
+                    <div class="ad-label">ADVERTISEMENT</div>
+                    <div class="ad-placeholder">
+                        <span class="ad-hint">Premium Financial Partner Slot (High RPM)</span>
+                    </div>
+                </div>
+
+                <!-- Viral Share Trigger -->
+                <div class="share-tools">
+                    <span>Share your verdict:</span>
+                    <div class="share-buttons">
+                        <button class="btn-share" onclick="shareOnX()">𝕏</button>
+                        <button class="btn-share" onclick="shareOnLinkedIn()">in</button>
+                        <button class="btn-share" onclick="copyLink()">🔗</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -366,6 +387,14 @@
                                         th:text="${'$' + #numbers.formatInteger(result.investmentB, 0, 'COMMA')}"></strong></span>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Ad Slot: Bottom Sticky/In-feed -->
+                <div class="ad-container-bottom" id="ad-bottom-reality">
+                    <div class="ad-label">ADVERTISEMENT</div>
+                    <div class="ad-placeholder">
+                        <span class="ad-hint">Career & Relocation Partner Slot</span>
                     </div>
                 </div>
             </div>
