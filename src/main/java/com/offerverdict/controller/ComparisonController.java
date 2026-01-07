@@ -9,9 +9,7 @@ import com.offerverdict.model.HouseholdType;
 import com.offerverdict.model.HousingType;
 import com.offerverdict.model.JobInfo;
 import com.offerverdict.service.ComparisonService;
-import com.offerverdict.service.PurchasingPowerService;
-import com.offerverdict.service.SalaryDataService;
-import com.offerverdict.util.MetaDescriptionUtil;
+
 import com.offerverdict.util.SlugNormalizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,23 +40,17 @@ public class ComparisonController {
 
     private final DataRepository repository;
     private final ComparisonService comparisonService;
-    private final SalaryDataService salaryDataService;
     private final AppProperties appProperties;
     private final ObjectMapper objectMapper;
-    private final PurchasingPowerService purchasingPowerService; // Injected field
 
     public ComparisonController(DataRepository repository,
             ComparisonService comparisonService,
-            SalaryDataService salaryDataService,
             AppProperties appProperties,
-            ObjectMapper objectMapper,
-            PurchasingPowerService purchasingPowerService) { // Injected into constructor
+            ObjectMapper objectMapper) {
         this.repository = repository;
         this.comparisonService = comparisonService;
-        this.salaryDataService = salaryDataService;
         this.appProperties = appProperties;
         this.objectMapper = objectMapper;
-        this.purchasingPowerService = purchasingPowerService; // Assigned
     }
 
     @GetMapping({ "/", "/start" })
@@ -179,8 +171,6 @@ public class ComparisonController {
         double safeCurrentSalary = clampSalary(currentSalary);
         double safeOfferSalary = clampSalary(offerSalary);
 
-        Double rsuValue = (rsuAmount != null && rsuAmount > 0) ? rsuAmount : null;
-
         ComparisonResult result = comparisonService.compare(
                 cityEntryA.getSlug(),
                 cityEntryB.getSlug(),
@@ -192,7 +182,9 @@ public class ComparisonController {
                 fourOhOneKRate,
                 monthlyInsurance,
                 0.0,
-                rsuValue);
+                0.0, // sideHustle
+                false, // isRemote
+                true); // isCarOwner default
 
         if (result == null)
             throw new IllegalStateException("ComparisonResult cannot be null");
@@ -347,45 +339,56 @@ public class ComparisonController {
     @GetMapping("/api/calculate")
     @ResponseBody
     public ComparisonResult calculateApi(
-            @RequestParam String cityA,
-            @RequestParam String cityB,
+            @RequestParam String cityASlug,
+            @RequestParam String cityBSlug,
             @RequestParam double currentSalary,
             @RequestParam double offerSalary,
-            @RequestParam(required = false) Double fourOhOneKRate,
-            @RequestParam(required = false) Double monthlyInsurance,
-            @RequestParam(required = false) Double rsuAmount,
-            @RequestParam(required = false) Boolean isMarried,
-            @RequestParam(required = false, defaultValue = "SINGLE") String householdType,
-            @RequestParam(required = false, defaultValue = "RENT") String housingType) {
+            @RequestParam(required = false, defaultValue = "false") boolean isPremiumBenefits,
+            @RequestParam(required = false, defaultValue = "false") boolean isHomeOwner,
+            @RequestParam(required = false, defaultValue = "false") boolean hasStudentLoan,
+            @RequestParam(required = false, defaultValue = "false") boolean hasDependents,
+            @RequestParam(required = false, defaultValue = "0") double sideHustle,
+            @RequestParam(required = false, defaultValue = "0") double otherLeaks,
+            @RequestParam(required = false, defaultValue = "false") boolean isRemote,
+            @RequestParam(required = false, defaultValue = "false") boolean isTaxOptimized,
+            @RequestParam(required = false, defaultValue = "true") boolean isCarOwner,
+            @RequestParam(required = false, defaultValue = "0") double signingBonus,
+            @RequestParam(required = false, defaultValue = "0") double equityAnnual,
+            @RequestParam(required = false, defaultValue = "1.0") double equityMultiplier,
+            @RequestParam(required = false, defaultValue = "0") double commuteTime) {
 
-        String normalizedCityA = SlugNormalizer.normalize(cityA);
-        String normalizedCityB = SlugNormalizer.normalize(cityB);
+        CityCostEntry cityEntryA = repository.getCity(cityASlug);
+        CityCostEntry cityEntryB = repository.getCity(cityBSlug);
 
-        CityCostEntry cityEntryA = repository.findCityLoosely(normalizedCityA)
-                .orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityA));
-        CityCostEntry cityEntryB = repository.findCityLoosely(normalizedCityB)
-                .orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityB));
+        HouseholdType householdType = hasDependents ? HouseholdType.FAMILY : HouseholdType.SINGLE;
+        HousingType housingType = isHomeOwner ? HousingType.OWN : HousingType.RENT;
 
-        HouseholdType parsedHouseholdType = HouseholdType.valueOf(householdType.toUpperCase());
-        HousingType parsedHousingType = HousingType.valueOf(housingType.toUpperCase());
+        // Logical mapping of "Boosts" and "Leaks"
+        Double fourOhOneK = (isPremiumBenefits || isTaxOptimized) ? 0.08 : 0.04;
+        Double insurance = isPremiumBenefits ? 100.0 : 400.0;
 
-        double safeCurrentSalary = clampSalary(currentSalary);
-        double safeOfferSalary = clampSalary(offerSalary);
-        Double rsuValue = (rsuAmount != null && rsuAmount > 0) ? rsuAmount : null;
-        Boolean effectiveIsMarried = isMarried != null ? isMarried : (parsedHouseholdType == HouseholdType.FAMILY);
+        // Combine Boolean debt with Granular Leaks
+        double totalDebtMonthly = (hasStudentLoan ? 800.0 : 0.0) + otherLeaks;
+        double totalBoostMonthly = sideHustle;
 
         return comparisonService.compare(
                 cityEntryA.getSlug(),
                 cityEntryB.getSlug(),
-                safeCurrentSalary,
-                safeOfferSalary,
-                parsedHouseholdType,
-                parsedHousingType,
-                effectiveIsMarried,
-                fourOhOneKRate,
-                monthlyInsurance,
-                0.0,
-                rsuValue);
+                currentSalary,
+                offerSalary,
+                householdType,
+                housingType,
+                hasDependents,
+                fourOhOneK,
+                insurance,
+                totalDebtMonthly,
+                totalBoostMonthly,
+                isRemote,
+                isCarOwner,
+                signingBonus,
+                equityAnnual,
+                equityMultiplier,
+                commuteTime);
     }
 
     @GetMapping("/admin/reload-data")

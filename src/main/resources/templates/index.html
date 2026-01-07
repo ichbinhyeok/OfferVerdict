@@ -9,7 +9,9 @@
         content="Stop guessing. Start knowing. Calculate the real value of your job offer with taxes, rent, and cost of living accounted for.">
 
     <!-- Unified Design System -->
-    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/core.css">
+    <link rel="stylesheet" href="/css/index.css">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,102 +29,86 @@
         <!-- Hero Section -->
         <header class="landing-header animate-in">
             <h1 class="landing-title">
-                Should You <br>
-                <span class="gradient-text">Take The Job?</span>
+                Should you <span class="gradient-text">move</span>?<br>
+                Find the truth.
             </h1>
             <p class="landing-subtitle">
-                Stop guessing. Real data on Taxes, Rent, and Cost of Living.
+                The reality-first comparison engine for your next career step.
             </p>
         </header>
 
-        <!-- Use a GET request so params show in URL (SEO friendly) -->
-        <form action="/" method="get" class="journey-card animate-in delay-2">
+        <main class="journey-card animate-in delay-2">
+            <form action="/start" method="get">
+                <!-- Shared Occupation Context -->
+                <div class="occupation-header">
+                    <div class="form-group" style="text-align: center;">
+                        <label class="form-label">Your Occupation</label>
+                        <input type="text" name="job" list="job-list" class="form-input"
+                            placeholder="e.g. Software Engineer"
+                            style="text-align: center; max-width: 450px; margin: 0 auto;" required>
+                        <datalist id="job-list">
+                            <option th:each="job : ${jobs}" th:value="${job.title}">
+                        </datalist>
+                    </div>
+                </div>
 
-            <!-- Shared Job Title -->
-            <div class="form-group"
-                style="margin-bottom: 2rem; max-width: 400px; margin-left: auto; margin-right: auto;">
-                <label class="form-label" style="text-align: center;">Target Role</label>
-                <input type="text" name="job" list="job-list" class="form-input" placeholder="e.g. Software Engineer"
-                    style="text-align: center; font-size: 1.1rem;" required>
-                <datalist id="job-list">
-                    <option value="Software Engineer">
-                    <option value="Data Scientist">
-                    <option value="Product Manager">
-                    <option value="Nurse">
-                    <option value="Teacher">
-                    <option value="Accountant">
-                    <option value="Marketing Manager">
-                    <option value="Sales Representative">
+                <div class="journey-grid">
+                    <!-- Current Situation -->
+                    <div class="area-header-current">
+                        <h3>Current Status</h3>
+                    </div>
+                    <div class="area-city-current">
+                        <div class="form-group">
+                            <label class="form-label">Location</label>
+                            <input type="text" name="cityA" list="city-list" class="form-input"
+                                placeholder="e.g. San Francisco" required>
+                        </div>
+                    </div>
+                    <div class="area-salary-current">
+                        <div class="form-group">
+                            <label class="form-label">Gross Salary</label>
+                            <input type="number" name="currentSalary" class="form-input" placeholder="120,000" required>
+                        </div>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="journey-arrow">→</div>
+
+                    <!-- Offer Situation -->
+                    <div class="area-header-offer">
+                        <h3>New Offer</h3>
+                    </div>
+                    <div class="area-city-offer">
+                        <div class="form-group">
+                            <label class="form-label">Location</label>
+                            <input type="text" name="cityB" list="city-list" class="form-input"
+                                placeholder="e.g. Austin" required>
+                        </div>
+                    </div>
+                    <div class="area-salary-offer">
+                        <div class="form-group">
+                            <label class="form-label">Gross Salary</label>
+                            <input type="number" name="offerSalary" class="form-input" placeholder="140,000" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="submit-container">
+                    <button type="submit" class="btn btn-premium btn-large">Compare Reality</button>
+                    <p style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--gray-400);">
+                        Instant Verdict • No account required • Real IRS data
+                    </p>
+                </div>
+
+                <datalist id="city-list">
+                    <option th:each="city : ${cities}" th:value="${city.city + ', ' + city.state}">
                 </datalist>
-            </div>
+            </form>
+        </main>
 
-            <div class="journey-grid">
-                <!-- Current Situation -->
-                <div class="journey-section">
-                    <h3>Current Situation</h3>
-
-                    <div class="form-group">
-                        <label class="form-label">City</label>
-                        <input type="text" name="cityA" list="city-list" class="form-input"
-                            placeholder="San Francisco, CA" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Base Salary</label>
-                        <input type="number" name="currentSalary" class="form-input" placeholder="150000" required>
-                    </div>
-                </div>
-
-                <!-- Visual Arrow -->
-                <div class="journey-arrow">→</div>
-
-                <!-- New Offer -->
-                <div class="journey-section">
-                    <h3>The New Offer</h3>
-
-                    <div class="form-group">
-                        <label class="form-label">City</label>
-                        <input type="text" name="cityB" list="city-list" class="form-input" placeholder="Austin, TX"
-                            required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Offer Salary</label>
-                        <input type="number" name="offerSalary" class="form-input" placeholder="145000" required>
-                    </div>
-                </div>
-            </div>
-
-            <div style="margin-top: 2.5rem; text-align: center;">
-                <button type="submit" class="btn btn-primary submit-btn"
-                    style="width: 100%; max-width: 300px; font-size: 1.1rem; padding: 1rem;">
-                    Get My Verdict →
-                </button>
-            </div>
-
-            <datalist id="city-list">
-                <option value="San Francisco, CA">
-                <option value="New York, NY">
-                <option value="Austin, TX">
-                <option value="Seattle, WA">
-                <option value="Los Angeles, CA">
-                <option value="Chicago, IL">
-                <option value="Denver, CO">
-                <option value="Boston, MA">
-                <option value="Miami, FL">
-                <option value="Atlanta, GA">
-            </datalist>
-        </form>
-
-        <!-- Social Proof / Trust -->
-        <div class="data-sources-grid animate-in delay-3" style="opacity: 0.7;">
-            <div class="source-item">🏛️ IRS Tax Tables 2026</div>
-            <div class="source-item">🏠 Zillow Rent Index</div>
-            <div class="source-item">📊 BLS Labor Stats</div>
-        </div>
-
-        <footer>
-            <p>© 2026 OfferVerdict. The Confirmation Engine.</p>
+        <footer class="footer animate-in delay-3">
+            <p>© 2026 OfferVerdict. Know your worth, anywhere.</p>
         </footer>
     </div>
 </body>

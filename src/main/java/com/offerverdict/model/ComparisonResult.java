@@ -23,6 +23,45 @@ public class ComparisonResult {
 
     private String jobPercentile; // e.g. "22%"
     private boolean isGoodSalary;
+    private String verdictColor; // e.g. "premium-gold", "harsh-red"
+    private double reverseSalaryGoal;
+    private String benchmarkContext;
+    private String authorityAdvice; // e.g. "Do not go unless you save $40k more"
+    private String wealthBufferMsg; // e.g. "This move adds $450k to your 10-year wealth."
+    private double investmentA;
+    private double investmentB;
+
+    public String getWealthBufferMsg() {
+        return wealthBufferMsg;
+    }
+
+    public void setWealthBufferMsg(String wealthBufferMsg) {
+        this.wealthBufferMsg = wealthBufferMsg;
+    }
+
+    public double getInvestmentA() {
+        return investmentA;
+    }
+
+    public void setInvestmentA(double investmentA) {
+        this.investmentA = investmentA;
+    }
+
+    public double getInvestmentB() {
+        return investmentB;
+    }
+
+    public void setInvestmentB(double investmentB) {
+        this.investmentB = investmentB;
+    }
+
+    public String getAuthorityAdvice() {
+        return authorityAdvice;
+    }
+
+    public void setAuthorityAdvice(String authorityAdvice) {
+        this.authorityAdvice = authorityAdvice;
+    }
 
     // Getters and Setters
     public Verdict getVerdict() {
@@ -159,5 +198,29 @@ public class ComparisonResult {
 
     public void setLeverageMsg(String leverageMsg) {
         this.leverageMsg = leverageMsg;
+    }
+
+    public String getVerdictColor() {
+        return verdictColor;
+    }
+
+    public void setVerdictColor(String verdictColor) {
+        this.verdictColor = verdictColor;
+    }
+
+    public double getReverseSalaryGoal() {
+        return reverseSalaryGoal;
+    }
+
+    public void setReverseSalaryGoal(double reverseSalaryGoal) {
+        this.reverseSalaryGoal = reverseSalaryGoal;
+    }
+
+    public String getBenchmarkContext() {
+        return benchmarkContext;
+    }
+
+    public void setBenchmarkContext(String benchmarkContext) {
+        this.benchmarkContext = benchmarkContext;
     }
 }

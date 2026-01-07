@@ -4,6 +4,7 @@ import com.offerverdict.service.TaxCalculatorService;
 
 public class ComparisonBreakdown {
     private double grossSalary; // Added for reverse calc
+    private String cityName;
     private double netMonthly;
     private double rent;
     private double livingCost;
@@ -12,9 +13,96 @@ public class ComparisonBreakdown {
     private double transport;
     private double utilities;
     private double misc;
+    private double localTax;
+    private double insurance;
     private double yearsToBuyHouse;
     private double monthsToBuyTesla;
+    private double starbucksSavings;
     private TaxCalculatorService.TaxResult taxResult;
+
+    // Advanced Lab Fields
+    private double equityValue;
+    private double signingBonus;
+    private double commuteTime; // in minutes
+    private double realHourlyRate;
+
+    public double getEquityValue() {
+        return equityValue;
+    }
+
+    public void setEquityValue(double equityValue) {
+        this.equityValue = equityValue;
+    }
+
+    public double getSigningBonus() {
+        return signingBonus;
+    }
+
+    public void setSigningBonus(double signingBonus) {
+        this.signingBonus = signingBonus;
+    }
+
+    public double getCommuteTime() {
+        return commuteTime;
+    }
+
+    public void setCommuteTime(double commuteTime) {
+        this.commuteTime = commuteTime;
+    }
+
+    public double getRealHourlyRate() {
+        return realHourlyRate;
+    }
+
+    public void setRealHourlyRate(double realHourlyRate) {
+        this.realHourlyRate = realHourlyRate;
+    }
+
+    // Delta fields for inline badges (Comparison with the other side)
+    private double salaryDiff;
+    private double taxDiff;
+    private double housingDiff;
+    private double residualDiff;
+
+    public double getSalaryDiff() {
+        return salaryDiff;
+    }
+
+    public void setSalaryDiff(double salaryDiff) {
+        this.salaryDiff = salaryDiff;
+    }
+
+    public double getTaxDiff() {
+        return taxDiff;
+    }
+
+    public void setTaxDiff(double taxDiff) {
+        this.taxDiff = taxDiff;
+    }
+
+    public double getHousingDiff() {
+        return housingDiff;
+    }
+
+    public void setHousingDiff(double housingDiff) {
+        this.housingDiff = housingDiff;
+    }
+
+    public double getResidualDiff() {
+        return residualDiff;
+    }
+
+    public void setResidualDiff(double residualDiff) {
+        this.residualDiff = residualDiff;
+    }
+
+    public double getStarbucksSavings() {
+        return starbucksSavings;
+    }
+
+    public void setStarbucksSavings(double starbucksSavings) {
+        this.starbucksSavings = starbucksSavings;
+    }
 
     public double getGrossSalary() {
         return grossSalary;
@@ -22,6 +110,14 @@ public class ComparisonBreakdown {
 
     public void setGrossSalary(double grossSalary) {
         this.grossSalary = grossSalary;
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
     }
 
     public double getNetMonthly() {
@@ -110,5 +206,21 @@ public class ComparisonBreakdown {
 
     public void setTaxResult(TaxCalculatorService.TaxResult taxResult) {
         this.taxResult = taxResult;
+    }
+
+    public double getLocalTax() {
+        return localTax;
+    }
+
+    public void setLocalTax(double localTax) {
+        this.localTax = localTax;
+    }
+
+    public double getInsurance() {
+        return insurance;
+    }
+
+    public void setInsurance(double insurance) {
+        this.insurance = insurance;
     }
 }

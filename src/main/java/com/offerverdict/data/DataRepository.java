@@ -3,6 +3,7 @@ package com.offerverdict.data;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.offerverdict.exception.ResourceNotFoundException;
+import com.offerverdict.model.AuthoritativeMetrics;
 import com.offerverdict.model.CityCostEntry;
 import com.offerverdict.model.JobInfo;
 import com.offerverdict.model.StateTax;
@@ -29,6 +30,7 @@ public class DataRepository {
     private List<JobInfo> jobs = Collections.emptyList();
     private Map<String, CityCostEntry> cityBySlug = Collections.emptyMap();
     private Map<String, JobInfo> jobBySlug = Collections.emptyMap();
+    private AuthoritativeMetrics authoritativeMetrics;
 
     public DataRepository(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -44,6 +46,10 @@ public class DataRepository {
             this.taxData = objectMapper.readValue(
                     new ClassPathResource("data/StateTax.json").getInputStream(),
                     TaxData.class);
+
+            this.authoritativeMetrics = objectMapper.readValue(
+                    new ClassPathResource("data/AuthoritativeData.json").getInputStream(),
+                    AuthoritativeMetrics.class);
 
             // Updated to handle metadata wrapper
             CityDataContainer cityContainer = objectMapper.readValue(
@@ -66,7 +72,6 @@ public class DataRepository {
 
     // Inner class for JSON wrapper
     private static class CityDataContainer {
-        public Map<String, Object> metadata;
         public List<CityCostEntry> cities;
     }
 
@@ -167,5 +172,9 @@ public class DataRepository {
     public Map<String, StateTax> stateTaxMap() {
         return taxData.getStates().stream()
                 .collect(Collectors.toMap(s -> s.getState().toUpperCase(Locale.US), s -> s));
+    }
+
+    public AuthoritativeMetrics getAuthoritativeMetrics() {
+        return authoritativeMetrics;
     }
 }

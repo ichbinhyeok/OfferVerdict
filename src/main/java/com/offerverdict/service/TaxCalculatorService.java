@@ -89,6 +89,7 @@ public class TaxCalculatorService {
      * 
      * @deprecated Use calculateTax() for detailed breakdown with pre-tax deductions
      */
+    @Deprecated
     public double calculateNetAnnual(double salary, String stateCode) {
         // Step 1: Apply Standard Deduction
         double taxableIncome = Math.max(0, salary - STANDARD_DEDUCTION_SINGLE_2025);
@@ -217,6 +218,7 @@ public class TaxCalculatorService {
      * 
      * @deprecated Use calculateTax() for detailed breakdown with pre-tax deductions
      */
+    @Deprecated
     public TaxBreakdown calculateTaxBreakdown(double salary, String stateCode) {
         double taxableIncome = Math.max(0, salary - STANDARD_DEDUCTION_SINGLE_2025);
 
@@ -568,6 +570,10 @@ public class TaxCalculatorService {
 
         public void setNetIncome(double netIncome) {
             this.netIncome = netIncome;
+        }
+
+        public double getTotalTax() {
+            return ficaTax + federalTax + stateTax;
         }
 
         public double getEffectiveTaxRate() {

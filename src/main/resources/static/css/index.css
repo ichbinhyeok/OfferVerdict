@@ -1,0 +1,203 @@
+/* 
+   OfferVerdict: Landing Page (Index) Styles
+   Aesthetic: Premium, Lucid, Interactive.
+*/
+
+.landing-container {
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl) var(--space-lg);
+    background: radial-gradient(circle at top right, #e0e7ff 0%, var(--bg-page) 60%);
+}
+
+.landing-header {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+}
+
+.landing-title {
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-weight: 900;
+    color: var(--gray-900);
+    margin: 0 0 var(--space-md);
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.landing-subtitle {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: var(--gray-500);
+    font-weight: 500;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Journey Card (The Glass Form) */
+.journey-card {
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--white);
+    border-radius: var(--radius-xl);
+    padding: 3.5rem;
+    box-shadow: var(--shadow-premium);
+    width: 100%;
+    max-width: 900px;
+}
+
+.occupation-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.journey-grid {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    grid-template-areas:
+        "header-p .      header-f"
+        "city-p   arrow  city-f"
+        "salary-p arrow  salary-f";
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.journey-grid h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--gray-400);
+    margin-bottom: 1.5rem;
+    font-weight: 800;
+}
+
+.area-header-current {
+    grid-area: header-p;
+}
+
+.area-city-current {
+    grid-area: city-p;
+}
+
+.area-salary-current {
+    grid-area: salary-p;
+}
+
+.journey-arrow {
+    grid-area: arrow;
+    align-self: center;
+    font-size: 2rem;
+    color: var(--gray-300);
+    margin-top: 2rem;
+}
+
+.area-header-offer {
+    grid-area: header-f;
+}
+
+.area-city-offer {
+    grid-area: city-f;
+}
+
+.area-salary-offer {
+    grid-area: salary-f;
+}
+
+/* Premium Inputs */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.form-input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    font-size: 1.1rem;
+    font-family: var(--font-sans);
+    transition: all var(--duration-base) var(--ease-out);
+    background: var(--white);
+    box-shadow: var(--shadow-sm);
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--gray-900);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.submit-container {
+    text-align: center;
+    margin-top: 3.5rem;
+    border-top: 1px solid var(--gray-200);
+    padding-top: 2.5rem;
+}
+
+.btn-large {
+    padding: 1.25rem 4rem;
+    font-size: 1.125rem;
+}
+
+/* Animations */
+.animate-in {
+    animation: fadeInUp 0.8s var(--ease-out) both;
+}
+
+.delay-2 {
+    animation-delay: 0.2s;
+}
+
+.delay-3 {
+    animation-delay: 0.4s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .journey-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "header-p" "city-p" "salary-p"
+            "arrow"
+            "header-f" "city-f" "salary-f";
+    }
+
+    .journey-arrow {
+        transform: rotate(90deg);
+    }
+
+    .journey-card {
+        padding: 2rem;
+    }
+}

@@ -6,14 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title}">OfferVerdict</title>
 
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/core.css">
+    <link rel="stylesheet" href="/css/result.css">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap"
         rel="stylesheet">
-
-    <link rel="stylesheet" href="/css/dashboard.css">
 
     <!-- SEO -->
     <meta name="description" th:content="${metaDescription}">
@@ -27,6 +29,22 @@
 
 <body class="theme-lucid">
 
+    <!-- Sticky Verdict Bar -->
+    <div class="sticky-verdict-bar" id="stickyBar">
+        <div class="container container-flex">
+            <div class="sticky-left">
+                <span class="sticky-label">VERDICT:</span>
+                <span class="sticky-text" th:text="${result.verdictCopy}">DON'T GO</span>
+            </div>
+            <div class="sticky-center">
+                <span class="sticky-gain" th:text="${result.monthlyGainStr}">+$1,200</span>
+            </div>
+            <div class="sticky-right">
+                <a href="#simulator" class="btn-lab-jump">Simulation Lab</a>
+            </div>
+        </div>
+    </div>
+
     <nav class="top-nav">
         <div class="container">
             <a href="/" class="logo">OfferVerdict</a>
@@ -35,28 +53,28 @@
 
     <main class="main-content">
         <!-- LAYER 1: VERDICT (The Hook) -->
-        <section class="verdict-section" th:classappend="${result.verdict != null ? result.verdict.name() : 'NO_GO'}">
+        <section class="verdict-section" th:classappend="${result.verdictColor}">
             <div class="container">
                 <div class="verdict-header">
-                    <span class="badge-source">DATA: IRS 2025 • NUMBEO • BLS</span>
+                    <span class="badge-source"
+                        th:text="${result.benchmarkContext != null ? result.benchmarkContext : 'DATA: IRS 2025 • NUMBEO • BLS'}">DATA:
+                        IRS 2025 • NUMBEO • BLS</span>
                 </div>
 
                 <div class="verdict-display">
-                    <h1 class="verdict-text animate-pop"
-                        th:text="${result.verdictCopy != null ? result.verdictCopy : 'CALCULATING'}">DON'T GO</h1>
-                    <div class="verdict-sub"
-                        th:text="${result.valueDiffMsg != null ? result.valueDiffMsg : 'Analyzing your options...'}">You
-                        get poorer.</div>
+                    <h1 class="verdict-text animate-pop" th:text="${result.verdictCopy}"
+                        th:classappend="${result.verdict.name()}">DON'T GO</h1>
+                    <div class="verdict-sub" th:text="${result.valueDiffMsg}">You get poorer.</div>
 
                     <!-- Negotiation Leverage -->
-                    <div class="leverage-card"
-                        th:if="${result.verdict != null and (result.verdict.name() == 'NO_GO' or result.verdict.name() == 'WARNING' or result.verdict.name() == 'CONDITIONAL')}">
-                        <div class="leverage-icon">💡</div>
+                    <div class="leverage-card" th:if="${result.verdict != null}">
+                        <div class="leverage-icon">⚖️</div>
                         <div class="leverage-content">
-                            <span class="leverage-title">Agentic Negotiator</span>
-                            <span class="leverage-msg"
-                                th:text="${result.leverageMsg != null ? result.leverageMsg : 'Negotiate for better compensation to match your current lifestyle.'}">
-                                Ask for $145,000 to match your current lifestyle.
+                            <span class="leverage-title">Authority Advice</span>
+                            <span class="leverage-msg">
+                                <span th:text="${result.authorityAdvice}">Stay focused on the threshold.</span>
+                                <strong class="mono" th:if="${result.reverseSalaryGoal > offerSalary}"
+                                    th:text="${'$' + #numbers.formatInteger(result.reverseSalaryGoal, 0, 'COMMA')}">$145,000</strong>
                             </span>
                         </div>
                     </div>
@@ -91,18 +109,23 @@
                                 th:text="${'$' + #numbers.formatInteger(currentSalary, 0, 'COMMA')}">$100,000</span>
                         </div>
                         <div class="line-item danger-text">
-                            <span class="label">Total Tax (Est.)</span>
-                            <span class="value mono"
+                            <span class="label">Fed + State Tax (Est.)</span>
+                            <span class="value mono line-tax"
                                 th:text="${'-$' + #numbers.formatInteger(result.current.taxResult.totalTax, 0, 'COMMA')}">-$24,000</span>
                         </div>
+                        <div class="line-item danger-text">
+                            <span class="label">Local Income Tax</span>
+                            <span class="value mono line-local"
+                                th:text="${'-$' + #numbers.formatInteger(result.current.localTax * 12, 0, 'COMMA')}">-$0</span>
+                        </div>
                         <div class="line-item warning-text">
-                            <span class="label">Housing (Yearly)</span>
-                            <span class="value mono"
+                            <span class="label">Annual Housing</span>
+                            <span class="value mono line-rent"
                                 th:text="${'-$' + #numbers.formatInteger(result.current.rent * 12, 0, 'COMMA')}">-$36,000</span>
                         </div>
                         <div class="line-item success-text highlight-row">
-                            <span class="label">Residual (Cash)</span>
-                            <span class="value mono"
+                            <span class="label">Residual (Savings Potential)</span>
+                            <span class="value mono line-residual"
                                 th:text="${'$' + #numbers.formatInteger(result.current.residual * 12, 0, 'COMMA')}">$40,000</span>
                         </div>
                     </div>
@@ -119,18 +142,23 @@
                                 th:text="${'$' + #numbers.formatInteger(offerSalary, 0, 'COMMA')}">$120,000</span>
                         </div>
                         <div class="line-item danger-text">
-                            <span class="label">Total Tax (Est.)</span>
-                            <span class="value mono"
+                            <span class="label">Fed + State Tax (Est.)</span>
+                            <span class="value mono line-tax"
                                 th:text="${'-$' + #numbers.formatInteger(result.offer.taxResult.totalTax, 0, 'COMMA')}">-$32,000</span>
                         </div>
+                        <div class="line-item danger-text">
+                            <span class="label">Local Income Tax</span>
+                            <span class="value mono line-local"
+                                th:text="${'-$' + #numbers.formatInteger(result.offer.localTax * 12, 0, 'COMMA')}">-$0</span>
+                        </div>
                         <div class="line-item warning-text">
-                            <span class="label">Housing (Yearly)</span>
-                            <span class="value mono"
+                            <span class="label">Annual Housing</span>
+                            <span class="value mono line-rent"
                                 th:text="${'-$' + #numbers.formatInteger(result.offer.rent * 12, 0, 'COMMA')}">-$48,000</span>
                         </div>
                         <div class="line-item success-text highlight-row">
-                            <span class="label">Residual (Cash)</span>
-                            <span class="value mono"
+                            <span class="label">Residual (Savings Potential)</span>
+                            <span class="value mono line-residual"
                                 th:text="${'$' + #numbers.formatInteger(result.offer.residual * 12, 0, 'COMMA')}">$40,000</span>
                         </div>
                     </div>
@@ -143,7 +171,136 @@
             </div>
         </section>
 
-        <!-- LAYER 3: FEELING (The Experience/Reality) -->
+        <!-- LAYER 3: SIMULATOR (The Personalization) -->
+        <section class="simulator-section" id="simulator">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Simulation Lab</h2>
+                    <p>Challenge the verdict. Personalize your fiscal reality.</p>
+                </div>
+
+                <div class="simulator-box">
+                    <form id="simulationForm">
+                        <!-- Technical Hidden State -->
+                        <input type="hidden" name="cityASlug" th:value="${cityA.slug}">
+                        <input type="hidden" name="cityBSlug" th:value="${cityB.slug}">
+                        <input type="hidden" name="currentSalary" th:value="${currentSalary}">
+                        <input type="hidden" name="offerSalary" th:value="${offerSalary}">
+
+                        <!-- Boost/Leak Hidden Toggles -->
+                        <input type="hidden" name="isPremiumBenefits" id="boost-benefits" value="false">
+                        <input type="hidden" name="isHomeOwner" id="boost-home" value="false">
+                        <input type="hidden" name="isRemote" id="boost-remote" value="false">
+                        <input type="hidden" name="hasStudentLoan" id="leak-debt" value="false">
+                        <input type="hidden" name="isTaxOptimized" id="boost-tax" value="false">
+                        <input type="hidden" name="isCarOwner" id="boost-car" value="true">
+
+                        <div class="lab-container">
+                            <div class="lab-column full-width">
+                                <h3>Simulation Options (Offer Focus)</h3>
+                                <div class="lab-grid three-col">
+                                    <div class="lab-card" data-target="boost-benefits">
+                                        <div class="icon">💼</div>
+                                        <div class="card-info">
+                                            <h4>Premium Benefits</h4>
+                                            <p>401k & HSA boosts</p>
+                                        </div>
+                                    </div>
+                                    <div class="lab-card" data-target="boost-remote">
+                                        <div class="icon">💻</div>
+                                        <div class="card-info">
+                                            <h4>Remote Work</h4>
+                                            <p>70% Transport savings</p>
+                                        </div>
+                                    </div>
+                                    <div class="lab-card active" data-target="boost-car">
+                                        <div class="icon">🚗</div>
+                                        <div class="card-info">
+                                            <h4>Car Owner</h4>
+                                            <p>Insurance & gas costs</p>
+                                        </div>
+                                    </div>
+                                    <div class="lab-card" data-target="boost-tax">
+                                        <div class="icon">🧾</div>
+                                        <div class="card-info">
+                                            <h4>Tax Optimization</h4>
+                                            <p>Maximize deductions</p>
+                                        </div>
+                                    </div>
+                                    <div class="lab-card" data-target="boost-home">
+                                        <div class="icon">🏠</div>
+                                        <div class="card-info">
+                                            <h4>Homeowner</h4>
+                                            <p>Zero rent / Equity</p>
+                                        </div>
+                                    </div>
+                                    <div class="lab-card" data-target="leak-debt">
+                                        <div class="icon">🎓</div>
+                                        <div class="card-info">
+                                            <h4>Education Debt</h4>
+                                            <p>Monthly loan payments</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GRANULAR ADJUSTMENTS (Sliders) -->
+                        <div class="lab-adjustments">
+                            <div class="adjustments-grid">
+                                <div class="slider-group">
+                                    <label>
+                                        Signing / Relo Bonus
+                                        <span class="slider-val" id="val-signingbonus">$0</span>
+                                    </label>
+                                    <input type="range" name="signingBonus" min="0" max="50000" step="1000" value="0">
+                                </div>
+                                <div class="slider-group">
+                                    <label>
+                                        Annual Equity (RSUs)
+                                        <span class="slider-val" id="val-equityannual">$0</span>
+                                    </label>
+                                    <input type="range" name="equityAnnual" min="0" max="100000" step="5000" value="0">
+                                </div>
+                                <div class="slider-group">
+                                    <label>
+                                        Equity Growth Scenario
+                                        <span class="slider-val" id="val-equitymultiplier">1.0x</span>
+                                    </label>
+                                    <input type="range" name="equityMultiplier" min="0.5" max="2.0" step="0.1"
+                                        value="1.0">
+                                </div>
+                                <div class="slider-group">
+                                    <label>
+                                        Daily Commute (One-way min)
+                                        <span class="slider-val" id="val-commutetime">0m</span>
+                                    </label>
+                                    <input type="range" name="commuteTime" min="0" max="120" step="5" value="0">
+                                </div>
+                                <div class="slider-group">
+                                    <label>
+                                        Side Hustle (Monthly)
+                                        <span class="slider-val" id="val-sidehustle">$0</span>
+                                    </label>
+                                    <input type="range" name="sideHustle" min="0" max="5000" step="100" value="0">
+                                </div>
+                                <div class="slider-group">
+                                    <label>
+                                        Other Monthly Leaks
+                                        <span class="slider-val" id="val-leaks">$0</span>
+                                    </label>
+                                    <input type="range" name="otherLeaks" min="0" max="3000" step="100" value="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" id="btn-recalc" class="btn-simulate">Recalculate Verdict</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- LAYER 4: FEELING (The Experience/Reality) -->
         <section class="feeling-section">
             <div class="container">
                 <div class="section-title">
@@ -193,61 +350,28 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </section>
 
-        <!-- LAYER 4: SIMULATOR (The Retention/Confidence) -->
-        <section class="simulator-section" id="simulator">
-            <div class="container">
-                <div class="section-title">
-                    <h2>Simulation Lab</h2>
-                    <p>Personalize the data into conviction.</p>
-                </div>
-
-                <div class="simulator-box">
-                    <form id="simulationForm" class="sim-grid">
-                        <!-- Hidden Inputs -->
-                        <input type="hidden" name="cityA" th:value="${cityA.slug}">
-                        <input type="hidden" name="cityB" th:value="${cityB.slug}">
-                        <input type="hidden" name="currentSalary" th:value="${currentSalary}">
-                        <input type="hidden" name="offerSalary" th:value="${offerSalary}">
-
-                        <!-- Controls -->
-                        <div class="control-group">
-                            <label>Filing Status</label>
-                            <select name="isMarried" id="sim-married">
-                                <option value="false" th:selected="${!effectiveIsMarried}">Single</option>
-                                <option value="true" th:selected="${effectiveIsMarried}">Married (Joint)</option>
-                            </select>
+                    <!-- Wealth Buffer Accelerator -->
+                    <div class="reality-card highlight wealth-card">
+                        <div class="icon">📈</div>
+                        <div class="reality-content">
+                            <h4>Wealth Buffer Index</h4>
+                            <p>Estimated wealth gap in 10 years at 7% compound growth.</p>
+                            <div class="comparison-row success-text">
+                                <strong class="line-wealth" th:text="${result.wealthBufferMsg}">Waiting for
+                                    data...</strong>
+                            </div>
+                            <div class="investment-row">
+                                <span class="sub-text">Offer Potential: <strong
+                                        th:text="${'$' + #numbers.formatInteger(result.investmentB, 0, 'COMMA')}"></strong></span>
+                            </div>
                         </div>
-
-                        <div class="control-group">
-                            <label>Housing Type</label>
-                            <select name="housingType" id="sim-housing">
-                                <option value="RENT">Renting</option>
-                                <option value="OWN">Buying</option>
-                                <option value="PARENTS">Living with Parents</option>
-                            </select>
-                        </div>
-
-                        <div class="control-group">
-                            <label>401k Contribution (%)</label>
-                            <input type="number" name="fourOhOneKRate" value="0.05" step="0.01" min="0" max="0.30">
-                        </div>
-
-                        <div class="control-group">
-                            <button type="button" id="btn-recalc" class="btn-simulate">Run Simulation</button>
-                        </div>
-                    </form>
-
-                    <div id="sim-result-preview" class="sim-preview hidden">
-                        <!-- Dynamic JS result will populate here -->
-                        Updating verdict...
                     </div>
                 </div>
             </div>
         </section>
+
+
 
         <footer class="footer">
             <div class="container">

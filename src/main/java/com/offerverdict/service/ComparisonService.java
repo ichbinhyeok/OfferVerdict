@@ -2,14 +2,15 @@ package com.offerverdict.service;
 
 import com.offerverdict.config.AppProperties;
 import com.offerverdict.data.DataRepository;
+import com.offerverdict.model.AuthoritativeMetrics;
 import com.offerverdict.model.CityCostEntry;
 import com.offerverdict.model.ComparisonBreakdown;
 import com.offerverdict.model.ComparisonResult;
+import com.offerverdict.model.HouseholdType;
+import com.offerverdict.model.HousingType;
 import com.offerverdict.model.JobInfo;
 import com.offerverdict.model.LifestyleMetrics;
 import com.offerverdict.model.Verdict;
-import com.offerverdict.model.HouseholdType;
-import com.offerverdict.model.HousingType;
 import com.offerverdict.util.SlugNormalizer;
 import org.springframework.stereotype.Service;
 
@@ -23,26 +24,20 @@ import java.util.stream.Collectors;
 public class ComparisonService {
     private final DataRepository repository;
     private final TaxCalculatorService taxCalculatorService;
-    private final CostCalculatorService costCalculatorService;
-    private final RentDataService rentDataService;
-    private final SalaryDataService salaryDataService;
     private final AppProperties appProperties;
-    private final PurchasingPowerService purchasingPowerService; // Added missing field
+    private final FinancialEngine financialEngine;
+    private final VerdictAdviser verdictAdviser;
 
     public ComparisonService(DataRepository repository,
             TaxCalculatorService taxCalculatorService,
-            CostCalculatorService costCalculatorService,
-            RentDataService rentDataService,
-            SalaryDataService salaryDataService,
             AppProperties appProperties,
-            PurchasingPowerService purchasingPowerService) { // Added missing param
+            FinancialEngine financialEngine,
+            VerdictAdviser verdictAdviser) {
         this.repository = repository;
         this.taxCalculatorService = taxCalculatorService;
-        this.costCalculatorService = costCalculatorService;
-        this.rentDataService = rentDataService;
-        this.salaryDataService = salaryDataService;
         this.appProperties = appProperties;
-        this.purchasingPowerService = purchasingPowerService;
+        this.financialEngine = financialEngine;
+        this.verdictAdviser = verdictAdviser;
     }
 
     public ComparisonResult compare(String cityASlug,
@@ -50,28 +45,43 @@ public class ComparisonService {
             double currentSalary,
             double offerSalary,
             HouseholdType householdType,
-            HousingType housingType) {
+            HousingType housingType,
+            Boolean isMarried,
+            Double fourOhOneKRate,
+            Double monthlyInsurance,
+            double studentLoanOrChildcare,
+            double sideHustle,
+            boolean isRemote,
+            boolean isCarOwner) {
         return compare(cityASlug, cityBSlug, currentSalary, offerSalary, householdType, housingType,
-                null, null, null, 0.0, null);
+                isMarried, fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, sideHustle, isRemote, isCarOwner,
+                0.0, 0.0, 1.0, 0.0);
     }
 
     public ComparisonResult compare(String citySlugA, String citySlugB, double salaryA, double salaryB,
             HouseholdType householdType, HousingType housingType, Boolean isMarried,
-            Double fourOhOneKRate, Double monthlyInsurance, double studentLoanOrChildcare, Double rsuAmount) {
+            Double fourOhOneKRate, Double monthlyInsurance, double studentLoanOrChildcare,
+            double sideHustle, boolean isRemote, boolean isCarOwner,
+            double signingBonus, double equityAnnual, double equityMultiplier, double commuteTime) {
 
         CityCostEntry cityA = repository.getCity(citySlugA);
         CityCostEntry cityB = repository.getCity(citySlugB);
+        AuthoritativeMetrics metrics = repository.getAuthoritativeMetrics();
 
         // 1. Build Financial Breakdowns (The Evidence)
+        // [AUTHORITY UPGRADE]: Current is FIXED, Offer is SIMULATED
         ComparisonBreakdown breakdownA = buildBreakdown(salaryA, cityA, householdType, housingType, isMarried,
-                fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, rsuAmount);
+                fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, 0.0, false, true,
+                0.0, 0.0, 1.0, 0.0, metrics);
+
         ComparisonBreakdown breakdownB = buildBreakdown(salaryB, cityB, householdType, housingType, isMarried,
-                fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, rsuAmount);
+                fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, sideHustle, isRemote, isCarOwner,
+                signingBonus, equityAnnual, equityMultiplier, commuteTime, metrics);
 
         ComparisonBreakdown current = breakdownA;
         ComparisonBreakdown offer = breakdownB;
 
-        breakdownA.setGrossSalary(salaryA); // Ensure gross is set for leverage calc
+        breakdownA.setGrossSalary(salaryA);
         breakdownB.setGrossSalary(salaryB);
 
         // 2. Initialize Result & Verdict (The Hook)
@@ -80,7 +90,7 @@ public class ComparisonService {
         result.setOffer(breakdownB);
 
         // Calculate Verdict & Leverage using the Cash-Flow First logic
-        purchasingPowerService.calculateVerdict(result);
+        calculateVerdict(result);
 
         // Calculate detailed Residual comparison (The "Freedom Index")
         double residualA = breakdownA.getResidual();
@@ -90,19 +100,6 @@ public class ComparisonService {
 
         result.setCurrentLifestyle(new LifestyleMetrics(residualA, currentHourlyRate));
         result.setOfferLifestyle(new LifestyleMetrics(residualB, offerHourlyRate));
-
-        // Calculate Delta Percent for Verdict Copy generation (if not set by service)
-        // Service sets Verdict, Copy, MonthlyGain, ValueDiff.
-        // We might need deltaPercent for internal logic or copy generation if service
-        // didn't set it fully?
-        // PurchasingPowerService sets specific copy, so we might skip
-        // generateVerdictCopy or use it as fallback.
-        // Let's rely on PurchasingPowerService for the core Verdict.
-
-        // Note: updateVerdictWithAfterTaxReality is likely redundant now as
-        // PurchasingPowerService includes tax/rent
-        // But we can keep it as a safety check or remove it.
-        // Removing it since PurchasingPowerService now uses the full breakdown.
 
         // Calculate Delta Percent just in case
         double deltaPercent = computeDeltaPercent(residualA, residualB);
@@ -126,6 +123,36 @@ public class ComparisonService {
         String cityAName = cityA.getCity();
         String cityBName = cityB.getCity();
 
+        // --- STRATEGIC METRICS: WEALTH BUFFER ---
+        double monthlyDiff = offer.getResidual() - current.getResidual();
+        // 10 Year Wealth projection at 7% return (0.07/12 = 0.00583 monthly)
+        double r = 0.07 / 12.0;
+        int n = 120; // 10 years
+        double wealthGap = 0;
+        if (monthlyDiff != 0) {
+            wealthGap = monthlyDiff * ((Math.pow(1 + r, n) - 1) / r);
+        }
+
+        result.setInvestmentA(current.getResidual() * ((Math.pow(1 + r, n) - 1) / r));
+        result.setInvestmentB(offer.getResidual() * ((Math.pow(1 + r, n) - 1) / r));
+
+        if (monthlyDiff > 0) {
+            result.setWealthBufferMsg(String.format("This move adds %s to your 10-year wealth at 7%% returns.",
+                    currency.format(wealthGap)));
+        } else if (monthlyDiff < 0) {
+            result.setWealthBufferMsg(String.format("This move destroys %s of potential wealth in 10 years.",
+                    currency.format(Math.abs(wealthGap))));
+        } else {
+            result.setWealthBufferMsg("No change in wealth trajectory.");
+        }
+
+        // --- CALC DELTAS (Simplified) ---
+        offer.setSalaryDiff(salaryB - salaryA);
+        offer.setTaxDiff((offer.getTaxResult().getTotalTax() + (offer.getLocalTax() * 12))
+                - (current.getTaxResult().getTotalTax() + (current.getLocalTax() * 12)));
+        offer.setHousingDiff((offer.getRent() * 12) - (current.getRent() * 12));
+        offer.setResidualDiff((offer.getResidual() * 12) - (current.getResidual() * 12));
+
         // Tax Message
         double taxA = current.getTaxResult().getFederalTax() + current.getTaxResult().getStateTax();
         double taxB = offer.getTaxResult().getFederalTax() + offer.getTaxResult().getStateTax();
@@ -148,15 +175,13 @@ public class ComparisonService {
 
         if (rentA > rentB) {
             result.setRentDiffMsg(
-                    String.format("Rent in %s is %s cheaper (Zillow)", cityBName, currency.format(rentDiff)));
+                    String.format("Rent in %s is %s cheaper (CityCost)", cityBName, currency.format(rentDiff)));
         } else {
             result.setRentDiffMsg(
                     String.format("Rent in %s is %s more expensive", cityBName, currency.format(rentDiff)));
         }
 
         // Value (Real Hourly)
-        // Adjust offer hourly by COL relative to Current? Or just use residual change?
-        // Let's use Residual change per hour
         double residualHourlyChange = monthlyGain / 160.0; // 160 hours/mo
         if (residualHourlyChange < 0) {
             result.setValueDiffMsg(
@@ -165,14 +190,6 @@ public class ComparisonService {
             result.setValueDiffMsg(
                     String.format("Real hourly value increases by %s", currency.format(residualHourlyChange)));
         }
-
-        // Salary Benchmark
-        // For now hardcode lookups for fallback
-        // Salary Benchmark (Temporarily disabled due to build error)
-        // result.setJobPercentile(salaryDataService.getPercentileLabel("software-engineer",
-        // cityBSlug, offerSalary));
-        // result.setGoodSalary(salaryDataService.isGoodSalary("software-engineer",
-        // cityBSlug, offerSalary));
 
         return result;
     }
@@ -185,7 +202,14 @@ public class ComparisonService {
             Double fourOhOneKRate,
             Double monthlyInsurance,
             double studentLoanOrChildcare,
-            Double rsuAmount) {
+            double sideHustle,
+            boolean isRemote,
+            boolean isCarOwner,
+            double signingBonus,
+            double equityAnnual,
+            double equityMultiplier,
+            double commuteTime,
+            AuthoritativeMetrics metrics) {
 
         TaxCalculatorService.TaxResult taxResult = taxCalculatorService.calculateTax(
                 salary,
@@ -194,21 +218,37 @@ public class ComparisonService {
                 fourOhOneKRate,
                 monthlyInsurance,
                 studentLoanOrChildcare > 0 ? studentLoanOrChildcare : null,
-                rsuAmount);
+                0.0); // RSU removed for now to simplify Lab
 
         double netAnnual = taxResult.getNetIncome();
-        double netMonthly = netAnnual / 12.0;
+
+        // --- NEW AUTHORITATIVE ENRICHMENT ---
+        double localTaxAnnual = financialEngine.calculateLocalTax(salary, city.getSlug(), metrics);
+        double insuranceAnnual = isCarOwner ? financialEngine.calculateCarInsurance(city.getState(), metrics) : 0.0;
+
+        // Amortized signing bonus & Equity scenario
+        double annualEquity = equityAnnual * equityMultiplier;
+        double amortizedSigning = signingBonus / 1.0; // Assume 1 year for first-year view
+
+        double totalAnnualNet = netAnnual - localTaxAnnual - insuranceAnnual + annualEquity + amortizedSigning;
+        double netMonthly = totalAnnualNet / 12.0;
+
+        // Commute Time-Value Cost
+        double hourlyRate = salary / 2080.0;
+        double netHourlyRate = (netAnnual / 2080.0) * 0.8; // conservative net hourly
+        double monthlyCommuteCost = (commuteTime * 2 * 22 / 60.0) * netHourlyRate;
+
         double householdMultiplier = householdType == HouseholdType.FAMILY ? 1.4 : 1.0;
 
         double rent;
         double housingCost = 0.0;
 
-        // USE RentDataService if available
-        double zillowRent = rentDataService.getMedianRent(city.getSlug());
+        // Use CityCost.json data directly
+        double cityAvgRent = city.getAvgRent() > 0 ? city.getAvgRent() : 2000.0; // Fallback
 
         switch (housingType) {
             case RENT:
-                rent = zillowRent;
+                rent = cityAvgRent;
                 break;
             case OWN:
                 rent = 0.0;
@@ -219,10 +259,10 @@ public class ComparisonService {
                 housingCost = 300.0;
                 break;
             default:
-                rent = zillowRent;
+                rent = cityAvgRent;
         }
 
-        double livingCost = costCalculatorService.calculateLivingCost(city, householdType);
+        double livingCost = calculateLivingCost(city, householdType);
         double groceries, transport, utilities, misc;
 
         if (city.getDetails() != null && !city.getDetails().isEmpty()) {
@@ -230,22 +270,42 @@ public class ComparisonService {
             transport = city.getDetails().getOrDefault("transport", 0.0) * householdMultiplier;
             utilities = city.getDetails().getOrDefault("utilities", 0.0) * householdMultiplier;
             misc = city.getDetails().getOrDefault("misc", 0.0) * householdMultiplier;
+
+            // Remote Work Discount (70% reduction in transport)
+            if (isRemote) {
+                transport *= 0.3;
+            }
+
             livingCost = groceries + transport + utilities + misc;
         } else {
             groceries = livingCost * 0.30;
             transport = livingCost * 0.15;
+            if (isRemote)
+                transport *= 0.3;
             utilities = livingCost * 0.10;
             misc = livingCost - (groceries + transport + utilities);
         }
 
         double totalHousingCost = rent + housingCost;
-        double residual = netMonthly - (totalHousingCost + livingCost);
+        // Residual = Net Income + Side Hustle - (Housing + Living + Debt + Commute
+        // Cost)
+        double residual = (netMonthly + sideHustle)
+                - (totalHousingCost + livingCost + studentLoanOrChildcare + (monthlyCommuteCost / 12.0));
+
+        // Actually, commute cost should be monthly already if calculated over 22 days
+        residual = (netMonthly + sideHustle)
+                - (totalHousingCost + livingCost + studentLoanOrChildcare + monthlyCommuteCost);
+
         double monthlyResidual = residual;
         double yearsToBuyHouse = monthlyResidual > 0 ? (city.getAvgHousePrice() * 0.20) / (monthlyResidual * 12)
-                : 999.0;
-        double monthsToBuyTesla = monthlyResidual > 0 ? 50000.0 / monthlyResidual : 999.0;
+                : 99.0;
+        double monthsToBuyTesla = monthlyResidual > 0 ? 50000.0 / monthlyResidual : 99.0;
+
+        // Starbucks Index: $6/coffee * 22 working days = $132 potential savings
+        double starbucksSavings = 6.0 * 22.0;
 
         ComparisonBreakdown breakdown = new ComparisonBreakdown();
+        breakdown.setCityName(city.getCity());
         breakdown.setNetMonthly(netMonthly);
         breakdown.setRent(totalHousingCost);
         breakdown.setLivingCost(livingCost);
@@ -254,8 +314,16 @@ public class ComparisonService {
         breakdown.setTransport(transport);
         breakdown.setUtilities(utilities);
         breakdown.setMisc(misc);
+        breakdown.setLocalTax(localTaxAnnual / 12.0);
+        breakdown.setInsurance(insuranceAnnual / 12.0);
         breakdown.setYearsToBuyHouse(yearsToBuyHouse);
         breakdown.setMonthsToBuyTesla(monthsToBuyTesla);
+        breakdown.setStarbucksSavings(starbucksSavings);
+
+        breakdown.setEquityValue(annualEquity);
+        breakdown.setSigningBonus(signingBonus);
+        breakdown.setCommuteTime(commuteTime);
+        breakdown.setRealHourlyRate(hourlyRate); // Could refine with commute hours added to denominator
 
         if (taxResult != null) {
             breakdown.setTaxResult(taxResult);
@@ -264,12 +332,79 @@ public class ComparisonService {
         return breakdown;
     }
 
+    // Logic absorbed from CostCalculatorService
+    private double calculateLivingCost(CityCostEntry city, HouseholdType householdType) {
+        double baselineLivingCost = appProperties.getBaselineLivingCost();
+        double multiplier = householdType == HouseholdType.FAMILY ? 1.4 : 1.0;
+        return baselineLivingCost * (city.getColIndex() / 100.0) * multiplier;
+    }
+
+    // Logic absorbed from PurchasingPowerService
+    private void calculateVerdict(ComparisonResult result) {
+        AuthoritativeMetrics metrics = repository.getAuthoritativeMetrics();
+        double currentResidual = result.getCurrent().getResidual();
+        double offerResidual = result.getOffer().getResidual();
+
+        // 1. Determine Verdict & Ad-hoc Color
+        double diff = offerResidual - currentResidual;
+        double deltaPercent = computeDeltaPercent(currentResidual, offerResidual);
+
+        Verdict verdict = classifyVerdict(deltaPercent);
+        result.setVerdict(verdict);
+        result.setVerdictCopy(verdict.toString());
+
+        // 2. Set Visual Tone
+        String verdictColor = "neutral-blue"; // Default color
+        if (verdict == Verdict.GO)
+            result.setVerdictColor("premium-gold");
+        else if (verdict == Verdict.NO_GO)
+            result.setVerdictColor("harsh-red");
+        else
+            result.setVerdictColor(verdictColor);
+
+        // 3. Authority Messaging
+        result.setValueDiffMsg(
+                verdictAdviser.generateVerdictMessage(verdict, deltaPercent / 100.0, result.getOffer().getCityName()));
+
+        // 4. Reverse Calculation (The Magic Number)
+        double offerEffectiveTaxRate = result.getOffer().getTaxResult().getEffectiveTaxRate();
+        double gap = currentResidual - offerResidual;
+
+        // Strict Authority Logic: Don't go if gain < $40,000 (roughly 3.3k/mo)
+        double yearlyGain = diff * 12;
+        if (verdict == Verdict.NO_GO || verdict == Verdict.WARNING || yearlyGain < 40000) {
+            double reqGain = 40000.0; // The threshold
+            double salaryNeeded = result.getOffer().getGrossSalary()
+                    + ((reqGain - yearlyGain) / (1.0 - offerEffectiveTaxRate));
+            result.setAuthorityAdvice(String.format("Don't go unless you negotiate at least $%,.0f more.",
+                    salaryNeeded - result.getOffer().getGrossSalary()));
+            result.setReverseSalaryGoal(Math.round(salaryNeeded / 1000.0) * 1000.0);
+        } else {
+            result.setAuthorityAdvice("Safe to proceed. This move meets the authoritative growth threshold.");
+            result.setReverseSalaryGoal(result.getOffer().getGrossSalary());
+        }
+
+        result.setLeverageMsg(verdictAdviser.getNegotiationLever(gap * 12 / (1.0 - offerEffectiveTaxRate)));
+
+        // 5. Benchmark Context (The Receipts)
+        if (metrics != null) {
+            result.setBenchmarkContext(String.format("Based on %s (Last updated: %s)",
+                    metrics.getMetadata().source, metrics.getMetadata().lastUpdated));
+        }
+
+        result.setMonthlyGainStr((diff >= 0 ? "+" : "") + formatMoney(diff));
+    }
+
+    private String formatMoney(double amount) {
+        return String.format("%,.0f", amount);
+    }
+
     public Verdict classifyVerdict(double deltaPercent) {
-        if (deltaPercent >= 10) {
+        if (deltaPercent >= 5.0) {
             return Verdict.GO;
-        } else if (deltaPercent >= 0) {
+        } else if (deltaPercent >= -2.0) {
             return Verdict.CONDITIONAL;
-        } else if (deltaPercent > -10) {
+        } else if (deltaPercent > -10.0) {
             return Verdict.WARNING;
         }
         return Verdict.NO_GO;
@@ -280,18 +415,6 @@ public class ComparisonService {
             return residualB == 0 ? 0 : residualB > 0 ? 100 : -100;
         }
         return (residualB - residualA) / Math.abs(residualA) * 100.0;
-    }
-
-    private String generateVerdictCopy(Verdict verdict, double deltaPercent) {
-        double magnitude = Math.abs(deltaPercent);
-        return switch (verdict) {
-            case GO -> magnitude > 20
-                    ? "You unlock " + Math.round(deltaPercent) + "% more life. Take the win."
-                    : "You gain " + Math.round(deltaPercent) + "% more breathing room. Take it.";
-            case CONDITIONAL -> "Slight edge at +" + Math.round(deltaPercent) + "%. Negotiate perks then go.";
-            case WARNING -> "This move squeezes you by " + Math.abs(Math.round(deltaPercent)) + "%. Push back hard.";
-            case NO_GO -> "This offer makes you " + Math.abs(Math.round(deltaPercent)) + "% poorer. Walk away.";
-        };
     }
 
     public List<String> relatedCityComparisons(String jobSlug,
@@ -335,15 +458,5 @@ public class ComparisonService {
 
     public TaxCalculatorService.TaxBreakdown getTaxBreakdown(double salary, String stateCode) {
         return taxCalculatorService.calculateTaxBreakdown(salary, stateCode);
-    }
-
-    private void updateVerdictWithAfterTaxReality(ComparisonResult result, double residualA, double residualB) {
-        double diff = residualB - residualA;
-        // If Purchasing Power said GO, but After-Tax says NO...
-        if (result.getVerdict() == com.offerverdict.model.Verdict.GO && diff < 0) {
-            result.setVerdict(com.offerverdict.model.Verdict.WARNING);
-            result.setVerdictCopy("TAX TRAP");
-            result.setValueDiffMsg("Taxes kill the raise.");
-        }
     }
 }

@@ -2,7 +2,6 @@ package com.offerverdict.controller;
 
 import com.offerverdict.data.DataRepository;
 import com.offerverdict.model.CityCostEntry;
-import com.offerverdict.model.JobInfo;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,15 +15,6 @@ public class HubController {
 
     public HubController(DataRepository repository) {
         this.repository = repository;
-    }
-
-    @GetMapping("/jobs")
-    public String jobs(Model model) {
-        List<JobInfo> jobs = repository.getJobs();
-        model.addAttribute("jobs", jobs);
-        model.addAttribute("title", "Job salary verdict hubs");
-        model.addAttribute("metaDescription", "Explore verdict-first salary comparisons by job title.");
-        return "jobs";
     }
 
     @GetMapping("/cities")
