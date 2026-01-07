@@ -19,6 +19,7 @@
 
     <!-- Analytics -->
     <div th:replace="~{fragments/analytics :: analytics}"></div>
+
 </head>
 
 <body>
@@ -30,58 +31,87 @@
                 <span class="gradient-text">Take The Job?</span>
             </h1>
             <p class="landing-subtitle">
-                Stop guessing. Connect real data from IRS, Zillow, and BLS to see exactly
-                how much your life changes.
+                Stop guessing. Real data on Taxes, Rent, and Cost of Living.
             </p>
         </header>
 
-        <!-- Main Form Card (Glassmorphism) -->
-        <form action="/" method="get" class="input-grid animate-in delay-2">
-            <!-- Current Situation -->
-            <div class="glass-card form-card">
-                <h3>Current Situation</h3>
+        <!-- Use a GET request so params show in URL (SEO friendly) -->
+        <form action="/" method="get" class="journey-card animate-in delay-2">
 
-                <div class="form-group">
-                    <label class="form-label">Create Job Title</label>
-                    <input type="text" name="job" class="form-input" placeholder="e.g. Software Engineer" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Current City</label>
-                    <input type="text" name="cityA" class="form-input" placeholder="e.g. San Francisco, CA" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Current Base Salary</label>
-                    <input type="number" name="currentSalary" class="form-input" placeholder="e.g. 150000" required>
-                </div>
+            <!-- Shared Job Title -->
+            <div class="form-group"
+                style="margin-bottom: 2rem; max-width: 400px; margin-left: auto; margin-right: auto;">
+                <label class="form-label" style="text-align: center;">Target Role</label>
+                <input type="text" name="job" list="job-list" class="form-input" placeholder="e.g. Software Engineer"
+                    style="text-align: center; font-size: 1.1rem;" required>
+                <datalist id="job-list">
+                    <option value="Software Engineer">
+                    <option value="Data Scientist">
+                    <option value="Product Manager">
+                    <option value="Nurse">
+                    <option value="Teacher">
+                    <option value="Accountant">
+                    <option value="Marketing Manager">
+                    <option value="Sales Representative">
+                </datalist>
             </div>
 
-            <!-- New Offer -->
-            <div class="glass-card form-card">
-                <h3>The New Offer</h3>
+            <div class="journey-grid">
+                <!-- Current Situation -->
+                <div class="journey-section">
+                    <h3>Current Situation</h3>
 
-                <div class="form-group">
-                    <label class="form-label">Target Role</label>
-                    <div style="padding: 1rem; color: var(--text-tertiary); font-size: 0.9rem;">
-                        Same as current role
+                    <div class="form-group">
+                        <label class="form-label">City</label>
+                        <input type="text" name="cityA" list="city-list" class="form-input"
+                            placeholder="San Francisco, CA" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Base Salary</label>
+                        <input type="number" name="currentSalary" class="form-input" placeholder="150000" required>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Offer City</label>
-                    <input type="text" name="cityB" class="form-input" placeholder="e.g. Austin, TX" required>
-                </div>
+                <!-- Visual Arrow -->
+                <div class="journey-arrow">→</div>
 
-                <div class="form-group">
-                    <label class="form-label">Offer Base Salary</label>
-                    <input type="number" name="offerSalary" class="form-input" placeholder="e.g. 145000" required>
-                </div>
+                <!-- New Offer -->
+                <div class="journey-section">
+                    <h3>The New Offer</h3>
 
-                <button type="submit" class="btn btn-primary submit-btn">
+                    <div class="form-group">
+                        <label class="form-label">City</label>
+                        <input type="text" name="cityB" list="city-list" class="form-input" placeholder="Austin, TX"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Offer Salary</label>
+                        <input type="number" name="offerSalary" class="form-input" placeholder="145000" required>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 2.5rem; text-align: center;">
+                <button type="submit" class="btn btn-primary submit-btn"
+                    style="width: 100%; max-width: 300px; font-size: 1.1rem; padding: 1rem;">
                     Get My Verdict →
                 </button>
             </div>
+
+            <datalist id="city-list">
+                <option value="San Francisco, CA">
+                <option value="New York, NY">
+                <option value="Austin, TX">
+                <option value="Seattle, WA">
+                <option value="Los Angeles, CA">
+                <option value="Chicago, IL">
+                <option value="Denver, CO">
+                <option value="Boston, MA">
+                <option value="Miami, FL">
+                <option value="Atlanta, GA">
+            </datalist>
         </form>
 
         <!-- Social Proof / Trust -->

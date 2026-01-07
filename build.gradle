@@ -35,6 +35,11 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// CRITICAL FIX: Enable parameter name preservation for Spring @PathVariable
+tasks.withType(JavaCompile) {
+    options.compilerArgs << '-parameters'
+}
+
 tasks.named('test') {
     useJUnitPlatform()
 }

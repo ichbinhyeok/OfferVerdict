@@ -43,18 +43,18 @@ public class DataRepository {
         try {
             this.taxData = objectMapper.readValue(
                     new ClassPathResource("data/StateTax.json").getInputStream(),
-                    TaxData.class
-            );
-            this.cities = objectMapper.readValue(
+                    TaxData.class);
+
+            // Updated to handle metadata wrapper
+            CityDataContainer cityContainer = objectMapper.readValue(
                     new ClassPathResource("data/CityCost.json").getInputStream(),
-                    new TypeReference<>() {
-                    }
-            );
+                    CityDataContainer.class);
+            this.cities = cityContainer.cities;
+
             this.jobs = objectMapper.readValue(
                     new ClassPathResource("data/Jobs.json").getInputStream(),
                     new TypeReference<>() {
-                    }
-            );
+                    });
             this.cityBySlug = cities.stream()
                     .collect(Collectors.toMap(c -> SlugNormalizer.normalize(c.getSlug()), c -> c));
             this.jobBySlug = jobs.stream()
@@ -62,6 +62,12 @@ public class DataRepository {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load JSON data", e);
         }
+    }
+
+    // Inner class for JSON wrapper
+    private static class CityDataContainer {
+        public Map<String, Object> metadata;
+        public List<CityCostEntry> cities;
     }
 
     public TaxData getTaxData() {
@@ -88,7 +94,8 @@ public class DataRepository {
                     String citySlug = SlugNormalizer.normalize(city.getSlug());
                     return citySlug.startsWith(normalized) || normalized.startsWith(citySlug);
                 })
-                .min(Comparator.comparingInt(city -> Math.abs(SlugNormalizer.normalize(city.getSlug()).length() - normalized.length())));
+                .min(Comparator.comparingInt(
+                        city -> Math.abs(SlugNormalizer.normalize(city.getSlug()).length() - normalized.length())));
 
         if (startsWith.isPresent()) {
             return startsWith;
@@ -99,7 +106,8 @@ public class DataRepository {
                     String citySlug = SlugNormalizer.normalize(city.getSlug());
                     return citySlug.contains(normalized) || normalized.contains(citySlug);
                 })
-                .min(Comparator.comparingInt(city -> Math.abs(SlugNormalizer.normalize(city.getSlug()).length() - normalized.length())));
+                .min(Comparator.comparingInt(
+                        city -> Math.abs(SlugNormalizer.normalize(city.getSlug()).length() - normalized.length())));
     }
 
     public JobInfo getJob(String slug) {
@@ -122,7 +130,8 @@ public class DataRepository {
                     String jobSlug = SlugNormalizer.normalize(job.getSlug());
                     return jobSlug.startsWith(normalized) || normalized.startsWith(jobSlug);
                 })
-                .min(Comparator.comparingInt(job -> Math.abs(SlugNormalizer.normalize(job.getSlug()).length() - normalized.length())));
+                .min(Comparator.comparingInt(
+                        job -> Math.abs(SlugNormalizer.normalize(job.getSlug()).length() - normalized.length())));
 
         if (startsWith.isPresent()) {
             return startsWith;
@@ -133,7 +142,8 @@ public class DataRepository {
                     String jobSlug = SlugNormalizer.normalize(job.getSlug());
                     return jobSlug.contains(normalized) || normalized.contains(jobSlug);
                 })
-                .min(Comparator.comparingInt(job -> Math.abs(SlugNormalizer.normalize(job.getSlug()).length() - normalized.length())));
+                .min(Comparator.comparingInt(
+                        job -> Math.abs(SlugNormalizer.normalize(job.getSlug()).length() - normalized.length())));
     }
 
     public boolean hasCity(String slug) {

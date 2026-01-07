@@ -16,6 +16,11 @@ public class ComparisonResult {
     private String taxDiffMsg;
     private String rentDiffMsg;
     private String valueDiffMsg;
+
+    // Negotiation Leverage
+    private double breakEvenSalary;
+    private String leverageMsg; // "Ask for $145,000 to match your current lifestyle."
+
     private String jobPercentile; // e.g. "22%"
     private boolean isGoodSalary;
 
@@ -138,5 +143,21 @@ public class ComparisonResult {
 
     public void setGoodSalary(boolean goodSalary) {
         isGoodSalary = goodSalary;
+    }
+
+    public double getBreakEvenSalary() {
+        return breakEvenSalary;
+    }
+
+    public void setBreakEvenSalary(double breakEvenSalary) {
+        this.breakEvenSalary = breakEvenSalary;
+    }
+
+    public String getLeverageMsg() {
+        return leverageMsg;
+    }
+
+    public void setLeverageMsg(String leverageMsg) {
+        this.leverageMsg = leverageMsg;
     }
 }

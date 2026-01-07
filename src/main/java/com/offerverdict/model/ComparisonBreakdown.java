@@ -3,6 +3,7 @@ package com.offerverdict.model;
 import com.offerverdict.service.TaxCalculatorService;
 
 public class ComparisonBreakdown {
+    private double grossSalary; // Added for reverse calc
     private double netMonthly;
     private double rent;
     private double livingCost;
@@ -14,6 +15,14 @@ public class ComparisonBreakdown {
     private double yearsToBuyHouse;
     private double monthsToBuyTesla;
     private TaxCalculatorService.TaxResult taxResult;
+
+    public double getGrossSalary() {
+        return grossSalary;
+    }
+
+    public void setGrossSalary(double grossSalary) {
+        this.grossSalary = grossSalary;
+    }
 
     public double getNetMonthly() {
         return netMonthly;
@@ -94,11 +103,11 @@ public class ComparisonBreakdown {
     public void setMonthsToBuyTesla(double monthsToBuyTesla) {
         this.monthsToBuyTesla = monthsToBuyTesla;
     }
-    
+
     public TaxCalculatorService.TaxResult getTaxResult() {
         return taxResult;
     }
-    
+
     public void setTaxResult(TaxCalculatorService.TaxResult taxResult) {
         this.taxResult = taxResult;
     }

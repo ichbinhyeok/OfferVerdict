@@ -1,270 +1,260 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verdict Result - OfferVerdict</title>
-    <meta name="robots" content="index, follow">
-
-    <!-- Unified Design System -->
-    <link rel="stylesheet" href="/css/dashboard.css">
+    <title th:text="${title}">OfferVerdict</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Courier+Prime:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
         rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-    <!-- SEO Meta -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+
+    <!-- SEO -->
     <meta name="description" th:content="${metaDescription}">
     <link rel="canonical" th:href="${canonicalUrl}">
-    <meta property="og:title" th:content="${ogTitle}">
-    <meta property="og:description" th:content="${ogDescription}">
-    <meta property="og:url" th:content="${ogUrl}">
-    <meta property="og:image" th:content="${ogImageUrl}">
 
-    <!-- Structured Data -->
-    <script type="application/ld+json" th:utext="${structuredDataJson}"></script>
-
-    <!-- Analytics -->
-    <div th:replace="~{fragments/analytics :: analytics}"></div>
-
-    <!-- Share Generation -->
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <!-- Open Graph -->
+    <meta property="og:title" th:content="${ogTitle}" />
+    <meta property="og:description" th:content="${ogDescription}" />
+    <meta property="og:image" th:content="${ogImageUrl}" />
 </head>
 
-<body>
+<body class="theme-lucid">
 
-    <div class="verdict-container">
-
-        <!-- COMMAND HEADER -->
-        <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
-            <div class="logo" style="font-weight: 900; font-size: 1.2rem;">OfferVerdict</div>
-            <a href="/" class="btn btn-glass" style="font-size: 0.8rem;">← New Analysis</a>
-        </header>
-
-        <!-- PART 1: THE RECEIPT (Verdict) -->
-        <div class="receipt-card animate-in">
-            <div class="receipt-header">
-                <span>OFFER VERDICT RECEIPT</span>
-                <span>ID: #OV-2026-<span th:text="${#strings.randomAlphanumeric(4)}">A7B9</span></span>
-            </div>
-
-            <div class="verdict-hero">
-                <div id="verdict-badge" class="verdict-badge"
-                    th:classappend="${result.verdict.name() == 'GO'} ? 'verdict-go' : 'verdict-nogo'"
-                    th:text="${result.verdict}">GO</div>
-
-                <div class="core-numbers">
-                    <div class="number-item">
-                        <span class="number-value gradient-text" id="net-gain-display"
-                            th:text="${result.monthlyGainStr}">+$2,102</span>
-                        <span class="number-label">Monthly Gain</span>
-                    </div>
-                    <!-- Vertical Divider -->
-                    <div style="width: 1px; background: #e2e8f0;"></div>
-                    <div class="number-item">
-                        <span class="number-value" style="color: #4a5568;" id="freedom-display"
-                            th:text="${result.freedomIndex}">25%</span>
-                        <span class="number-label">Freedom Index</span>
-                    </div>
-                </div>
-
-                <div style="font-size: 0.9rem; color: #718096; margin-top: 5px;">
-                    <span style="background: #edf2f7; padding: 2px 8px; border-radius: 4px;">Verified vs Market</span>
-                    Comparable to Top <span style="font-weight: 700; color: #2d3748;"
-                        th:text="${result.jobPercentile}">22%</span> 📊 BLS
-                </div>
-            </div>
-
-            <!-- WHY SECTION (Data Authority) -->
-            <div class="why-section">
-                <h4
-                    style="margin-bottom: 1rem; color: var(--text-tertiary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                    Why This Verdict? (Irrefutable Data)</h4>
-                <ul class="why-list">
-                    <li class="why-item">
-                        <span class="why-icon">🏛️</span>
-                        <div>
-                            <div style="font-weight: 700;">Tax Impact</div>
-                            <div style="font-size: 0.9rem;">
-                                <span th:text="${result.taxDiffMsg}">San Francisco takes $847 more/mo than Austin</span>
-                                <span class="source-badge">IRS 2026</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="why-item">
-                        <span class="why-icon">🏠</span>
-                        <div>
-                            <div style="font-weight: 700;">Rent Burden</div>
-                            <div style="font-size: 0.9rem;">
-                                <span th:text="${result.rentDiffMsg}">Rent jumps from 32% to 41% of income</span>
-                                <span class="source-badge">Zillow</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="why-item">
-                        <span class="why-icon">💰</span>
-                        <div>
-                            <div style="font-weight: 700;">Real Value</div>
-                            <div style="font-size: 0.9rem;">
-                                <span th:text="${result.valueDiffMsg}">Real hourly value drops 12.3% adjusted for
-                                    COL</span>
-                                <span class="source-badge">BLS/Numbeo</span>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- YOUR LIFE SECTION (Emotional) -->
-            <div class="your-life-grid">
-                <div class="life-card">
-                    <div style="font-size: 1.5rem;">🏠</div>
-                    <div class="life-value" id="housing-months"
-                        th:text="${#numbers.formatInteger(result.offer.yearsToBuyHouse * 12, 0) + 'mo'}">42mo</div>
-                    <div class="life-msg">To Buy House</div>
-                </div>
-                <div class="life-card">
-                    <div style="font-size: 1.5rem;">🎓</div>
-                    <div class="life-value" id="loan-payoff">--</div>
-                    <div class="life-msg">Student Loan</div>
-                </div>
-                <div class="life-card">
-                    <div style="font-size: 1.5rem;">📈</div>
-                    <div class="life-value" id="401k-status">YES</div>
-                    <div class="life-msg">Max 401k</div>
-                </div>
-                <div class="life-card">
-                    <div style="font-size: 1.5rem;">✈️</div>
-                    <div class="life-value" id="travel-trips"
-                        th:text="${#numbers.formatInteger(result.offer.monthsToBuyTesla, 0)}">8</div>
-                    <div class="life-msg">Tesla Months</div>
-                </div>
-                <div class="life-card">
-                    <div style="font-size: 1.5rem;">🚗</div>
-                    <div class="life-value" id="car-tier">BMW</div>
-                    <div class="life-msg">Car Tier</div>
-                </div>
-                <div class="life-card">
-                    <div style="font-size: 1.5rem;">🍽️</div>
-                    <div class="life-value" id="dining-freq">28</div>
-                    <div class="life-msg">Dining Out/mo</div>
-                </div>
-            </div>
-
-            <div class="share-actions">
-                <button class="btn btn-primary" id="share-btn">📤 Download Receipt</button>
-                <button class="btn btn-glass" onclick="window.print()">🖨️ Print PDF</button>
-            </div>
-
-        </div> <!-- End Receipt -->
-
-
-        <!-- PART 2: SIMULATOR -->
-        <div class="simulator-container animate-in delay-2">
-            <h3 style="text-align: center; margin-bottom: 1.5rem;">🎮 "What If..." Simulator</h3>
-
-            <!-- Presets -->
-            <div class="preset-controls">
-                <button class="preset-btn active" data-scenario="default">Default</button>
-                <button class="preset-btn" data-scenario="roommate">+ Roommate</button>
-                <button class="preset-btn" data-scenario="married">+ Married</button>
-                <button class="preset-btn" data-scenario="max401k">Max 401k</button>
-                <button class="preset-btn" data-scenario="optimize"
-                    style="background: var(--text-primary); color: white;">✨ AI Optimize</button>
-            </div>
-
-            <!-- Sliders -->
-            <div class="slider-group">
-                <div class="slider-header">
-                    <span class="slider-label">Proposed Salary</span>
-                    <span class="slider-value" id="salary-val"
-                        th:text="${#numbers.formatCurrency(offerSalary)}">$150,000</span>
-                </div>
-                <input type="range" id="salary-slider" min="80000" max="400000" step="1000"
-                    th:value="${#numbers.formatDecimal(offerSalary, 0, 0)}">
-                <div style="font-size: 0.8rem; color: #48bb78; margin-top: 5px;">
-                    💡 Just $5k more for "Strong GO"
-                </div>
-            </div>
-
-            <div class="slider-group">
-                <div class="slider-header">
-                    <span class="slider-label">401k Contribution</span>
-                    <span class="slider-value" id="401k-val">5%</span>
-                </div>
-                <input type="range" id="401k-slider" min="0" max="25" step="1" value="5">
-                <div style="font-size: 0.8rem; color: #718096; margin-top: 5px;">
-                    Retirement acceleration: <span id="retirement-imp">Normal</span>
-                </div>
-            </div>
-
-            <!-- Progress to GO -->
-            <div class="progress-section">
-                <h4 style="color: var(--text-secondary);">🎯 Progress to GO</h4>
-                <div class="progress-bar-container">
-                    <div class="progress-fill" id="progress-fill" style="width: 72%;"></div>
-                </div>
-                <p style="font-size: 0.9rem; color: var(--text-secondary);" id="progress-msg">
-                    You are close to a clear GO verdict!
-                </p>
-
-                <div class="fomo-msg animate-in delay-3" th:if="${!result.isGoodSalary}">
-                    ⚠️ Current offer is below market rate for <span th:text="${cityB.city}">Austin</span>.
-                </div>
-
-                <div class="simulation-counter">
-                    🎯 Your Simulations: <span id="sim-count">1</span>/10 (Keep going for AI unlock)
-                </div>
-            </div>
-
-            <!-- Affiliate / Action Buttons -->
-            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a th:href="@{'https://www.linkedin.com/jobs/search?keywords=' + ${job.title} + '&location=' + ${cityB.city}}"
-                    target="_blank" class="affiliate-btn">
-                    <span>💼</span> Find <span th:text="${job.title}">Jobs</span> in <span
-                        th:text="${cityB.city}">Austin</span>
-                </a>
-                <a th:href="@{'https://www.google.com/search?q=moving+companies+' + ${cityA.city} + '+to+' + ${cityB.city}}"
-                    target="_blank" class="affiliate-btn">
-                    <span>📦</span> Movers to <span th:text="${cityB.city}">Austin</span>
-                </a>
-            </div>
+    <nav class="top-nav">
+        <div class="container">
+            <a href="/" class="logo">OfferVerdict</a>
         </div>
+    </nav>
 
-        <!-- Related Comparisons (pSEO Links) -->
-        <div style="margin-top: 3rem;">
-            <h4 style="text-align: center; margin-bottom: 1rem;">Compare Other Scenarios</h4>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
-                <a th:each="link : ${otherCityLinks}" th:href="${link}" class="btn btn-glass"
-                    style="font-size: 0.8rem;">
-                    Compare <span th:text="${cityA.city}">SF</span> vs Others
-                </a>
-            </div>
-        </div>
+    <main class="main-content">
+        <!-- LAYER 1: VERDICT (The Hook) -->
+        <section class="verdict-section" th:classappend="${result.verdict != null ? result.verdict.name() : 'NO_GO'}">
+            <div class="container">
+                <div class="verdict-header">
+                    <span class="badge-source">DATA: IRS 2025 • NUMBEO • BLS</span>
+                </div>
 
-        <!-- DATA AUTHORITY FOOTER -->
-        <footer>
-            <div style="font-weight: 700; margin-bottom: 1rem;">Data Powered By:</div>
-            <div class="data-sources-grid">
-                <div class="source-item">🏛️ IRS Tax Tables 2026</div>
-                <div class="source-item">📋 State Dept. Revenue</div>
-                <div class="source-item">🏠 Zillow Rent Index</div>
-                <div class="source-item">📊 BLS Labor Stats</div>
-                <div class="source-item">🌏 Numbeo COL</div>
+                <div class="verdict-display">
+                    <h1 class="verdict-text animate-pop"
+                        th:text="${result.verdictCopy != null ? result.verdictCopy : 'CALCULATING'}">DON'T GO</h1>
+                    <div class="verdict-sub"
+                        th:text="${result.valueDiffMsg != null ? result.valueDiffMsg : 'Analyzing your options...'}">You
+                        get poorer.</div>
+
+                    <!-- Negotiation Leverage -->
+                    <div class="leverage-card"
+                        th:if="${result.verdict != null and (result.verdict.name() == 'NO_GO' or result.verdict.name() == 'WARNING' or result.verdict.name() == 'CONDITIONAL')}">
+                        <div class="leverage-icon">💡</div>
+                        <div class="leverage-content">
+                            <span class="leverage-title">Agentic Negotiator</span>
+                            <span class="leverage-msg"
+                                th:text="${result.leverageMsg != null ? result.leverageMsg : 'Negotiate for better compensation to match your current lifestyle.'}">
+                                Ask for $145,000 to match your current lifestyle.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="financial-impact">
+                    <div class="impact-label">Monthly Cash Flow Impact</div>
+                    <div class="impact-value" th:text="${result.monthlyGainStr != null ? result.monthlyGainStr : '$0'}">
+                        -$1,200</div>
+                </div>
             </div>
-            <div style="margin-top: 2rem; opacity: 0.6;">
-                Last Data Sync: <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">2026-01-07</span> PST
-                <br>
-                <a href="#" style="color: inherit; text-decoration: underline;">How We Calculate</a>
+        </section>
+
+        <!-- LAYER 2: EVIDENCE (The Logic) -->
+        <section class="evidence-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>The Receipts</h2>
+                    <p>Why we reached this verdict.</p>
+                </div>
+
+                <div class="receipt-grid">
+                    <!-- City A -->
+                    <div class="receipt-card">
+                        <div class="card-header">
+                            <h3 th:text="${cityA.city}">City A</h3>
+                            <span class="badge">Current</span>
+                        </div>
+                        <div class="line-item">
+                            <span class="label">Gross Salary</span>
+                            <span class="value mono"
+                                th:text="${'$' + #numbers.formatInteger(currentSalary, 0, 'COMMA')}">$100,000</span>
+                        </div>
+                        <div class="line-item danger-text">
+                            <span class="label">Total Tax (Est.)</span>
+                            <span class="value mono"
+                                th:text="${'-$' + #numbers.formatInteger(result.current.taxResult.totalTax, 0, 'COMMA')}">-$24,000</span>
+                        </div>
+                        <div class="line-item warning-text">
+                            <span class="label">Housing (Yearly)</span>
+                            <span class="value mono"
+                                th:text="${'-$' + #numbers.formatInteger(result.current.rent * 12, 0, 'COMMA')}">-$36,000</span>
+                        </div>
+                        <div class="line-item success-text highlight-row">
+                            <span class="label">Residual (Cash)</span>
+                            <span class="value mono"
+                                th:text="${'$' + #numbers.formatInteger(result.current.residual * 12, 0, 'COMMA')}">$40,000</span>
+                        </div>
+                    </div>
+
+                    <!-- City B -->
+                    <div class="receipt-card">
+                        <div class="card-header">
+                            <h3 th:text="${cityB.city}">City B</h3>
+                            <span class="badge brand">Offer</span>
+                        </div>
+                        <div class="line-item">
+                            <span class="label">Gross Salary</span>
+                            <span class="value mono"
+                                th:text="${'$' + #numbers.formatInteger(offerSalary, 0, 'COMMA')}">$120,000</span>
+                        </div>
+                        <div class="line-item danger-text">
+                            <span class="label">Total Tax (Est.)</span>
+                            <span class="value mono"
+                                th:text="${'-$' + #numbers.formatInteger(result.offer.taxResult.totalTax, 0, 'COMMA')}">-$32,000</span>
+                        </div>
+                        <div class="line-item warning-text">
+                            <span class="label">Housing (Yearly)</span>
+                            <span class="value mono"
+                                th:text="${'-$' + #numbers.formatInteger(result.offer.rent * 12, 0, 'COMMA')}">-$48,000</span>
+                        </div>
+                        <div class="line-item success-text highlight-row">
+                            <span class="label">Residual (Cash)</span>
+                            <span class="value mono"
+                                th:text="${'$' + #numbers.formatInteger(result.offer.residual * 12, 0, 'COMMA')}">$40,000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Bar for Tax/Rent Gap -->
+                <div class="visual-gap">
+                    <!-- Simple CSS bars could go here if needed, keeping it clean for now -->
+                </div>
+            </div>
+        </section>
+
+        <!-- LAYER 3: FEELING (The Experience/Reality) -->
+        <section class="feeling-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Reality Check</h2>
+                    <p>What this change actually feels like.</p>
+                </div>
+
+                <div class="reality-grid">
+                    <!-- Tesla Index -->
+                    <div class="reality-card">
+                        <div class="icon">🚗</div>
+                        <div class="reality-content">
+                            <h4>Tesla Model 3 Index</h4>
+                            <p>
+                                In <span th:text="${cityA.city}">City A</span>, it takes <strong
+                                    th:text="${#numbers.formatDecimal(result.current.monthsToBuyTesla, 1, 1)}">8.2</strong>
+                                months of savings.
+                                <br>
+                                In <span th:text="${cityB.city}">City B</span>, it takes <strong
+                                    th:text="${#numbers.formatDecimal(result.offer.monthsToBuyTesla, 1, 1)}">9.5</strong>
+                                months.
+                            </p>
+                            <div class="mini-verdict"
+                                th:if="${result.offer.monthsToBuyTesla < result.current.monthsToBuyTesla}">You get
+                                wheels faster.</div>
+                            <div class="mini-verdict negative"
+                                th:if="${result.offer.monthsToBuyTesla >= result.current.monthsToBuyTesla}">You work
+                                longer for the same car.</div>
+                        </div>
+                    </div>
+
+                    <!-- House Index -->
+                    <div class="reality-card">
+                        <div class="icon">🏡</div>
+                        <div class="reality-content">
+                            <h4>The American Dream</h4>
+                            <p>Years to save 20% down payment on average home.</p>
+                            <div class="comparison-row">
+                                <span th:text="${cityA.city}">City A</span>: <strong
+                                    th:text="${#numbers.formatDecimal(result.current.yearsToBuyHouse, 1, 1) + ' Years'}">5.2
+                                    Years</strong>
+                            </div>
+                            <div class="comparison-row">
+                                <span th:text="${cityB.city}">City B</span>: <strong
+                                    th:text="${#numbers.formatDecimal(result.offer.yearsToBuyHouse, 1, 1) + ' Years'}">7.4
+                                    Years</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LAYER 4: SIMULATOR (The Retention/Confidence) -->
+        <section class="simulator-section" id="simulator">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Simulation Lab</h2>
+                    <p>Personalize the data into conviction.</p>
+                </div>
+
+                <div class="simulator-box">
+                    <form id="simulationForm" class="sim-grid">
+                        <!-- Hidden Inputs -->
+                        <input type="hidden" name="cityA" th:value="${cityA.slug}">
+                        <input type="hidden" name="cityB" th:value="${cityB.slug}">
+                        <input type="hidden" name="currentSalary" th:value="${currentSalary}">
+                        <input type="hidden" name="offerSalary" th:value="${offerSalary}">
+
+                        <!-- Controls -->
+                        <div class="control-group">
+                            <label>Filing Status</label>
+                            <select name="isMarried" id="sim-married">
+                                <option value="false" th:selected="${!effectiveIsMarried}">Single</option>
+                                <option value="true" th:selected="${effectiveIsMarried}">Married (Joint)</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Housing Type</label>
+                            <select name="housingType" id="sim-housing">
+                                <option value="RENT">Renting</option>
+                                <option value="OWN">Buying</option>
+                                <option value="PARENTS">Living with Parents</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label>401k Contribution (%)</label>
+                            <input type="number" name="fourOhOneKRate" value="0.05" step="0.01" min="0" max="0.30">
+                        </div>
+
+                        <div class="control-group">
+                            <button type="button" id="btn-recalc" class="btn-simulate">Run Simulation</button>
+                        </div>
+                    </form>
+
+                    <div id="sim-result-preview" class="sim-preview hidden">
+                        <!-- Dynamic JS result will populate here -->
+                        Updating verdict...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2026 OfferVerdict. Built on Truth.</p>
             </div>
         </footer>
-
-    </div>
+    </main>
 
     <script src="/js/dashboard.js"></script>
 </body>

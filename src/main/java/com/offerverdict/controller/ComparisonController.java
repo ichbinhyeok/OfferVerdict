@@ -9,6 +9,7 @@ import com.offerverdict.model.HouseholdType;
 import com.offerverdict.model.HousingType;
 import com.offerverdict.model.JobInfo;
 import com.offerverdict.service.ComparisonService;
+import com.offerverdict.service.PurchasingPowerService;
 import com.offerverdict.service.SalaryDataService;
 import com.offerverdict.util.MetaDescriptionUtil;
 import com.offerverdict.util.SlugNormalizer;
@@ -44,17 +45,20 @@ public class ComparisonController {
     private final SalaryDataService salaryDataService;
     private final AppProperties appProperties;
     private final ObjectMapper objectMapper;
+    private final PurchasingPowerService purchasingPowerService; // Injected field
 
     public ComparisonController(DataRepository repository,
             ComparisonService comparisonService,
             SalaryDataService salaryDataService,
             AppProperties appProperties,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            PurchasingPowerService purchasingPowerService) { // Injected into constructor
         this.repository = repository;
         this.comparisonService = comparisonService;
         this.salaryDataService = salaryDataService;
         this.appProperties = appProperties;
         this.objectMapper = objectMapper;
+        this.purchasingPowerService = purchasingPowerService; // Assigned
     }
 
     @GetMapping({ "/", "/start" })
