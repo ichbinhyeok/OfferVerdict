@@ -1,5 +1,7 @@
 package com.offerverdict.model;
 
+import com.offerverdict.service.TaxCalculatorService;
+
 public class ComparisonBreakdown {
     private double netMonthly;
     private double rent;
@@ -11,6 +13,7 @@ public class ComparisonBreakdown {
     private double misc;
     private double yearsToBuyHouse;
     private double monthsToBuyTesla;
+    private TaxCalculatorService.TaxResult taxResult;
 
     public double getNetMonthly() {
         return netMonthly;
@@ -90,5 +93,13 @@ public class ComparisonBreakdown {
 
     public void setMonthsToBuyTesla(double monthsToBuyTesla) {
         this.monthsToBuyTesla = monthsToBuyTesla;
+    }
+    
+    public TaxCalculatorService.TaxResult getTaxResult() {
+        return taxResult;
+    }
+    
+    public void setTaxResult(TaxCalculatorService.TaxResult taxResult) {
+        this.taxResult = taxResult;
     }
 }

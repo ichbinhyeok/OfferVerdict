@@ -26,7 +26,8 @@ public class SitemapController {
     private final ComparisonService comparisonService;
     private final AppProperties appProperties;
 
-    public SitemapController(DataRepository repository, ComparisonService comparisonService, AppProperties appProperties) {
+    public SitemapController(DataRepository repository, ComparisonService comparisonService,
+            AppProperties appProperties) {
         this.repository = repository;
         this.comparisonService = comparisonService;
         this.appProperties = appProperties;
@@ -36,6 +37,10 @@ public class SitemapController {
     public ResponseEntity<String> sitemapIndex() {
         List<String> urls = buildComparisonUrls();
         int chunkSize = appProperties.getSitemapChunkSize();
+        // default chunk size 5000 if not set
+        if (chunkSize <= 0)
+            chunkSize = 5000;
+
         int totalChunks = (int) Math.ceil(urls.size() / (double) chunkSize);
         List<String> locs = new ArrayList<>();
         for (int i = 1; i <= totalChunks; i++) {
@@ -58,6 +63,9 @@ public class SitemapController {
     public ResponseEntity<String> sitemapPage(@PathVariable int page) {
         List<String> urls = buildComparisonUrls();
         int chunkSize = appProperties.getSitemapChunkSize();
+        if (chunkSize <= 0)
+            chunkSize = 5000;
+
         int from = Math.max(0, (page - 1) * chunkSize);
         if (from >= urls.size()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("");
@@ -82,23 +90,33 @@ public class SitemapController {
         List<JobInfo> jobs = repository.getJobs();
         List<CityCostEntry> cities = repository.getCities();
         List<String> paths = new ArrayList<>();
+
+        // 1. Static Pages
+        paths.add(comparisonService.buildCanonicalUrl("/"));
+
+        // 2. Job x CityA x CityB Comparisons
+        // Generate Clean URLs (No Query Params) - Use Logic Defaults
         for (JobInfo job : jobs) {
             for (CityCostEntry cityA : cities) {
                 for (CityCostEntry cityB : cities) {
                     if (!cityA.getSlug().equals(cityB.getSlug())) {
-                        String path = "/" + job.getSlug() + "-salary-" + cityA.getSlug() + "-vs-" + cityB.getSlug()
-                                + "?currentSalary=120000&offerSalary=150000";
+                        String path = "/" + job.getSlug() + "-salary-" + cityA.getSlug() + "-vs-" + cityB.getSlug();
                         paths.add(comparisonService.buildCanonicalUrl(path));
                     }
                 }
             }
         }
+
+        // 3. Tax Comparisons (State A vs State B)
+        // TODO: Add tax comparisons once TaxComparisonController is active
+
         return paths.stream().distinct().collect(Collectors.toList());
     }
 
     private ResponseEntity<String> respondWithCache(String body) {
         return ResponseEntity.ok()
-                .header(HttpHeaders.CACHE_CONTROL, CacheControl.maxAge(86400, TimeUnit.SECONDS).cachePublic().getHeaderValue())
+                .header(HttpHeaders.CACHE_CONTROL,
+                        CacheControl.maxAge(86400, TimeUnit.SECONDS).cachePublic().getHeaderValue())
                 .body(body);
     }
 }

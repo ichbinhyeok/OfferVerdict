@@ -23,6 +23,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    
+    // DevTools for automatic reload of templates and static resources
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     // [중요] 제가 드린 코드(@Data, @Builder)를 쓰기 위해 꼭 필요한 Lombok 추가
     compileOnly 'org.projectlombok:lombok'

@@ -1,0 +1,131 @@
+{
+    "cities": [
+        {
+            "slug": "san-francisco-ca",
+            "city": "San Francisco",
+            "state": "CA",
+            "stateCode": "CA",
+            "medianRent": 3595,
+            "avgRent1BR": 3200,
+            "avgRent2BR": 4200,
+            "rentTrend": "up",
+            "yearOverYearChange": 4.2,
+            "dataSource": "Zillow Jan 2026"
+        },
+        {
+            "slug": "new-york-ny",
+            "city": "New York",
+            "state": "NY",
+            "stateCode": "NY",
+            "medianRent": 3000,
+            "avgRent1BR": 2800,
+            "avgRent2BR": 3800,
+            "rentTrend": "up",
+            "yearOverYearChange": 4.8,
+            "dataSource": "Zillow Jan 2026"
+        },
+        {
+            "slug": "austin-tx",
+            "city": "Austin",
+            "state": "TX",
+            "stateCode": "TX",
+            "medianRent": 1554,
+            "avgRent1BR": 1400,
+            "avgRent2BR": 1900,
+            "rentTrend": "down",
+            "yearOverYearChange": -3.4,
+            "dataSource": "Zillow Nov 2025"
+        },
+        {
+            "slug": "seattle-wa",
+            "city": "Seattle",
+            "state": "WA",
+            "stateCode": "WA",
+            "medianRent": 2082,
+            "avgRent1BR": 1900,
+            "avgRent2BR": 2600,
+            "rentTrend": "up",
+            "yearOverYearChange": 3.3,
+            "dataSource": "Zillow Jan 2026"
+        },
+        {
+            "slug": "boston-ma",
+            "city": "Boston",
+            "state": "MA",
+            "stateCode": "MA",
+            "medianRent": 2800,
+            "avgRent1BR": 2500,
+            "avgRent2BR": 3400,
+            "rentTrend": "stable",
+            "yearOverYearChange": 2.1,
+            "dataSource": "Zillow Jan 2026"
+        },
+        {
+            "slug": "los-angeles-ca",
+            "city": "Los Angeles",
+            "state": "CA",
+            "stateCode": "CA",
+            "medianRent": 2800,
+            "avgRent1BR": 2500,
+            "avgRent2BR": 3500,
+            "rentTrend": "stable",
+            "yearOverYearChange": 1.8,
+            "dataSource": "Zillow Jan 2026"
+        },
+        {
+            "slug": "chicago-il",
+            "city": "Chicago",
+            "state": "IL",
+            "stateCode": "IL",
+            "medianRent": 1800,
+            "avgRent1BR": 1600,
+            "avgRent2BR": 2200,
+            "rentTrend": "stable",
+            "yearOverYearChange": 1.2,
+            "dataSource": "Zillow Jan 2026"
+        },
+        {
+            "slug": "denver-co",
+            "city": "Denver",
+            "state": "CO",
+            "stateCode": "CO",
+            "medianRent": 1950,
+            "avgRent1BR": 1750,
+            "avgRent2BR": 2400,
+            "rentTrend": "up",
+            "yearOverYearChange": 2.5,
+            "dataSource": "Zillow Jan 2026"
+        },
+        {
+            "slug": "miami-fl",
+            "city": "Miami",
+            "state": "FL",
+            "stateCode": "FL",
+            "medianRent": 2400,
+            "avgRent1BR": 2200,
+            "avgRent2BR": 3000,
+            "rentTrend": "up",
+            "yearOverYearChange": 3.5,
+            "dataSource": "Zillow Jan 2026"
+        },
+        {
+            "slug": "dallas-tx",
+            "city": "Dallas",
+            "state": "TX",
+            "stateCode": "TX",
+            "medianRent": 1650,
+            "avgRent1BR": 1500,
+            "avgRent2BR": 2000,
+            "rentTrend": "down",
+            "yearOverYearChange": -1.8,
+            "dataSource": "Zillow Jan 2026"
+        }
+    ],
+    "dataSource": {
+        "name": "Zillow Rent Index",
+        "authority": "🏠 Zillow",
+        "url": "https://www.zillow.com",
+        "lastUpdated": "2026-01-07",
+        "updateFrequency": "Monthly"
+    }
+}

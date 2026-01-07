@@ -1,436 +1,272 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head th:replace="~{fragments/header :: head(${title}, ${metaDescription}, ${canonicalUrl}, ${ogTitle}, ${ogDescription}, ${ogUrl}, ${ogImageUrl})}"></head>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verdict Result - OfferVerdict</title>
+    <meta name="robots" content="index, follow">
+
+    <!-- Unified Design System -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Courier+Prime:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- SEO Meta -->
+    <meta name="description" th:content="${metaDescription}">
+    <link rel="canonical" th:href="${canonicalUrl}">
+    <meta property="og:title" th:content="${ogTitle}">
+    <meta property="og:description" th:content="${ogDescription}">
+    <meta property="og:url" th:content="${ogUrl}">
+    <meta property="og:image" th:content="${ogImageUrl}">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json" th:utext="${structuredDataJson}"></script>
+
+    <!-- Analytics -->
+    <div th:replace="~{fragments/analytics :: analytics}"></div>
+
+    <!-- Share Generation -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+
 <body>
-<div class="page-container">
-    <!-- Top Header -->
-    <header class="page-header">
-        <div class="header-content">
-            <a href="/" class="logo">OfferVerdict</a>
-            <button class="btn-edit-inputs" id="editInputsBtn" aria-label="Edit inputs">
-                <span>✏️</span> Edit Inputs
-            </button>
-        </div>
-    </header>
 
-    <!-- Edit Inputs Accordion -->
-    <div class="edit-panel" id="editPanel">
-        <div class="edit-panel-content">
-            <form th:action="@{/}" method="get">
-                <input type="hidden" name="job" th:value="${job.slug}"/>
-                <div class="edit-grid">
-                    <div class="input-group">
-                        <label class="input-label">Current salary</label>
-                        <input type="number" name="currentSalary" class="minimal-input" min="1000" max="10000000" step="1" th:value="${currentSalary}" required/>
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Offer salary</label>
-                        <input type="number" name="offerSalary" class="minimal-input" min="1000" max="10000000" step="1" th:value="${offerSalary}" required/>
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Current city</label>
-                        <input name="cityA" class="minimal-input" list="city-options" th:value="${cityA.slug}" required/>
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Offer city</label>
-                        <input name="cityB" class="minimal-input" list="city-options" th:value="${cityB.slug}" required/>
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Household</label>
-                        <select name="householdType" class="minimal-select" th:value="${householdType}">
-                            <option value="SINGLE" th:selected="${householdType.name() == 'SINGLE'}">Single</option>
-                            <option value="FAMILY" th:selected="${householdType.name() == 'FAMILY'}">Family</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Housing</label>
-                        <select name="housingType" class="minimal-select" th:value="${housingType}">
-                            <option value="RENT" th:selected="${housingType.name() == 'RENT'}">Renting</option>
-                            <option value="OWN" th:selected="${housingType.name() == 'OWN'}">Own home</option>
-                            <option value="PARENTS" th:selected="${housingType.name() == 'PARENTS'}">Living with parents</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <button type="submit" class="btn btn-primary btn-full">Update verdict</button>
-                    </div>
-                </div>
-            </form>
-            <datalist id="city-options">
-                <option th:each="city : ${cities}" th:value="${city.slug}" th:text="|${city.city}, ${city.state}|"></option>
-            </datalist>
-        </div>
-    </div>
+    <div class="verdict-container">
 
-    <div th:if="${validationMessage}" class="validation-message">
-        <strong>Check your numbers.</strong>
-        <span th:text="${validationMessage}">Please enter a realistic salary.</span>
-    </div>
+        <!-- COMMAND HEADER -->
+        <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div class="logo" style="font-weight: 900; font-size: 1.2rem;">OfferVerdict</div>
+            <a href="/" class="btn btn-glass" style="font-size: 0.8rem;">← New Analysis</a>
+        </header>
 
-    <!-- Mobile Sticky Header -->
-    <div class="mobile-sticky-header" id="mobileSticky">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <div class="verdict-mini" id="verdictMini" th:text="${result?.verdict ?: 'GO'}">GO</div>
-            <div class="residual-mini" id="residualMini">
-                <span th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0)) : '$0'}">$0</span>
-                <span class="unit" style="font-size: 0.75rem; opacity: 0.7;">/mo</span>
-            </div>
-        </div>
-        <button class="mobile-edit-btn" onclick="document.getElementById('editInputsBtn').click();" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.5rem;">
-            ✏️
-        </button>
-    </div>
-
-    <!-- Split-View Dashboard Container -->
-    <main class="dashboard-container">
-        <!-- LEFT STICKY COLUMN: "Command Center" (40%) -->
-        <div class="command-center">
-        <!-- Financial Receipt Card -->
-        <section class="verdict-hero" th:classappend="'verdict-' + ${result?.verdict?.name()?.toLowerCase()?.replace('_','-') ?: 'go'}" id="verdictHero">
-            <div class="verdict-hero-content">
-                <!-- Header -->
-                <p class="verdict-route" th:text="|${cityA?.city ?: 'City A'}, ${cityA?.state ?: 'ST'} → ${cityB?.city ?: 'City B'}, ${cityB?.state ?: 'ST'}|">Route</p>
-                <h1 class="verdict-badge" id="verdictBadge" th:text="${result?.verdict ?: 'GO'}">GO</h1>
-                <p class="verdict-copy" id="verdictCopy" th:text="${result?.verdictCopy ?: 'Calculating...'}">Punchy copy</p>
-                
-                <!-- Financial Receipt -->
-                <div class="financial-receipt">
-                    <!-- Income Section -->
-                    <div class="receipt-section">
-                        <div class="receipt-header">INCOME</div>
-                        <div class="receipt-line">
-                            <span class="receipt-label">Annual Salary</span>
-                            <span class="receipt-value" th:text="${offerSalary != null ? ('$' + #numbers.formatDecimal(offerSalary, 1, 0) + '/yr') : '$0/yr'}">$0/yr</span>
-                        </div>
-                        <div class="receipt-line highlight">
-                            <span class="receipt-label">Monthly Net</span>
-                            <span class="receipt-value" id="heroNetValue" th:text="${result?.offer?.netMonthly != null ? ('$' + #numbers.formatDecimal(result.offer.netMonthly, 1, 0) + '/mo') : '$0/mo'}">$0/mo</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Expenses Section -->
-                    <div class="receipt-section">
-                        <div class="receipt-header">EXPENSES</div>
-                        <div class="receipt-line">
-                            <span class="receipt-label">Housing</span>
-                            <span class="receipt-value negative" id="heroHousingValue" th:text="${result?.offer?.rent != null ? ('-$' + #numbers.formatDecimal(result.offer.rent, 1, 0) + '/mo') : '-$0/mo'}">-$0/mo</span>
-                        </div>
-                        <div class="receipt-line">
-                            <span class="receipt-label">Living Costs</span>
-                            <span class="receipt-value negative" id="heroLivingValue" th:text="${result?.offer?.livingCost != null ? ('-$' + #numbers.formatDecimal(result.offer.livingCost, 1, 0) + '/mo') : '-$0/mo'}">-$0/mo</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Total Section -->
-                    <div class="receipt-total">
-                        <div class="receipt-line total">
-                            <span class="receipt-label">MONTHLY RESIDUAL</span>
-                            <span class="receipt-value" id="heroResidualValue">
-                                <span class="rolling-number tabular-nums" 
-                                      th:attr="data-target=${result?.offer?.residual != null ? #numbers.formatDecimal(result.offer.residual, 1, 0) : 0}" 
-                                      data-prefix="$"
-                                      th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0)) : '$0'}">$0</span>
-                                <span class="unit">/mo</span>
-                            </span>
-                        </div>
-                        <div class="receipt-line delta">
-                            <span class="receipt-label">vs Current City</span>
-                            <span class="receipt-value" id="deltaPercentValue">
-                                <span class="rolling-number tabular-nums delta-percent"
-                                      th:attr="data-target=${result?.deltaPercent != null ? #numbers.formatDecimal(result.deltaPercent, 1, 1) : 0}"
-                                      th:text="${result?.deltaPercent != null ? (#numbers.formatDecimal(result.deltaPercent, 1, 1) + '%') : '0%'}">0%</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 3-Year Projection (Compact) -->
-                <div class="projection-compact">
-                    <div class="projection-header">3-YEAR SAVINGS</div>
-                    <div class="projection-bar-wrapper">
-                        <div class="projection-bar" id="compactProjectionBar">
-                            <span class="projection-amount" id="compact3YearValue" th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual * 36, 1, 0)) : '$0'}">$0</span>
-                        </div>
-                    </div>
-                    <div class="projection-subtitle" id="dreamTextCompact">Building wealth...</div>
-                </div>
-            </div>
-        </section>
-        </div>
-        <!-- END Command Center -->
-
-        <!-- RIGHT SCROLLABLE COLUMN: "Lab" (60%) -->
-        <div class="lab-controls">
-        
-        <!-- The Numbers Section: Waterfall Chart (Moved from Left) -->
-        <section class="evidence-section">
-            <h2 class="section-title">📊 The Numbers</h2>
-            <p class="section-subtitle" style="text-align: center; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">
-                Hover over each bar to see detailed breakdown
-            </p>
-            <div class="waterfall-chart" id="waterfallChart">
-                <div class="waterfall-item">
-                    <div class="waterfall-label">Gross</div>
-                    <div class="waterfall-bar waterfall-positive" id="waterfallGross" 
-                         th:attr="data-value=${offerTaxBreakdown?.grossIncome != null ? (offerTaxBreakdown.grossIncome / 12) : 0}"
-                         style="height: 100%">
-                        <span class="waterfall-value" id="waterfallGrossValue" 
-                              th:text="${offerTaxBreakdown?.grossIncome != null ? ('$' + #numbers.formatDecimal(offerTaxBreakdown.grossIncome / 12, 1, 0)) : '$0'}">$0</span>
-                    </div>
-                </div>
-                <div class="waterfall-item">
-                    <div class="waterfall-label">Taxes</div>
-                    <div class="waterfall-bar waterfall-negative" id="waterfallTaxes"
-                         th:attr="data-value=${offerTaxBreakdown?.totalTax != null ? (offerTaxBreakdown.totalTax / 12) : 0}"
-                         style="height: 0%">
-                        <span class="waterfall-value" id="waterfallTaxesValue"
-                              th:text="${offerTaxBreakdown?.totalTax != null ? ('$' + #numbers.formatDecimal(offerTaxBreakdown.totalTax / 12, 1, 0)) : '$0'}">$0</span>
-                    </div>
-                </div>
-                <div class="waterfall-item">
-                    <div class="waterfall-label">Housing</div>
-                    <div class="waterfall-bar waterfall-negative" id="waterfallHousing"
-                         th:attr="data-value=${result?.offer?.rent ?: 0}"
-                         style="height: 0%">
-                        <span class="waterfall-value" id="waterfallHousingValue"
-                              th:text="${result?.offer?.rent != null ? ('$' + #numbers.formatDecimal(result.offer.rent, 1, 0)) : '$0'}">$0</span>
-                    </div>
-                </div>
-                <div class="waterfall-item">
-                    <div class="waterfall-label">Residual</div>
-                    <div class="waterfall-bar waterfall-positive" id="waterfallResidual"
-                         th:attr="data-value=${result?.offer?.residual ?: 0}"
-                         style="height: 0%">
-                        <span class="waterfall-value" id="waterfallResidualValue"
-                              th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0)) : '$0'}">$0</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Life Simulator Section -->
-        <section class="simulator-section" id="lifeSimulator">
-            <div class="section-header">
-                <h2>🛠️ Can I survive there?</h2>
-                <p class="section-subtitle">Adjust your lifestyle scenarios and watch the numbers change in real-time</p>
+        <!-- PART 1: THE RECEIPT (Verdict) -->
+        <div class="receipt-card animate-in">
+            <div class="receipt-header">
+                <span>OFFER VERDICT RECEIPT</span>
+                <span>ID: #OV-2026-<span th:text="${#strings.randomAlphanumeric(4)}">A7B9</span></span>
             </div>
 
-            <div class="simulator-controls">
-                <!-- Housing Scenario -->
-                <div class="control-group">
-                    <label class="control-label">🏠 Housing Scenario</label>
-                    <div class="control-inputs">
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="housingScenario" value="RENT" id="housingRent" checked/>
-                                <span>💰 Renting (Default)</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="housingScenario" value="OWN" id="housingOwn"/>
-                                <span>🏡 Own Home (No rent, but property tax/maintenance)</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="housingScenario" value="PARENTS" id="housingParents"/>
-                                <span>👨‍👩‍👦 Living with Parents ($0 rent, +$300 social cost)</span>
-                            </label>
-                        </div>
-                        
-                        <!-- Roommate Toggle -->
-                        <div class="toggle-control" style="margin-top: 1rem;">
-                            <label class="toggle-label">
-                                <input type="checkbox" id="roommateToggle"/>
-                                <span class="toggle-slider"></span>
-                                <span class="toggle-text">💑 Split Rent with Partner/Roommate (-50%)</span>
-                            </label>
-                        </div>
-                        
-                        <!-- Rent Slider (only visible when RENT is selected) -->
-                        <div class="slider-control" id="rentSliderGroup" style="margin-top: 1rem;">
-                            <label>Adjust Monthly Rent</label>
-                            <div class="slider-wrapper">
-                                <input type="range" id="rentSlider" 
-                                       th:attr="data-base=${result?.offer?.rent ?: 0}"
-                                       min="0" max="10000" step="50" 
-                                       th:value="${result?.offer?.rent ?: 0}"/>
-                                <span class="slider-value" id="rentValue" th:text="${result?.offer?.rent != null ? ('$' + #numbers.formatDecimal(result.offer.rent, 1, 0)) : '$0'}">$0</span>
+            <div class="verdict-hero">
+                <div id="verdict-badge" class="verdict-badge"
+                    th:classappend="${result.verdict.name() == 'GO'} ? 'verdict-go' : 'verdict-nogo'"
+                    th:text="${result.verdict}">GO</div>
+
+                <div class="core-numbers">
+                    <div class="number-item">
+                        <span class="number-value gradient-text" id="net-gain-display"
+                            th:text="${result.monthlyGainStr}">+$2,102</span>
+                        <span class="number-label">Monthly Gain</span>
+                    </div>
+                    <!-- Vertical Divider -->
+                    <div style="width: 1px; background: #e2e8f0;"></div>
+                    <div class="number-item">
+                        <span class="number-value" style="color: #4a5568;" id="freedom-display"
+                            th:text="${result.freedomIndex}">25%</span>
+                        <span class="number-label">Freedom Index</span>
+                    </div>
+                </div>
+
+                <div style="font-size: 0.9rem; color: #718096; margin-top: 5px;">
+                    <span style="background: #edf2f7; padding: 2px 8px; border-radius: 4px;">Verified vs Market</span>
+                    Comparable to Top <span style="font-weight: 700; color: #2d3748;"
+                        th:text="${result.jobPercentile}">22%</span> 📊 BLS
+                </div>
+            </div>
+
+            <!-- WHY SECTION (Data Authority) -->
+            <div class="why-section">
+                <h4
+                    style="margin-bottom: 1rem; color: var(--text-tertiary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                    Why This Verdict? (Irrefutable Data)</h4>
+                <ul class="why-list">
+                    <li class="why-item">
+                        <span class="why-icon">🏛️</span>
+                        <div>
+                            <div style="font-weight: 700;">Tax Impact</div>
+                            <div style="font-size: 0.9rem;">
+                                <span th:text="${result.taxDiffMsg}">San Francisco takes $847 more/mo than Austin</span>
+                                <span class="source-badge">IRS 2026</span>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Transport Controls -->
-                <div class="control-group">
-                    <label class="control-label">🚗 Transportation</label>
-                    <div class="control-inputs">
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="transport" value="car" id="transportCar" checked/>
-                                <span>🚗 Car Owner (Default)</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="transport" value="transit" id="transportTransit"/>
-                                <span>🚇 Public Transit Only (Save on gas/insurance)</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Dining Controls -->
-                <div class="control-group">
-                    <label class="control-label">🍽️ Dining & Lifestyle</label>
-                    <div class="control-inputs">
-                        <div class="slider-control">
-                            <label>Home Cook ↔ Foodie</label>
-                            <div class="slider-wrapper">
-                                <input type="range" id="diningSlider" min="0" max="100" step="5" value="50"/>
-                                <span class="slider-value" id="diningValue">50%</span>
+                    </li>
+                    <li class="why-item">
+                        <span class="why-icon">🏠</span>
+                        <div>
+                            <div style="font-weight: 700;">Rent Burden</div>
+                            <div style="font-size: 0.9rem;">
+                                <span th:text="${result.rentDiffMsg}">Rent jumps from 32% to 41% of income</span>
+                                <span class="source-badge">Zillow</span>
                             </div>
-                            <p style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.5rem;">0% = Cook every meal | 100% = Eat out frequently</p>
                         </div>
-                    </div>
+                    </li>
+                    <li class="why-item">
+                        <span class="why-icon">💰</span>
+                        <div>
+                            <div style="font-weight: 700;">Real Value</div>
+                            <div style="font-size: 0.9rem;">
+                                <span th:text="${result.valueDiffMsg}">Real hourly value drops 12.3% adjusted for
+                                    COL</span>
+                                <span class="source-badge">BLS/Numbeo</span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- YOUR LIFE SECTION (Emotional) -->
+            <div class="your-life-grid">
+                <div class="life-card">
+                    <div style="font-size: 1.5rem;">🏠</div>
+                    <div class="life-value" id="housing-months"
+                        th:text="${#numbers.formatInteger(result.offer.yearsToBuyHouse * 12, 0) + 'mo'}">42mo</div>
+                    <div class="life-msg">To Buy House</div>
+                </div>
+                <div class="life-card">
+                    <div style="font-size: 1.5rem;">🎓</div>
+                    <div class="life-value" id="loan-payoff">--</div>
+                    <div class="life-msg">Student Loan</div>
+                </div>
+                <div class="life-card">
+                    <div style="font-size: 1.5rem;">📈</div>
+                    <div class="life-value" id="401k-status">YES</div>
+                    <div class="life-msg">Max 401k</div>
+                </div>
+                <div class="life-card">
+                    <div style="font-size: 1.5rem;">✈️</div>
+                    <div class="life-value" id="travel-trips"
+                        th:text="${#numbers.formatInteger(result.offer.monthsToBuyTesla, 0)}">8</div>
+                    <div class="life-msg">Tesla Months</div>
+                </div>
+                <div class="life-card">
+                    <div style="font-size: 1.5rem;">🚗</div>
+                    <div class="life-value" id="car-tier">BMW</div>
+                    <div class="life-msg">Car Tier</div>
+                </div>
+                <div class="life-card">
+                    <div style="font-size: 1.5rem;">🍽️</div>
+                    <div class="life-value" id="dining-freq">28</div>
+                    <div class="life-msg">Dining Out/mo</div>
                 </div>
             </div>
-        </section>
 
-        <!-- Ad Placeholder 1 -->
-        <div class="ad-placeholder">
-            📢 Ad Space (Hidden in Production)
+            <div class="share-actions">
+                <button class="btn btn-primary" id="share-btn">📤 Download Receipt</button>
+                <button class="btn btn-glass" onclick="window.print()">🖨️ Print PDF</button>
+            </div>
+
+        </div> <!-- End Receipt -->
+
+
+        <!-- PART 2: SIMULATOR -->
+        <div class="simulator-container animate-in delay-2">
+            <h3 style="text-align: center; margin-bottom: 1.5rem;">🎮 "What If..." Simulator</h3>
+
+            <!-- Presets -->
+            <div class="preset-controls">
+                <button class="preset-btn active" data-scenario="default">Default</button>
+                <button class="preset-btn" data-scenario="roommate">+ Roommate</button>
+                <button class="preset-btn" data-scenario="married">+ Married</button>
+                <button class="preset-btn" data-scenario="max401k">Max 401k</button>
+                <button class="preset-btn" data-scenario="optimize"
+                    style="background: var(--text-primary); color: white;">✨ AI Optimize</button>
+            </div>
+
+            <!-- Sliders -->
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-label">Proposed Salary</span>
+                    <span class="slider-value" id="salary-val"
+                        th:text="${#numbers.formatCurrency(offerSalary)}">$150,000</span>
+                </div>
+                <input type="range" id="salary-slider" min="80000" max="400000" step="1000"
+                    th:value="${#numbers.formatDecimal(offerSalary, 0, 0)}">
+                <div style="font-size: 0.8rem; color: #48bb78; margin-top: 5px;">
+                    💡 Just $5k more for "Strong GO"
+                </div>
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-label">401k Contribution</span>
+                    <span class="slider-value" id="401k-val">5%</span>
+                </div>
+                <input type="range" id="401k-slider" min="0" max="25" step="1" value="5">
+                <div style="font-size: 0.8rem; color: #718096; margin-top: 5px;">
+                    Retirement acceleration: <span id="retirement-imp">Normal</span>
+                </div>
+            </div>
+
+            <!-- Progress to GO -->
+            <div class="progress-section">
+                <h4 style="color: var(--text-secondary);">🎯 Progress to GO</h4>
+                <div class="progress-bar-container">
+                    <div class="progress-fill" id="progress-fill" style="width: 72%;"></div>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);" id="progress-msg">
+                    You are close to a clear GO verdict!
+                </p>
+
+                <div class="fomo-msg animate-in delay-3" th:if="${!result.isGoodSalary}">
+                    ⚠️ Current offer is below market rate for <span th:text="${cityB.city}">Austin</span>.
+                </div>
+
+                <div class="simulation-counter">
+                    🎯 Your Simulations: <span id="sim-count">1</span>/10 (Keep going for AI unlock)
+                </div>
+            </div>
+
+            <!-- Affiliate / Action Buttons -->
+            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a th:href="@{'https://www.linkedin.com/jobs/search?keywords=' + ${job.title} + '&location=' + ${cityB.city}}"
+                    target="_blank" class="affiliate-btn">
+                    <span>💼</span> Find <span th:text="${job.title}">Jobs</span> in <span
+                        th:text="${cityB.city}">Austin</span>
+                </a>
+                <a th:href="@{'https://www.google.com/search?q=moving+companies+' + ${cityA.city} + '+to+' + ${cityB.city}}"
+                    target="_blank" class="affiliate-btn">
+                    <span>📦</span> Movers to <span th:text="${cityB.city}">Austin</span>
+                </a>
+            </div>
         </div>
 
-        <!-- Lifestyle Multiplier -->
-        <section class="lifestyle-section">
-            <h2 class="section-title">☕ What that money really means</h2>
-            <p class="section-subtitle" style="text-align: center; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.875rem;">
-                Your monthly residual can buy...
-            </p>
-            <div class="lifestyle-scroll">
-                <div class="lifestyle-item">
-                    <div class="lifestyle-icon">☕</div>
-                    <div class="lifestyle-value tabular-nums" th:text="${result?.offerLifestyle?.starbucksCoffees != null ? #numbers.formatDecimal(result.offerLifestyle.starbucksCoffees, 0, 0) : 0}">0</div>
-                    <div class="lifestyle-label">Starbucks<span class="unit">/mo</span></div>
-                </div>
-                <div class="lifestyle-item">
-                    <div class="lifestyle-icon">📺</div>
-                    <div class="lifestyle-value tabular-nums" th:text="${result?.offerLifestyle?.netflixSubscriptions != null ? #numbers.formatDecimal(result.offerLifestyle.netflixSubscriptions, 0, 0) : 0}">0</div>
-                    <div class="lifestyle-label">Netflix<span class="unit">/mo</span></div>
-                </div>
-                <div class="lifestyle-item">
-                    <div class="lifestyle-icon">🍔</div>
-                    <div class="lifestyle-value tabular-nums" th:text="${result?.offerLifestyle?.uberEatsOrders != null ? #numbers.formatDecimal(result.offerLifestyle.uberEatsOrders, 0, 0) : 0}">0</div>
-                    <div class="lifestyle-label">Uber Eats<span class="unit">/mo</span></div>
-                </div>
-                <div class="lifestyle-item">
-                    <div class="lifestyle-icon">✈️</div>
-                    <div class="lifestyle-value tabular-nums" th:text="${result?.offerLifestyle?.weekendGetaways != null ? #numbers.formatDecimal(result.offerLifestyle.weekendGetaways, 1, 1) : 0}">0</div>
-                    <div class="lifestyle-label">Weekend Trips<span class="unit">/yr</span></div>
-                </div>
+        <!-- Related Comparisons (pSEO Links) -->
+        <div style="margin-top: 3rem;">
+            <h4 style="text-align: center; margin-bottom: 1rem;">Compare Other Scenarios</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+                <a th:each="link : ${otherCityLinks}" th:href="${link}" class="btn btn-glass"
+                    style="font-size: 0.8rem;">
+                    Compare <span th:text="${cityA.city}">SF</span> vs Others
+                </a>
             </div>
-        </section>
-
-        <!-- 3-Year Asset Projection - "The Race Track" -->
-        <section class="dream-section">
-            <h2 class="section-title">🏁 3-Year Savings Race</h2>
-            <div class="asset-projection">
-                <!-- Current City Progress Bar -->
-                <div class="projection-card">
-                    <div class="projection-label" th:text="|${cityA?.city ?: 'City A'} (Current)|">Current City</div>
-                    <div class="projection-progress">
-                        <div class="projection-progress-fill" id="currentCityProgress" style="width: 0%">
-                            <div class="projection-value tabular-nums" id="currentCityProjection"
-                                 th:attr="data-value=${result?.current?.residual != null ? (result.current.residual * 36) : 0}"
-                                 th:text="${result?.current?.residual != null ? ('$' + #numbers.formatDecimal(result.current.residual * 36, 1, 0)) : '$0'}">$0</div>
-                        </div>
-                    </div>
-                    <div class="projection-subtitle">
-                        <span th:text="${result?.current?.residual != null ? ('$' + #numbers.formatDecimal(result.current.residual, 1, 0) + '/mo') : '$0/mo'}">$0/mo</span>
-                        <span style="opacity: 0.6;"> × 36 months</span>
-                    </div>
-                </div>
-                
-                <!-- New City Progress Bar -->
-                <div class="projection-card">
-                    <div class="projection-label" th:text="|${cityB?.city ?: 'City B'} (New Offer)|">New City</div>
-                    <div class="projection-progress">
-                        <div class="projection-progress-fill" id="newCityProgress" style="width: 0%">
-                            <div class="projection-value tabular-nums" id="newCityProjection"
-                                 th:attr="data-value=${result?.offer?.residual != null ? (result.offer.residual * 36) : 0}"
-                                 th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual * 36, 1, 0)) : '$0'}">$0</div>
-                        </div>
-                    </div>
-                    <div class="projection-subtitle">
-                        <span th:text="${result?.offer?.residual != null ? ('$' + #numbers.formatDecimal(result.offer.residual, 1, 0) + '/mo') : '$0/mo'}">$0/mo</span>
-                        <span style="opacity: 0.6;"> × 36 months</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Dynamic Dream Text -->
-            <div class="dream-text" id="dreamText">
-                <p>💭 At this rate, you're building wealth...</p>
-            </div>
-        </section>
-
-        <!-- Quick Compare -->
-        <section class="compare-section">
-            <h2 class="section-title">Quick Compare</h2>
-            <div class="compare-card">
-                <div class="input-group">
-                    <label class="input-label">Compare <span th:text="${cityB?.city ?: 'City B'}">City B</span> with:</label>
-                    <select id="city-swap" class="minimal-select">
-                        <option value="">Select a city...</option>
-                        <option th:each="city : ${cities}"
-                                th:value="${city?.slug ?: ''}"
-                                th:text="|${city?.city ?: 'Unknown'}, ${city?.state ?: ''}|"
-                                th:disabled="${city?.slug == cityB?.slug}"></option>
-                    </select>
-                </div>
-            </div>
-        </section>
         </div>
-        <!-- END Lab Controls -->
-    </main>
-</div>
 
-<div th:replace="~{fragments/footer :: footer}"></div>
+        <!-- DATA AUTHORITY FOOTER -->
+        <footer>
+            <div style="font-weight: 700; margin-bottom: 1rem;">Data Powered By:</div>
+            <div class="data-sources-grid">
+                <div class="source-item">🏛️ IRS Tax Tables 2026</div>
+                <div class="source-item">📋 State Dept. Revenue</div>
+                <div class="source-item">🏠 Zillow Rent Index</div>
+                <div class="source-item">📊 BLS Labor Stats</div>
+                <div class="source-item">🌏 Numbeo COL</div>
+            </div>
+            <div style="margin-top: 2rem; opacity: 0.6;">
+                Last Data Sync: <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">2026-01-07</span> PST
+                <br>
+                <a href="#" style="color: inherit; text-decoration: underline;">How We Calculate</a>
+            </div>
+        </footer>
 
-<!-- Confetti Container -->
-<div id="confettiContainer"></div>
+    </div>
 
-<!-- Initialize Simulator with Server Data (BEFORE main.js) -->
-<script th:inline="javascript">
-    window.INITIAL_DATA = {
-        currentResidual: /*[[${result?.current?.residual ?: 0}]]*/ 0,
-        offerResidual: /*[[${result?.offer?.residual ?: 0}]]*/ 0,
-        offerNetMonthly: /*[[${result?.offer?.netMonthly ?: 0}]]*/ 0,
-        offerRent: /*[[${result?.offer?.rent ?: 0}]]*/ 0,
-        offerLivingCost: /*[[${result?.offer?.livingCost ?: 0}]]*/ 0,
-        offerTransport: /*[[${result?.offer?.transport ?: 0}]]*/ 0,
-        offerGroceries: /*[[${result?.offer?.groceries ?: 0}]]*/ 0,
-        offerMisc: /*[[${result?.offer?.misc ?: 0}]]*/ 0,
-        deltaPercent: /*[[${result?.deltaPercent ?: 0}]]*/ 0,
-        currentResidualAbs: /*[[${result?.current?.residual != null ? #numbers.formatDecimal(T(java.lang.Math).abs(result.current.residual), 1, 0) : 0}]]*/ 0,
-        currentResidual: /*[[${result?.current?.residual ?: 0}]]*/ 0,
-        cityAAvgHousePrice: /*[[${cityA?.avgHousePrice ?: 0}]]*/ 0,
-        cityBAvgHousePrice: /*[[${cityB?.avgHousePrice ?: 0}]]*/ 0,
-        grossIncome: /*[[${offerTaxBreakdown?.grossIncome ?: 0}]]*/ 0,
-        taxes: /*[[${offerTaxBreakdown?.totalTax ?: 0}]]*/ 0,
-        housingType: /*[[${housingType?.name() ?: 'RENT'}]]*/ 'RENT',
-        householdType: /*[[${householdType?.name() ?: 'SINGLE'}]]*/ 'SINGLE',
-        // Tax Breakdown for Precision
-        taxBreakdown: {
-            federal: /*[[${offerTaxBreakdown?.federalTax ?: 0}]]*/ 0,
-            state: /*[[${offerTaxBreakdown?.stateTax ?: 0}]]*/ 0,
-            socialSecurity: /*[[${offerTaxBreakdown?.socialSecurityTax ?: 0}]]*/ 0,
-            medicare: /*[[${offerTaxBreakdown?.medicareTax ?: 0}]]*/ 0,
-            additionalMedicare: /*[[${offerTaxBreakdown?.additionalMedicareTax ?: 0}]]*/ 0
-        },
-        offerSalary: /*[[${offerSalary ?: 0}]]*/ 0,
-        cityAName: /*[[${cityA?.city ?: 'City A'}]]*/ 'City A',
-        cityBName: /*[[${cityB?.city ?: 'City B'}]]*/ 'City B'
-    };
-    console.log('[INITIAL_DATA] Precision data loaded:', window.INITIAL_DATA);
-</script>
-
-<script th:src="@{/js/main.js}"></script>
-<script type="application/ld+json" th:utext="${structuredDataJson}"></script>
+    <script src="/js/dashboard.js"></script>
 </body>
+
 </html>

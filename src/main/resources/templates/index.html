@@ -1,132 +1,100 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head th:replace="~{fragments/header :: head(${title}, ${metaDescription}, null, null, null, null, null)}"></head>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OfferVerdict - Should I Take The Job?</title>
+    <meta name="description"
+        content="Stop guessing. Start knowing. Calculate the real value of your job offer with taxes, rent, and cost of living accounted for.">
+
+    <!-- Unified Design System -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Analytics -->
+    <div th:replace="~{fragments/analytics :: analytics}"></div>
+</head>
+
 <body>
-<!-- Top Header -->
-<header class="page-header">
-    <div class="header-content">
-        <a href="/" class="logo">OfferVerdict</a>
-    </div>
-</header>
-
-<div class="container">
-    <!-- Hero Section - Responsive Layout -->
-    <div class="hero-section-responsive">
-        <!-- Hero Content -->
-        <div class="hero-content-responsive animate-slide-up">
-            <p class="hero-eyebrow">Verdict-first salary comparison</p>
-            <h1 class="hero-title">Reality-check your job move</h1>
-            <p class="hero-description">
-                Compare your actual buying power with taxes and cost of living. 
-                Get a clear verdict: GO, CONDITIONAL, WARNING, or NO-GO.
+    <div class="landing-container">
+        <!-- Hero Section -->
+        <header class="landing-header animate-in">
+            <h1 class="landing-title">
+                Should You <br>
+                <span class="gradient-text">Take The Job?</span>
+            </h1>
+            <p class="landing-subtitle">
+                Stop guessing. Connect real data from IRS, Zillow, and BLS to see exactly
+                how much your life changes.
             </p>
-            
-            <!-- Trust Badges -->
-            <div class="trust-badges">
-                <span class="trust-badge">🇺🇸 US-wide tax & cost data</span>
-                <span class="trust-badge">📊 Real-time calculations</span>
-                <span class="trust-badge">🔒 Privacy-first</span>
+        </header>
+
+        <!-- Main Form Card (Glassmorphism) -->
+        <form action="/" method="get" class="input-grid animate-in delay-2">
+            <!-- Current Situation -->
+            <div class="glass-card form-card">
+                <h3>Current Situation</h3>
+
+                <div class="form-group">
+                    <label class="form-label">Create Job Title</label>
+                    <input type="text" name="job" class="form-input" placeholder="e.g. Software Engineer" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Current City</label>
+                    <input type="text" name="cityA" class="form-input" placeholder="e.g. San Francisco, CA" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Current Base Salary</label>
+                    <input type="number" name="currentSalary" class="form-input" placeholder="e.g. 150000" required>
+                </div>
             </div>
+
+            <!-- New Offer -->
+            <div class="glass-card form-card">
+                <h3>The New Offer</h3>
+
+                <div class="form-group">
+                    <label class="form-label">Target Role</label>
+                    <div style="padding: 1rem; color: var(--text-tertiary); font-size: 0.9rem;">
+                        Same as current role
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Offer City</label>
+                    <input type="text" name="cityB" class="form-input" placeholder="e.g. Austin, TX" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Offer Base Salary</label>
+                    <input type="number" name="offerSalary" class="form-input" placeholder="e.g. 145000" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary submit-btn">
+                    Get My Verdict →
+                </button>
+            </div>
+        </form>
+
+        <!-- Social Proof / Trust -->
+        <div class="data-sources-grid animate-in delay-3" style="opacity: 0.7;">
+            <div class="source-item">🏛️ IRS Tax Tables 2026</div>
+            <div class="source-item">🏠 Zillow Rent Index</div>
+            <div class="source-item">📊 BLS Labor Stats</div>
         </div>
 
-        <!-- Input Card - Responsive Width -->
-        <div class="form-card-responsive animate-slide-up delay-1">
-            <form th:action="@{/}" method="get" id="mainForm">
-                <!-- Step Indicator -->
-                <div class="step-track">
-                    <div class="step-dot active" data-step="1">1</div>
-                    <div class="step-dot" data-step="2">2</div>
-                    <div class="step-dot" data-step="3">3</div>
-                </div>
-
-                <!-- Step 1: Job & Cities -->
-                <div class="step-group active" data-step="1">
-                    <h3 style="margin-bottom: var(--space-xl); font-size: var(--text-2xl);">What's your role and cities?</h3>
-                    
-                    <div class="input-group">
-                        <label class="input-label">Job Title</label>
-                        <select name="job" id="jobSelect" class="minimal-select" required>
-                            <option value="" disabled selected>Select a role</option>
-                            <optgroup th:each="group : ${jobsByCategory.entrySet()}" th:label="${group.key}">
-                                <option th:each="j : ${group.value}" th:value="${j.slug}" th:text="${j.title}"></option>
-                            </optgroup>
-                        </select>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label class="input-label">Current City</label>
-                        <input name="cityA" id="cityAInput" class="minimal-input" list="cities" placeholder="san-francisco-ca" required>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label class="input-label">Offer City</label>
-                        <input name="cityB" id="cityBInput" class="minimal-input" list="cities" placeholder="austin-tx" required>
-                    </div>
-                    
-                    <button type="button" class="btn btn-primary btn-full" onclick="nextStep(2)" style="margin-top: var(--space-lg);">Continue →</button>
-                </div>
-
-                <!-- Step 2: Salaries -->
-                <div class="step-group" data-step="2">
-                    <h3 style="margin-bottom: var(--space-xl); font-size: var(--text-2xl);">What are the salaries?</h3>
-                    
-                    <div class="input-group">
-                        <label class="input-label">Current Salary</label>
-                        <input type="number" name="currentSalary" id="currentSalaryInput" class="minimal-input" min="1000" max="10000000" step="1" placeholder="120000" required>
-                        <small style="color: var(--text-tertiary); font-size: var(--text-xs); margin-top: var(--space-xs); display: block;">Enter any amount between $1,000 and $10,000,000</small>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label class="input-label">Offer Salary</label>
-                        <input type="number" name="offerSalary" id="offerSalaryInput" class="minimal-input" min="1000" max="10000000" step="1" placeholder="135000" required>
-                        <small style="color: var(--text-tertiary); font-size: var(--text-xs); margin-top: var(--space-xs); display: block;">Enter any amount between $1,000 and $10,000,000</small>
-                    </div>
-                    
-                    <div class="step-buttons">
-                        <button type="button" class="btn btn-secondary" onclick="prevStep(1)">← Back</button>
-                        <button type="button" class="btn btn-primary" onclick="nextStep(3)">Review →</button>
-                    </div>
-                </div>
-
-                <!-- Step 3: Review & Submit -->
-                <div class="step-group" data-step="3">
-                    <h3 style="margin-bottom: var(--space-xl); font-size: var(--text-2xl);">Review your comparison</h3>
-                    
-                    <div class="glass-card" style="margin-bottom: var(--space-xl); padding: var(--space-xl);">
-                        <div style="display: grid; gap: var(--space-lg);">
-                            <div>
-                                <span class="hero-eyebrow">Job</span>
-                                <p id="reviewJob" style="font-size: var(--text-xl); font-weight: 600; margin-top: var(--space-xs); color: var(--text-primary);">-</p>
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg);">
-                                <div>
-                                    <span class="hero-eyebrow">Current</span>
-                                    <p id="reviewCurrent" style="font-size: var(--text-xl); font-weight: 600; margin-top: var(--space-xs); color: var(--text-primary);">-</p>
-                                </div>
-                                <div>
-                                    <span class="hero-eyebrow">Offer</span>
-                                    <p id="reviewOffer" style="font-size: var(--text-xl); font-weight: 600; margin-top: var(--space-xs); color: var(--text-primary);">-</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="step-buttons">
-                        <button type="button" class="btn btn-secondary" onclick="prevStep(2)">← Back</button>
-                        <button type="submit" class="btn btn-primary">Get Verdict →</button>
-                    </div>
-                </div>
-            </form>
-
-            <datalist id="cities">
-                <option th:each="city : ${cities}" th:value="${city.slug}" th:text="${city.city + ', ' + city.state}"></option>
-            </datalist>
-        </div>
+        <footer>
+            <p>© 2026 OfferVerdict. The Confirmation Engine.</p>
+        </footer>
     </div>
-</div>
-
-<div th:replace="~{fragments/footer :: footer}"></div>
-
-<script th:src="@{/js/main.js}"></script>
 </body>
+
 </html>

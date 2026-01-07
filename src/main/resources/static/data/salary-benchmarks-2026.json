@@ -1,0 +1,102 @@
+{
+    "occupations": {
+        "software-engineer": {
+            "title": "Software Engineer / Developer",
+            "socCode": "15-1252",
+            "nationalMedian": 133080,
+            "national25thPercentile": 96790,
+            "national75thPercentile": 161480,
+            "national90thPercentile": 198100,
+            "cities": [
+                {
+                    "slug": "san-francisco-ca",
+                    "city": "San Francisco",
+                    "state": "CA",
+                    "medianSalary": 171000,
+                    "percentile25": 130000,
+                    "percentile75": 220000,
+                    "percentile90": 280000,
+                    "dataSource": "BLS OES 2024 + Market Data 2025"
+                },
+                {
+                    "slug": "new-york-ny",
+                    "city": "New York",
+                    "state": "NY",
+                    "medianSalary": 155000,
+                    "percentile25": 120000,
+                    "percentile75": 195000,
+                    "percentile90": 250000,
+                    "dataSource": "BLS OES 2024 + Market Data 2025"
+                },
+                {
+                    "slug": "seattle-wa",
+                    "city": "Seattle",
+                    "state": "WA",
+                    "medianSalary": 157000,
+                    "percentile25": 125000,
+                    "percentile75": 200000,
+                    "percentile90": 260000,
+                    "dataSource": "BLS OES 2024 + Market Data 2025"
+                },
+                {
+                    "slug": "austin-tx",
+                    "city": "Austin",
+                    "state": "TX",
+                    "medianSalary": 125000,
+                    "percentile25": 95000,
+                    "percentile75": 160000,
+                    "percentile90": 195000,
+                    "dataSource": "BLS OES 2024 + Market Data 2025"
+                },
+                {
+                    "slug": "boston-ma",
+                    "city": "Boston",
+                    "state": "MA",
+                    "medianSalary": 144000,
+                    "percentile25": 110000,
+                    "percentile75": 180000,
+                    "percentile90": 225000,
+                    "dataSource": "BLS OES 2024 + Market Data 2025"
+                },
+                {
+                    "slug": "los-angeles-ca",
+                    "city": "Los Angeles",
+                    "state": "CA",
+                    "medianSalary": 147000,
+                    "percentile25": 115000,
+                    "percentile75": 185000,
+                    "percentile90": 230000,
+                    "dataSource": "BLS OES 2024 + Market Data 2025"
+                },
+                {
+                    "slug": "chicago-il",
+                    "city": "Chicago",
+                    "state": "IL",
+                    "medianSalary": 118000,
+                    "percentile25": 90000,
+                    "percentile75": 150000,
+                    "percentile90": 185000,
+                    "dataSource": "BLS OES 2024 + Market Data 2025"
+                },
+                {
+                    "slug": "denver-co",
+                    "city": "Denver",
+                    "state": "CO",
+                    "medianSalary": 130000,
+                    "percentile25": 100000,
+                    "percentile75": 165000,
+                    "percentile90": 200000,
+                    "dataSource": "BLS OES 2024 + Market Data 2025"
+                }
+            ]
+        }
+    },
+    "dataSource": {
+        "name": "U.S. Bureau of Labor Statistics (BLS) Occupational Employment Statistics",
+        "authority": "📊 BLS OES",
+        "version": "May 2024 + 2025 Market Projections",
+        "url": "https://www.bls.gov/oes/",
+        "lastUpdated": "2026-01-07",
+        "note": "BLS data (May 2024) combined with market trend projections for 2025-2026"
+    }
+}

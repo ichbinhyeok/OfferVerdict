@@ -16,10 +16,23 @@ import java.util.Map;
 @Service
 public class TaxCalculatorService {
     // ============================================
-    // 2025 IRS OFFICIAL TAX DATA (Single Filer)
+    // 2025 IRS OFFICIAL TAX DATA
     // ============================================
     
-    private static final double STANDARD_DEDUCTION_2025 = 14_600.0;
+    // Standard Deductions (2025)
+    private static final double STANDARD_DEDUCTION_SINGLE_2025 = 14_600.0;
+    private static final double STANDARD_DEDUCTION_MARRIED_2025 = 29_200.0;
+    
+    // 401k Contribution Limits (2024-2025)
+    private static final double MAX_401K_CONTRIBUTION_2024 = 23_000.0;
+    
+    // RSU Supplemental Tax Rate (Federal)
+    private static final double RSU_SUPPLEMENTAL_FEDERAL_RATE = 0.22;  // 22% flat rate
+    
+    // Smart Defaults (Industry Standard)
+    private static final double DEFAULT_401K_RATE = 0.05;  // 5%
+    private static final double DEFAULT_MONTHLY_INSURANCE = 150.0;  // $150/month
+    private static final double DEFAULT_ANNUAL_INSURANCE = DEFAULT_MONTHLY_INSURANCE * 12;  // $1,800/year
     
     // Federal Tax Brackets (2025 Single Filer)
     private static final double[][] FEDERAL_BRACKETS_2025 = {
@@ -34,9 +47,10 @@ public class TaxCalculatorService {
     
     // FICA (2025)
     private static final double SOCIAL_SECURITY_RATE = 0.062;  // 6.2%
-    private static final double SOCIAL_SECURITY_CAP = 176_100.0;
+    private static final double SOCIAL_SECURITY_CAP = 176_100.0;  // 2025 limit
     private static final double MEDICARE_RATE = 0.0145;        // 1.45%
-    private static final double ADDITIONAL_MEDICARE_THRESHOLD = 200_000.0;
+    private static final double ADDITIONAL_MEDICARE_THRESHOLD_SINGLE = 200_000.0;
+    private static final double ADDITIONAL_MEDICARE_THRESHOLD_MARRIED = 250_000.0;
     private static final double ADDITIONAL_MEDICARE_RATE = 0.009; // 0.9%
     
     // State Tax Strategy
@@ -61,16 +75,17 @@ public class TaxCalculatorService {
     /**
      * Calculate net annual income after all taxes
      * Uses 2025 IRS official data
+     * @deprecated Use calculateTax() for detailed breakdown with pre-tax deductions
      */
     public double calculateNetAnnual(double salary, String stateCode) {
         // Step 1: Apply Standard Deduction
-        double taxableIncome = Math.max(0, salary - STANDARD_DEDUCTION_2025);
+        double taxableIncome = Math.max(0, salary - STANDARD_DEDUCTION_SINGLE_2025);
         
         // Step 2: Calculate Federal Tax using 2025 brackets
         double federalTax = calculateFederalTax(taxableIncome);
         
         // Step 3: Calculate State Tax
-        double stateTax = calculateStateTax(salary, stateCode);
+        double stateTax = calculateStateTax(salary, stateCode);  // Legacy: uses gross income
         
         // Step 4: Calculate FICA (on gross, not taxable income)
         double ficaTax = calculateFICA(salary);
@@ -81,25 +96,122 @@ public class TaxCalculatorService {
     }
     
     /**
+     * Calculate tax using US Tax Waterfall method
+     * Waterfall: Gross -> Pre-tax Deductions -> FICA -> Taxable Income -> Net
+     * 
+     * @param grossIncome Annual gross income (base salary)
+     * @param stateCode State code (e.g., "CA", "TX")
+     * @param isMarried true for Married filing jointly, false for Single
+     * @param preTax401kRate Optional 401k contribution rate (0.0-1.0). If null, uses default 5%
+     * @param monthlyInsurance Optional monthly health insurance cost. If null, uses default $150/month
+     * @param studentLoanOrChildcare Optional student loan or childcare deduction. If null, uses 0
+     * @param rsuAmount Optional RSU amount. RSU is taxed separately with 22% supplemental federal rate
+     * @return TaxResult with detailed breakdown
+     */
+    public TaxResult calculateTax(double grossIncome, String stateCode, Boolean isMarried,
+                                  Double preTax401kRate, Double monthlyInsurance, Double studentLoanOrChildcare,
+                                  Double rsuAmount) {
+        // ============================================
+        // Step 0: Apply Smart Defaults
+        // ============================================
+        boolean married = isMarried != null && isMarried;
+        double effective401kRate = (preTax401kRate != null && preTax401kRate > 0) 
+            ? preTax401kRate : DEFAULT_401K_RATE;
+        double annualInsurance = (monthlyInsurance != null && monthlyInsurance > 0)
+            ? monthlyInsurance * 12 : DEFAULT_ANNUAL_INSURANCE;
+        double otherPreTaxDeductions = (studentLoanOrChildcare != null && studentLoanOrChildcare > 0)
+            ? studentLoanOrChildcare : 0.0;
+        double rsuValue = (rsuAmount != null && rsuAmount > 0) ? rsuAmount : 0.0;
+        
+        // ============================================
+        // Step A: Gross to Taxable Income
+        // ============================================
+        // Gross Income - Pre-tax Medical Insurance = FICA Taxable Base
+        // NOTE: RSU is NOT subject to 401k deductions, but IS subject to FICA
+        double ficaTaxableBase = grossIncome - annualInsurance + rsuValue;  // RSU added to FICA base
+        
+        // Calculate 401k contribution (with IRS limit)
+        // NOTE: 401k is calculated ONLY on base salary, NOT on RSU
+        double preTax401k = Math.min(
+            grossIncome * effective401kRate,
+            MAX_401K_CONTRIBUTION_2024
+        );
+        
+        // FICA Taxable Base - 401k Contribution = Federal/State Taxable Income (base salary only)
+        // RSU is handled separately for federal tax (22% supplemental rate)
+        double incomeAfterPreTaxDeductions = (grossIncome - annualInsurance) - preTax401k - otherPreTaxDeductions;
+        double taxableIncome = Math.max(0, incomeAfterPreTaxDeductions);
+        
+        // ============================================
+        // Step B: FICA Tax (includes RSU)
+        // ============================================
+        double ficaTax = calculateFICAWithMaritalStatus(ficaTaxableBase, married);
+        
+        // ============================================
+        // Step C: Federal Income Tax
+        // ============================================
+        // Base salary: Progressive brackets
+        double standardDeduction = married ? STANDARD_DEDUCTION_MARRIED_2025 : STANDARD_DEDUCTION_SINGLE_2025;
+        double federalTaxableIncome = Math.max(0, taxableIncome - standardDeduction);
+        double federalTaxOnSalary = calculateFederalTax(federalTaxableIncome);
+        
+        // RSU: Flat 22% supplemental rate (NOT subject to progressive brackets)
+        double rsuFederalTax = rsuValue * RSU_SUPPLEMENTAL_FEDERAL_RATE;
+        double totalFederalTax = federalTaxOnSalary + rsuFederalTax;
+        
+        // ============================================
+        // Step D: State Tax
+        // ============================================
+        // State tax is calculated on taxable income (base salary) + RSU
+        // RSU is usually taxed at the same rate as ordinary income in most states
+        double stateTaxableIncome = taxableIncome + rsuValue;
+        double stateTax = calculateStateTax(stateTaxableIncome, stateCode);
+        
+        // ============================================
+        // Step E: Calculate Net Income
+        // ============================================
+        double totalTax = ficaTax + totalFederalTax + stateTax;
+        double totalGrossIncome = grossIncome + rsuValue;
+        double netIncome = Math.max(0, totalGrossIncome - annualInsurance - preTax401k - otherPreTaxDeductions - totalTax);
+        
+        // ============================================
+        // Step F: Build TaxResult
+        // ============================================
+        TaxResult result = new TaxResult();
+        result.setGrossIncome(totalGrossIncome);  // Include RSU in gross income
+        result.setPreTax401k(preTax401k);
+        result.setPreTaxInsurance(annualInsurance);
+        result.setFicaTax(ficaTax);
+        result.setFederalTax(totalFederalTax);  // Includes both salary and RSU federal tax
+        result.setRsuFederalTax(rsuFederalTax);  // Separate RSU federal tax for breakdown
+        result.setStateTax(stateTax);
+        result.setNetIncome(netIncome);
+        result.recalculateEffectiveTaxRate();
+        
+        return result;
+    }
+    
+    /**
      * Get detailed tax breakdown for display
+     * @deprecated Use calculateTax() for detailed breakdown with pre-tax deductions
      */
     public TaxBreakdown calculateTaxBreakdown(double salary, String stateCode) {
-        double taxableIncome = Math.max(0, salary - STANDARD_DEDUCTION_2025);
+        double taxableIncome = Math.max(0, salary - STANDARD_DEDUCTION_SINGLE_2025);
         
         double federalTax = calculateFederalTax(taxableIncome);
-        double stateTax = calculateStateTax(salary, stateCode);
+        double stateTax = calculateStateTax(salary, stateCode);  // Legacy: uses gross income
         double ficaTax = calculateFICA(salary);
         
         TaxBreakdown breakdown = new TaxBreakdown();
         breakdown.grossIncome = salary;
-        breakdown.standardDeduction = STANDARD_DEDUCTION_2025;
+        breakdown.standardDeduction = STANDARD_DEDUCTION_SINGLE_2025;
         breakdown.taxableIncome = taxableIncome;
         breakdown.federalTax = federalTax;
         breakdown.stateTax = stateTax;
         breakdown.socialSecurityTax = Math.min(salary, SOCIAL_SECURITY_CAP) * SOCIAL_SECURITY_RATE;
         breakdown.medicareTax = salary * MEDICARE_RATE;
-        breakdown.additionalMedicareTax = salary > ADDITIONAL_MEDICARE_THRESHOLD 
-            ? (salary - ADDITIONAL_MEDICARE_THRESHOLD) * ADDITIONAL_MEDICARE_RATE 
+        breakdown.additionalMedicareTax = salary > ADDITIONAL_MEDICARE_THRESHOLD_SINGLE 
+            ? (salary - ADDITIONAL_MEDICARE_THRESHOLD_SINGLE) * ADDITIONAL_MEDICARE_RATE 
             : 0;
         breakdown.totalTax = federalTax + stateTax + ficaTax;
         breakdown.netIncome = Math.max(0, salary - breakdown.totalTax);
@@ -133,8 +245,12 @@ public class TaxCalculatorService {
     
     /**
      * Calculate State Tax with strategy pattern
+     * 
+     * @param taxableIncome Taxable income (after pre-tax deductions)
+     * @param stateCode State code
+     * @return State tax amount
      */
-    private double calculateStateTax(double salary, String stateCode) {
+    private double calculateStateTax(double taxableIncome, String stateCode) {
         String state = stateCode.toUpperCase(Locale.US);
         
         // No Tax States
@@ -146,95 +262,119 @@ public class TaxCalculatorService {
         
         // Flat Tax States
         if (FLAT_TAX_STATES.containsKey(state)) {
-            return salary * FLAT_TAX_STATES.get(state);
+            return taxableIncome * FLAT_TAX_STATES.get(state);
         }
         
         // Progressive Tax States
-        return calculateProgressiveStateTax(salary, state);
+        return calculateProgressiveStateTax(taxableIncome, state);
     }
     
     /**
      * Calculate Progressive State Tax (CA, NY, etc.)
+     * 
+     * @param taxableIncome Taxable income (after pre-tax deductions)
+     * @param state State code
+     * @return State tax amount
      */
-    private double calculateProgressiveStateTax(double salary, String state) {
+    private double calculateProgressiveStateTax(double taxableIncome, String state) {
         // California - Simplified progressive (effective rate approximation)
         if (state.equals("CA")) {
-            if (salary <= 10_412) return salary * 0.01;
-            if (salary <= 24_684) return salary * 0.02;
-            if (salary <= 38_959) return salary * 0.04;
-            if (salary <= 54_081) return salary * 0.06;
-            if (salary <= 68_350) return salary * 0.08;
-            if (salary <= 349_137) return salary * 0.093;
-            if (salary <= 418_961) return salary * 0.103;
-            if (salary <= 698_271) return salary * 0.113;
-            return salary * 0.123;
+            if (taxableIncome <= 10_412) return taxableIncome * 0.01;
+            if (taxableIncome <= 24_684) return taxableIncome * 0.02;
+            if (taxableIncome <= 38_959) return taxableIncome * 0.04;
+            if (taxableIncome <= 54_081) return taxableIncome * 0.06;
+            if (taxableIncome <= 68_350) return taxableIncome * 0.08;
+            if (taxableIncome <= 349_137) return taxableIncome * 0.093;
+            if (taxableIncome <= 418_961) return taxableIncome * 0.103;
+            if (taxableIncome <= 698_271) return taxableIncome * 0.113;
+            return taxableIncome * 0.123;
         }
         
         // New York (State + NYC if applicable)
         if (state.equals("NY")) {
-            double nyStateTax = calculateNYStateTax(salary);
+            double nyStateTax = calculateNYStateTax(taxableIncome);
             // Assume NYC for simplicity (add NYC tax)
-            double nycTax = salary * 0.038; // ~3.8% NYC local tax
+            double nycTax = taxableIncome * 0.038; // ~3.8% NYC local tax
             return nyStateTax + nycTax;
         }
         
         // New Jersey
         if (state.equals("NJ")) {
-            if (salary <= 20_000) return salary * 0.014;
-            if (salary <= 35_000) return salary * 0.0175;
-            if (salary <= 40_000) return salary * 0.035;
-            if (salary <= 75_000) return salary * 0.05525;
-            if (salary <= 500_000) return salary * 0.0637;
-            if (salary <= 1_000_000) return salary * 0.0897;
-            return salary * 0.1075;
+            if (taxableIncome <= 20_000) return taxableIncome * 0.014;
+            if (taxableIncome <= 35_000) return taxableIncome * 0.0175;
+            if (taxableIncome <= 40_000) return taxableIncome * 0.035;
+            if (taxableIncome <= 75_000) return taxableIncome * 0.05525;
+            if (taxableIncome <= 500_000) return taxableIncome * 0.0637;
+            if (taxableIncome <= 1_000_000) return taxableIncome * 0.0897;
+            return taxableIncome * 0.1075;
         }
         
         // Fallback: Use repository data if available
         Map<String, StateTax> stateTaxMap = repository.stateTaxMap();
         StateTax stateTax = stateTaxMap.get(state);
         if (stateTax != null) {
-            return computeTaxFromBrackets(salary, stateTax.getBrackets());
+            return computeTaxFromBrackets(taxableIncome, stateTax.getBrackets());
         }
         
         // Default: Assume moderate state tax (~5%)
-        return salary * 0.05;
+        return taxableIncome * 0.05;
     }
     
     /**
      * Calculate NY State Tax
+     * 
+     * @param taxableIncome Taxable income (after pre-tax deductions)
+     * @return NY State tax amount
      */
-    private double calculateNYStateTax(double salary) {
-        if (salary <= 8_500) return salary * 0.04;
-        if (salary <= 11_700) return salary * 0.045;
-        if (salary <= 13_900) return salary * 0.0525;
-        if (salary <= 80_650) return salary * 0.055;
-        if (salary <= 215_400) return salary * 0.06;
-        if (salary <= 1_077_550) return salary * 0.0685;
-        if (salary <= 5_000_000) return salary * 0.0965;
-        if (salary <= 25_000_000) return salary * 0.103;
-        return salary * 0.109;
+    private double calculateNYStateTax(double taxableIncome) {
+        if (taxableIncome <= 8_500) return taxableIncome * 0.04;
+        if (taxableIncome <= 11_700) return taxableIncome * 0.045;
+        if (taxableIncome <= 13_900) return taxableIncome * 0.0525;
+        if (taxableIncome <= 80_650) return taxableIncome * 0.055;
+        if (taxableIncome <= 215_400) return taxableIncome * 0.06;
+        if (taxableIncome <= 1_077_550) return taxableIncome * 0.0685;
+        if (taxableIncome <= 5_000_000) return taxableIncome * 0.0965;
+        if (taxableIncome <= 25_000_000) return taxableIncome * 0.103;
+        return taxableIncome * 0.109;
     }
     
     /**
      * Calculate FICA (2025)
      * - Social Security: 6.2% up to $176,100
      * - Medicare: 1.45% on all earnings
-     * - Additional Medicare: +0.9% over $200,000
+     * - Additional Medicare: +0.9% over $200,000 (Single) / $250,000 (Married)
+     * 
+     * @param ficaTaxableBase Income base for FICA calculation (gross - pre-tax insurance)
+     * @param isMarried true for Married filing jointly, false for Single
+     * @return Total FICA tax
      */
-    private double calculateFICA(double salary) {
-        // Social Security
-        double socialSecurity = Math.min(salary, SOCIAL_SECURITY_CAP) * SOCIAL_SECURITY_RATE;
+    private double calculateFICAWithMaritalStatus(double ficaTaxableBase, boolean isMarried) {
+        // Social Security: 6.2% up to cap
+        double socialSecurity = Math.min(ficaTaxableBase, SOCIAL_SECURITY_CAP) * SOCIAL_SECURITY_RATE;
         
-        // Medicare
-        double medicare = salary * MEDICARE_RATE;
+        // Medicare: 1.45% on all earnings (no cap)
+        double medicare = ficaTaxableBase * MEDICARE_RATE;
         
-        // Additional Medicare Tax (over $200k)
+        // Additional Medicare Tax (0.9% over threshold)
+        double additionalMedicareThreshold = isMarried 
+            ? ADDITIONAL_MEDICARE_THRESHOLD_MARRIED 
+            : ADDITIONAL_MEDICARE_THRESHOLD_SINGLE;
         double additionalMedicare = 0;
-        if (salary > ADDITIONAL_MEDICARE_THRESHOLD) {
-            additionalMedicare = (salary - ADDITIONAL_MEDICARE_THRESHOLD) * ADDITIONAL_MEDICARE_RATE;
+        if (ficaTaxableBase > additionalMedicareThreshold) {
+            additionalMedicare = (ficaTaxableBase - additionalMedicareThreshold) * ADDITIONAL_MEDICARE_RATE;
         }
         
         return socialSecurity + medicare + additionalMedicare;
+    }
+    
+    /**
+     * Calculate FICA (2025) - Legacy method for backward compatibility
+     * - Social Security: 6.2% up to $176,100
+     * - Medicare: 1.45% on all earnings
+     * - Additional Medicare: +0.9% over $200,000
+     */
+    private double calculateFICA(double salary) {
+        return calculateFICAWithMaritalStatus(salary, false);  // Default to Single
     }
     
     /**
@@ -281,6 +421,119 @@ public class TaxCalculatorService {
         
         public double getEffectiveTaxRate() {
             return grossIncome > 0 ? (totalTax / grossIncome) * 100 : 0;
+        }
+    }
+    
+    /**
+     * TaxResult - Detailed US tax calculation result
+     * Supports Waterfall method: Gross -> Pre-tax Deductions -> FICA -> Taxable Income -> Net
+     */
+    public static class TaxResult {
+        private double grossIncome;
+        private double preTax401k;
+        private double preTaxInsurance;
+        private double ficaTax;
+        private double federalTax;
+        private double rsuFederalTax;  // RSU-specific federal tax (22% supplemental rate)
+        private double stateTax;
+        private double netIncome;
+        private double effectiveTaxRate;
+        
+        // Constructors
+        public TaxResult() {
+        }
+        
+        public TaxResult(double grossIncome, double preTax401k, double preTaxInsurance,
+                        double ficaTax, double federalTax, double stateTax, double netIncome) {
+            this.grossIncome = grossIncome;
+            this.preTax401k = preTax401k;
+            this.preTaxInsurance = preTaxInsurance;
+            this.ficaTax = ficaTax;
+            this.federalTax = federalTax;
+            this.stateTax = stateTax;
+            this.netIncome = netIncome;
+            this.effectiveTaxRate = grossIncome > 0 ? ((ficaTax + federalTax + stateTax) / grossIncome) * 100 : 0;
+        }
+        
+        // Getters and Setters
+        public double getGrossIncome() {
+            return grossIncome;
+        }
+        
+        public void setGrossIncome(double grossIncome) {
+            this.grossIncome = grossIncome;
+        }
+        
+        public double getPreTax401k() {
+            return preTax401k;
+        }
+        
+        public void setPreTax401k(double preTax401k) {
+            this.preTax401k = preTax401k;
+        }
+        
+        public double getPreTaxInsurance() {
+            return preTaxInsurance;
+        }
+        
+        public void setPreTaxInsurance(double preTaxInsurance) {
+            this.preTaxInsurance = preTaxInsurance;
+        }
+        
+        public double getFicaTax() {
+            return ficaTax;
+        }
+        
+        public void setFicaTax(double ficaTax) {
+            this.ficaTax = ficaTax;
+        }
+        
+        public double getFederalTax() {
+            return federalTax;
+        }
+        
+        public void setFederalTax(double federalTax) {
+            this.federalTax = federalTax;
+        }
+        
+        public double getStateTax() {
+            return stateTax;
+        }
+        
+        public void setStateTax(double stateTax) {
+            this.stateTax = stateTax;
+        }
+        
+        public double getRsuFederalTax() {
+            return rsuFederalTax;
+        }
+        
+        public void setRsuFederalTax(double rsuFederalTax) {
+            this.rsuFederalTax = rsuFederalTax;
+        }
+        
+        public double getNetIncome() {
+            return netIncome;
+        }
+        
+        public void setNetIncome(double netIncome) {
+            this.netIncome = netIncome;
+        }
+        
+        public double getEffectiveTaxRate() {
+            return effectiveTaxRate;
+        }
+        
+        public void setEffectiveTaxRate(double effectiveTaxRate) {
+            this.effectiveTaxRate = effectiveTaxRate;
+        }
+        
+        /**
+         * Calculate and update effective tax rate based on current tax values
+         */
+        public void recalculateEffectiveTaxRate() {
+            double totalTax = ficaTax + federalTax + stateTax;
+            this.effectiveTaxRate = grossIncome > 0 ? (totalTax / grossIncome) * 100 : 0;
         }
     }
 }

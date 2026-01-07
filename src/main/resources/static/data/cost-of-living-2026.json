@@ -1,0 +1,181 @@
+{
+    "cities": [
+        {
+            "slug": "san-francisco-ca",
+            "city": "San Francisco",
+            "state": "CA",
+            "colIndex": 195.7,
+            "relativeTo": "National Average = 100",
+            "categories": {
+                "groceries": 115.3,
+                "housing": 300.5,
+                "utilities": 92.1,
+                "transportation": 145.2,
+                "healthcare": 128.4,
+                "miscellaneous": 118.7
+            },
+            "averageMonthlyCost": 4200,
+            "dataSource": "Numbeo Q4 2025"
+        },
+        {
+            "slug": "new-york-ny",
+            "city": "New York",
+            "state": "NY",
+            "colIndex": 244.0,
+            "relativeTo": "Prague = 100 (Expatistan)",
+            "categories": {
+                "groceries": 112.5,
+                "housing": 285.0,
+                "utilities": 105.3,
+                "transportation": 138.6,
+                "healthcare": 135.2,
+                "miscellaneous": 125.4
+            },
+            "averageMonthlyCost": 3800,
+            "dataSource": "Expatistan 2026"
+        },
+        {
+            "slug": "austin-tx",
+            "city": "Austin",
+            "state": "TX",
+            "colIndex": 105.2,
+            "relativeTo": "National Average = 100",
+            "categories": {
+                "groceries": 98.2,
+                "housing": 118.5,
+                "utilities": 102.1,
+                "transportation": 112.3,
+                "healthcare": 95.8,
+                "miscellaneous": 105.6
+            },
+            "averageMonthlyCost": 2100,
+            "dataSource": "Numbeo Q4 2025"
+        },
+        {
+            "slug": "seattle-wa",
+            "city": "Seattle",
+            "state": "WA",
+            "colIndex": 75.1,
+            "relativeTo": "NYC = 100",
+            "categories": {
+                "groceries": 108.5,
+                "housing": 210.3,
+                "utilities": 88.6,
+                "transportation": 132.4,
+                "healthcare": 118.9,
+                "miscellaneous": 112.3
+            },
+            "averageMonthlyCost": 2600,
+            "dataSource": "BLS Q4 2025"
+        },
+        {
+            "slug": "boston-ma",
+            "city": "Boston",
+            "state": "MA",
+            "colIndex": 81.2,
+            "relativeTo": "NYC = 100",
+            "categories": {
+                "groceries": 110.2,
+                "housing": 245.7,
+                "utilities": 125.3,
+                "transportation": 128.5,
+                "healthcare": 142.6,
+                "miscellaneous": 115.9
+            },
+            "averageMonthlyCost": 3200,
+            "dataSource": "BLS Q4 2025"
+        },
+        {
+            "slug": "los-angeles-ca",
+            "city": "Los Angeles",
+            "state": "CA",
+            "colIndex": 148.2,
+            "relativeTo": "National Average = 100",
+            "categories": {
+                "groceries": 106.8,
+                "housing": 232.4,
+                "utilities": 95.7,
+                "transportation": 142.9,
+                "healthcare": 122.5,
+                "miscellaneous": 114.8
+            },
+            "averageMonthlyCost": 3100,
+            "dataSource": "Numbeo Q4 2025"
+        },
+        {
+            "slug": "chicago-il",
+            "city": "Chicago",
+            "state": "IL",
+            "colIndex": 112.5,
+            "relativeTo": "National Average = 100",
+            "categories": {
+                "groceries": 102.3,
+                "housing": 135.8,
+                "utilities": 108.4,
+                "transportation": 118.6,
+                "healthcare": 112.9,
+                "miscellaneous": 108.2
+            },
+            "averageMonthlyCost": 2400,
+            "dataSource": "Numbeo Q4 2025"
+        },
+        {
+            "slug": "denver-co",
+            "city": "Denver",
+            "state": "CO",
+            "colIndex": 118.3,
+            "relativeTo": "National Average = 100",
+            "categories": {
+                "groceries": 103.5,
+                "housing": 155.2,
+                "utilities": 96.8,
+                "transportation": 125.4,
+                "healthcare": 108.6,
+                "miscellaneous": 110.5
+            },
+            "averageMonthlyCost": 2500,
+            "dataSource": "Numbeo Q4 2025"
+        },
+        {
+            "slug": "miami-fl",
+            "city": "Miami",
+            "state": "FL",
+            "colIndex": 189.0,
+            "relativeTo": "Prague = 100",
+            "categories": {
+                "groceries": 105.8,
+                "housing": 198.3,
+                "utilities": 92.5,
+                "transportation": 128.7,
+                "healthcare": 115.2,
+                "miscellaneous": 118.5
+            },
+            "averageMonthlyCost": 2900,
+            "dataSource": "Expatistan 2026"
+        },
+        {
+            "slug": "dallas-tx",
+            "city": "Dallas",
+            "state": "TX",
+            "colIndex": 98.5,
+            "relativeTo": "National Average = 100",
+            "categories": {
+                "groceries": 96.3,
+                "housing": 105.2,
+                "utilities": 98.7,
+                "transportation": 110.5,
+                "healthcare": 92.8,
+                "miscellaneous": 102.4
+            },
+            "averageMonthlyCost": 2000,
+            "dataSource": "Numbeo Q4 2025"
+        }
+    ],
+    "dataSource": {
+        "name": "Cost of Living Index (Numbeo, BLS, Expatistan)",
+        "authority": "🌏 Multiple Sources",
+        "note": "Composite data from Numbeo, BLS Consumer Price Index, and Expatistan",
+        "lastUpdated": "2026-01-07",
+        "updateFrequency": "Quarterly"
+    }
+}

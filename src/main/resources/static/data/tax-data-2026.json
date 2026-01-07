@@ -1,0 +1,48 @@
+{
+  "federalTaxBrackets2026": {
+    "single": [
+      { "min": 0, "max": 12400, "rate": 0.10 },
+      { "min": 12401, "max": 50400, "rate": 0.12 },
+      { "min": 50401, "max": 105700, "rate": 0.22 },
+      { "min": 105701, "max": 201775, "rate": 0.24 },
+      { "min": 201776, "max": 256225, "rate": 0.32 },
+      { "min": 256226, "max": 640600, "rate": 0.35 },
+      { "min": 640601, "max": 999999999, "rate": 0.37 }
+    ],
+    "married": [
+      { "min": 0, "max": 24800, "rate": 0.10 },
+      { "min": 24801, "max": 100800, "rate": 0.12 },
+      { "min": 100801, "max": 211400, "rate": 0.22 },
+      { "min": 211401, "max": 403550, "rate": 0.24 },
+      { "min": 403551, "max": 512450, "rate": 0.32 },
+      { "min": 512451, "max": 768700, "rate": 0.35 },
+      { "min": 768701, "max": 999999999, "rate": 0.37 }
+    ]
+  },
+  "stateTaxRates2026": {
+    "CA": { "rate": 0.093, "topRate": 0.133, "note": "Progressive 1-13.3%, avg ~9.3% for $100k+" },
+    "NY": { "rate": 0.065, "topRate": 0.109, "note": "Progressive 4-10.9%, avg ~6.5% for $100k+" },
+    "TX": { "rate": 0.0, "topRate": 0.0, "note": "No state income tax" },
+    "FL": { "rate": 0.0, "topRate": 0.0, "note": "No state income tax" },
+    "WA": { "rate": 0.0, "topRate": 0.0, "note": "No state income tax" },
+    "MA": { "rate": 0.05, "topRate": 0.05, "note": "Flat 5%" },
+    "IL": { "rate": 0.0495, "topRate": 0.0495, "note": "Flat 4.95%" },
+    "CO": { "rate": 0.044, "topRate": 0.044, "note": "Flat 4.4%" }
+  },
+  "ficaTax2026": {
+    "socialSecurity": { "rate": 0.062, "wageBase": 176100 },
+    "medicare": { "rate": 0.0145, "wageBase": 999999999 },
+    "additionalMedicare": { "rate": 0.009, "threshold": 200000 }
+  },
+  "standardDeduction2026": {
+    "single": 16100,
+    "married": 32200
+  },
+  "dataSource": {
+    "name": "IRS Tax Tables",
+    "version": "2026",
+    "authority": "🏛️ IRS",
+    "url": "https://www.irs.gov",
+    "lastUpdated": "2026-01-07"
+  }
+}

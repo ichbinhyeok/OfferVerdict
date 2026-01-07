@@ -10,6 +10,16 @@ public class ComparisonResult {
     private ComparisonBreakdown current;
     private ComparisonBreakdown offer;
 
+    // Receipt UI Fields
+    private String monthlyGainStr;
+    private String freedomIndex; // e.g. "25%"
+    private String taxDiffMsg;
+    private String rentDiffMsg;
+    private String valueDiffMsg;
+    private String jobPercentile; // e.g. "22%"
+    private boolean isGoodSalary;
+
+    // Getters and Setters
     public Verdict getVerdict() {
         return verdict;
     }
@@ -72,5 +82,61 @@ public class ComparisonResult {
 
     public void setOffer(ComparisonBreakdown offer) {
         this.offer = offer;
+    }
+
+    public String getMonthlyGainStr() {
+        return monthlyGainStr;
+    }
+
+    public void setMonthlyGainStr(String monthlyGainStr) {
+        this.monthlyGainStr = monthlyGainStr;
+    }
+
+    public String getFreedomIndex() {
+        return freedomIndex;
+    }
+
+    public void setFreedomIndex(String freedomIndex) {
+        this.freedomIndex = freedomIndex;
+    }
+
+    public String getTaxDiffMsg() {
+        return taxDiffMsg;
+    }
+
+    public void setTaxDiffMsg(String taxDiffMsg) {
+        this.taxDiffMsg = taxDiffMsg;
+    }
+
+    public String getRentDiffMsg() {
+        return rentDiffMsg;
+    }
+
+    public void setRentDiffMsg(String rentDiffMsg) {
+        this.rentDiffMsg = rentDiffMsg;
+    }
+
+    public String getValueDiffMsg() {
+        return valueDiffMsg;
+    }
+
+    public void setValueDiffMsg(String valueDiffMsg) {
+        this.valueDiffMsg = valueDiffMsg;
+    }
+
+    public String getJobPercentile() {
+        return jobPercentile;
+    }
+
+    public void setJobPercentile(String jobPercentile) {
+        this.jobPercentile = jobPercentile;
+    }
+
+    public boolean isGoodSalary() {
+        return isGoodSalary;
+    }
+
+    public void setGoodSalary(boolean goodSalary) {
+        isGoodSalary = goodSalary;
     }
 }

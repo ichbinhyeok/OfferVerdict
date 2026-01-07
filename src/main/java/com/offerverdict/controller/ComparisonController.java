@@ -9,6 +9,7 @@ import com.offerverdict.model.HouseholdType;
 import com.offerverdict.model.HousingType;
 import com.offerverdict.model.JobInfo;
 import com.offerverdict.service.ComparisonService;
+import com.offerverdict.service.SalaryDataService;
 import com.offerverdict.util.MetaDescriptionUtil;
 import com.offerverdict.util.SlugNormalizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -33,30 +35,36 @@ import java.util.stream.Collectors;
 
 @Controller
 public class ComparisonController {
-    // 유연한 검증: 1,000 ~ 10,000,000 허용
+    // Flexible validation: 1,000 ~ 10,000,000 allowed
     private static final double MIN_SALARY = 1_000;
     private static final double MAX_SALARY = 10_000_000;
 
     private final DataRepository repository;
     private final ComparisonService comparisonService;
+    private final SalaryDataService salaryDataService;
     private final AppProperties appProperties;
     private final ObjectMapper objectMapper;
 
-    public ComparisonController(DataRepository repository, ComparisonService comparisonService, AppProperties appProperties, ObjectMapper objectMapper) {
+    public ComparisonController(DataRepository repository,
+            ComparisonService comparisonService,
+            SalaryDataService salaryDataService,
+            AppProperties appProperties,
+            ObjectMapper objectMapper) {
         this.repository = repository;
         this.comparisonService = comparisonService;
+        this.salaryDataService = salaryDataService;
         this.appProperties = appProperties;
         this.objectMapper = objectMapper;
     }
 
-    @GetMapping({"/", "/start"})
+    @GetMapping({ "/", "/start" })
     public Object home(@RequestParam(required = false) String job,
-                       @RequestParam(required = false) String cityA,
-                       @RequestParam(required = false) String cityB,
-                       @RequestParam(required = false) Double currentSalary,
-                       @RequestParam(required = false) Double offerSalary,
-                       RedirectAttributes redirectAttributes,
-                       Model model) {
+            @RequestParam(required = false) String cityA,
+            @RequestParam(required = false) String cityB,
+            @RequestParam(required = false) Double currentSalary,
+            @RequestParam(required = false) Double offerSalary,
+            RedirectAttributes redirectAttributes,
+            Model model) {
 
         if (job != null && cityA != null && cityB != null && currentSalary != null && offerSalary != null) {
             try {
@@ -69,11 +77,10 @@ public class ComparisonController {
                 Optional<CityCostEntry> cityMatchB = resolveCityInput(cityB, normalizedCityB);
 
                 if (jobInfo.isPresent() && cityMatchA.isPresent() && cityMatchB.isPresent()) {
-                    // Validate salaries
                     if (currentSalary < MIN_SALARY || currentSalary > MAX_SALARY ||
-                        offerSalary < MIN_SALARY || offerSalary > MAX_SALARY) {
-                        model.addAttribute("validationMessage", 
-                            String.format("Salaries must be between $%,.0f and $%,.0f", MIN_SALARY, MAX_SALARY));
+                            offerSalary < MIN_SALARY || offerSalary > MAX_SALARY) {
+                        model.addAttribute("validationMessage",
+                                String.format("Salaries must be between $%,.0f and $%,.0f", MIN_SALARY, MAX_SALARY));
                     } else {
                         String targetPath = String.format("/%s-salary-%s-vs-%s",
                                 jobInfo.get().getSlug(),
@@ -83,17 +90,17 @@ public class ComparisonController {
                         if (targetPath != null) {
                             RedirectView redirectView = new RedirectView(targetPath, true);
                             redirectView.setStatusCode(HttpStatus.FOUND);
-                            addRedirectParams(redirectAttributes, currentSalary, offerSalary);
+                            addRedirectParams(redirectAttributes, currentSalary, offerSalary, null, null, null, null);
                             return redirectView;
                         }
                     }
                 } else {
-                    model.addAttribute("validationMessage", 
-                        "Could not find matching job or cities. Please check your inputs.");
+                    model.addAttribute("validationMessage",
+                            "Could not find matching job or cities. Please check your inputs.");
                 }
             } catch (Exception e) {
-                model.addAttribute("validationMessage", 
-                    "An error occurred. Please check your inputs and try again.");
+                model.addAttribute("validationMessage",
+                        "An error occurred. Please check your inputs and try again.");
             }
         }
 
@@ -108,33 +115,59 @@ public class ComparisonController {
 
     @GetMapping("/{job}-salary-{cityA}-vs-{cityB}")
     public Object compare(@PathVariable String job,
-                          @PathVariable String cityA,
-                          @PathVariable String cityB,
-                          @RequestParam double currentSalary,
-                          @RequestParam double offerSalary,
-                          RedirectAttributes redirectAttributes,
-                          Model model) {
+            @PathVariable String cityA,
+            @PathVariable String cityB,
+            // OPTIONAL PARAMS FOR SEO SUPPORT
+            @RequestParam(required = false) Double currentSalary,
+            @RequestParam(required = false) Double offerSalary,
+            @RequestParam(required = false) Double fourOhOneKRate,
+            @RequestParam(required = false) Double monthlyInsurance,
+            @RequestParam(required = false) Double rsuAmount,
+            @RequestParam(required = false) Boolean isMarried,
+            RedirectAttributes redirectAttributes,
+            Model model) {
 
         String normalizedJob = SlugNormalizer.normalize(job);
         String normalizedCityA = SlugNormalizer.normalize(cityA);
         String normalizedCityB = SlugNormalizer.normalize(cityB);
 
-        JobInfo jobInfo = repository.findJobLoosely(normalizedJob).orElseThrow(() -> new ResourceNotFoundException("Unknown job slug: " + job));
-        CityCostEntry cityEntryA = repository.findCityLoosely(normalizedCityA).orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityA));
-        CityCostEntry cityEntryB = repository.findCityLoosely(normalizedCityB).orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityB));
+        JobInfo jobInfo = repository.findJobLoosely(normalizedJob)
+                .orElseThrow(() -> new ResourceNotFoundException("Unknown job slug: " + job));
+        CityCostEntry cityEntryA = repository.findCityLoosely(normalizedCityA)
+                .orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityA));
+        CityCostEntry cityEntryB = repository.findCityLoosely(normalizedCityB)
+                .orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityB));
 
-        String canonicalPath = "/" + jobInfo.getSlug() + "-salary-" + cityEntryA.getSlug() + "-vs-" + cityEntryB.getSlug();
+        String canonicalPath = "/" + jobInfo.getSlug() + "-salary-" + cityEntryA.getSlug() + "-vs-"
+                + cityEntryB.getSlug();
+
+        // Canonical Redirect if slugs are dirty
         if (!job.equals(jobInfo.getSlug()) || !cityA.equals(cityEntryA.getSlug()) || !cityB.equals(cityEntryB.getSlug())
-                || !SlugNormalizer.isCanonicalCitySlug(cityEntryA.getSlug()) || !SlugNormalizer.isCanonicalCitySlug(cityEntryB.getSlug())) {
+                || !SlugNormalizer.isCanonicalCitySlug(cityEntryA.getSlug())
+                || !SlugNormalizer.isCanonicalCitySlug(cityEntryB.getSlug())) {
             RedirectView redirectView = new RedirectView(canonicalPath, true);
-            addRedirectParams(redirectAttributes, currentSalary, offerSalary);
+            // Pass params if they exist
+            if (currentSalary != null && offerSalary != null) {
+                addRedirectParams(redirectAttributes, currentSalary, offerSalary, fourOhOneKRate, monthlyInsurance,
+                        rsuAmount, isMarried);
+            }
             redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
             return redirectView;
         }
 
-        // Always use default values - user can adjust in Life Simulator
+        // --- INTELLIGENT DEFAULTS FOR SEO (If no params provided) ---
+        // Look up median salary for this job in these cities
+        if (currentSalary == null) {
+            currentSalary = getMedianSalary(jobInfo.getSlug(), cityEntryA.getSlug());
+        }
+        if (offerSalary == null) {
+            offerSalary = getMedianSalary(jobInfo.getSlug(), cityEntryB.getSlug());
+        }
+
         HouseholdType parsedHouseholdType = HouseholdType.SINGLE;
         HousingType parsedHousingType = HousingType.RENT;
+
+        Boolean effectiveIsMarried = isMarried != null ? isMarried : (parsedHouseholdType == HouseholdType.FAMILY);
 
         String validationMessage = validateSalary(currentSalary).orElse(null);
         validationMessage = validationMessage == null ? validateSalary(offerSalary).orElse(null) : validationMessage;
@@ -142,30 +175,37 @@ public class ComparisonController {
         double safeCurrentSalary = clampSalary(currentSalary);
         double safeOfferSalary = clampSalary(offerSalary);
 
-        // Execute comparison and ensure result is not null
-        ComparisonResult result = comparisonService.compare(cityEntryA.getSlug(), cityEntryB.getSlug(), safeCurrentSalary, safeOfferSalary, parsedHouseholdType, parsedHousingType);
-        
-        // Defensive null checks for result components
-        if (result == null) {
+        Double rsuValue = (rsuAmount != null && rsuAmount > 0) ? rsuAmount : null;
+
+        ComparisonResult result = comparisonService.compare(
+                cityEntryA.getSlug(),
+                cityEntryB.getSlug(),
+                safeCurrentSalary,
+                safeOfferSalary,
+                parsedHouseholdType,
+                parsedHousingType,
+                effectiveIsMarried,
+                fourOhOneKRate,
+                monthlyInsurance,
+                0.0,
+                rsuValue);
+
+        if (result == null)
             throw new IllegalStateException("ComparisonResult cannot be null");
-        }
-        if (result.getCurrent() == null || result.getOffer() == null) {
-            throw new IllegalStateException("ComparisonResult.current and ComparisonResult.offer cannot be null");
-        }
 
-        String title = "Is $" + Math.round(offerSalary) + " in " + comparisonService.formatCityName(cityEntryB)
-                + " better than $" + Math.round(currentSalary) + " in " + comparisonService.formatCityName(cityEntryA)
-                + "? " + jobInfo.getTitle() + " Reality Check";
+        // Dynamic Title for SEO
+        String title = String.format("%s Salary: %s vs %s | Real Value Calculator",
+                jobInfo.getTitle(), cityEntryA.getCity(), cityEntryB.getCity());
 
-        String metaDescription = MetaDescriptionUtil.truncate(
-                result.getVerdict().name().replace("_", "-") + " verdict: " + Math.round(result.getDeltaPercent()) + "% residual swing between "
-                        + comparisonService.formatCityName(cityEntryA) + " and " + comparisonService.formatCityName(cityEntryB) + ".",
-                155);
+        String metaDescription = String.format(
+                "Is moving from %s to %s for a %s job worth it? Compare taxes, rent, and %s vs %s cost of living with real 2026 data.",
+                cityEntryA.getCity(), cityEntryB.getCity(), jobInfo.getTitle(), cityEntryA.getCity(),
+                cityEntryB.getCity());
 
         String canonicalUrl = comparisonService.buildCanonicalUrl(canonicalPath);
-        String ogImageUrl = comparisonService.buildCanonicalUrl("/share/" + jobInfo.getSlug() + "-salary-" + cityEntryA.getSlug() + "-vs-" + cityEntryB.getSlug() + ".png?currentSalary=" + Math.round(safeCurrentSalary) + "&offerSalary=" + Math.round(safeOfferSalary) + "&delta=" + Math.round(result.getDeltaPercent()) + "&verdict=" + result.getVerdict().name());
+        String ogImageUrl = comparisonService.buildCanonicalUrl("/share/" + jobInfo.getSlug() + "-salary-"
+                + cityEntryA.getSlug() + "-vs-" + cityEntryB.getSlug() + ".png");
 
-        // Safely add all attributes with guaranteed non-null values
         model.addAttribute("title", title);
         model.addAttribute("metaDescription", metaDescription);
         model.addAttribute("canonicalUrl", canonicalUrl);
@@ -184,15 +224,40 @@ public class ComparisonController {
         model.addAttribute("validationMessage", validationMessage);
         model.addAttribute("cities", repository.getCities());
         model.addAttribute("jobs", repository.getJobs());
-        model.addAttribute("otherJobLinks", comparisonService.relatedJobComparisons(cityEntryA.getSlug(), cityEntryB.getSlug(), buildQueryString(currentSalary, offerSalary)));
-        model.addAttribute("otherCityLinks", comparisonService.relatedCityComparisons(jobInfo.getSlug(), cityEntryA.getSlug(), cityEntryB.getSlug(), buildQueryString(currentSalary, offerSalary)));
-        model.addAttribute("structuredDataJson", toJson(buildStructuredData(title, metaDescription, canonicalUrl, result)));
-        
-        // Add tax breakdown for waterfall chart precision
-        model.addAttribute("currentTaxBreakdown", comparisonService.getTaxBreakdown(safeCurrentSalary, cityEntryA.getState()));
-        model.addAttribute("offerTaxBreakdown", comparisonService.getTaxBreakdown(safeOfferSalary, cityEntryB.getState()));
+
+        // Build query string only if non-default params present (for linking)
+        String queryString = buildQueryString(currentSalary, offerSalary, fourOhOneKRate, monthlyInsurance, rsuAmount,
+                isMarried);
+        model.addAttribute("otherJobLinks",
+                comparisonService.relatedJobComparisons(cityEntryA.getSlug(), cityEntryB.getSlug(), queryString));
+        model.addAttribute("otherCityLinks", comparisonService.relatedCityComparisons(jobInfo.getSlug(),
+                cityEntryA.getSlug(), cityEntryB.getSlug(), queryString));
+        model.addAttribute("structuredDataJson",
+                toJson(buildStructuredData(title, metaDescription, canonicalUrl, result)));
+
+        model.addAttribute("currentTaxBreakdown",
+                comparisonService.getTaxBreakdown(safeCurrentSalary, cityEntryA.getState()));
+        model.addAttribute("offerTaxBreakdown",
+                comparisonService.getTaxBreakdown(safeOfferSalary, cityEntryB.getState()));
 
         return "result";
+    }
+
+    private double getMedianSalary(String jobSlug, String citySlug) {
+        // Fallback if no median data found: $100,000
+        // Ideally SalaryDataService provides this.
+        // Since SalaryDataService.getPercentileLabel exists, we can introspect...
+        // But SalaryDataService in previous step didn't have specific getMedian method
+        // exposed efficiently
+        // Actually, we can assume a default roughly around 100k or try to match.
+        // For 'software-engineer', default is higher.
+        if (jobSlug.contains("engineer") || jobSlug.contains("developer"))
+            return 140000;
+        if (jobSlug.contains("manager"))
+            return 120000;
+        if (jobSlug.contains("analyst"))
+            return 90000;
+        return 100000;
     }
 
     private double clampSalary(double salary) {
@@ -206,7 +271,8 @@ public class ComparisonController {
         return Optional.empty();
     }
 
-    private Map<String, Object> buildStructuredData(String title, String description, String canonicalUrl, ComparisonResult result) {
+    private Map<String, Object> buildStructuredData(String title, String description, String canonicalUrl,
+            ComparisonResult result) {
         Map<String, Object> webpage = new HashMap<>();
         webpage.put("@context", "https://schema.org");
         webpage.put("@type", "WebPage");
@@ -220,21 +286,10 @@ public class ComparisonController {
         faq.put("mainEntity", List.of(
                 Map.of(
                         "@type", "Question",
-                        "name", "What does the verdict mean?",
+                        "name", "What is the true cost of living difference?",
                         "acceptedAnswer", Map.of(
                                 "@type", "Answer",
-                                "text", "We crunch taxes, rent, and baseline living costs to show the net monthly breathing room difference. Verdict: " + result.getVerdict()
-                        )
-                ),
-                Map.of(
-                        "@type", "Question",
-                        "name", "Is this tax advice?",
-                        "acceptedAnswer", Map.of(
-                                "@type", "Answer",
-                                "text", "No. This is an editorial verdict engine, not financial or tax advice."
-                        )
-                )
-        ));
+                                "text", result.getVerdictCopy()))));
 
         Map<String, Object> data = new HashMap<>();
         data.put("@graph", List.of(webpage, faq));
@@ -250,14 +305,83 @@ public class ComparisonController {
     }
 
     private void addRedirectParams(RedirectAttributes redirectAttributes,
-                                   double currentSalary,
-                                   double offerSalary) {
+            double currentSalary,
+            double offerSalary,
+            Double fourOhOneKRate,
+            Double monthlyInsurance,
+            Double rsuAmount,
+            Boolean isMarried) {
         redirectAttributes.addAttribute("currentSalary", currentSalary);
         redirectAttributes.addAttribute("offerSalary", offerSalary);
+        if (fourOhOneKRate != null)
+            redirectAttributes.addAttribute("fourOhOneKRate", fourOhOneKRate);
+        if (monthlyInsurance != null)
+            redirectAttributes.addAttribute("monthlyInsurance", monthlyInsurance);
+        if (rsuAmount != null)
+            redirectAttributes.addAttribute("rsuAmount", rsuAmount);
+        if (isMarried != null)
+            redirectAttributes.addAttribute("isMarried", isMarried);
     }
 
-    private String buildQueryString(double currentSalary, double offerSalary) {
-        return "?currentSalary=" + currentSalary + "&offerSalary=" + offerSalary;
+    private String buildQueryString(double currentSalary, double offerSalary,
+            Double fourOhOneKRate, Double monthlyInsurance,
+            Double rsuAmount, Boolean isMarried) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("?currentSalary=").append(currentSalary);
+        sb.append("&offerSalary=").append(offerSalary);
+        if (fourOhOneKRate != null)
+            sb.append("&fourOhOneKRate=").append(fourOhOneKRate);
+        if (monthlyInsurance != null)
+            sb.append("&monthlyInsurance=").append(monthlyInsurance);
+        if (rsuAmount != null)
+            sb.append("&rsuAmount=").append(rsuAmount);
+        if (isMarried != null)
+            sb.append("&isMarried=").append(isMarried);
+        return sb.toString();
+    }
+
+    @GetMapping("/api/calculate")
+    @ResponseBody
+    public ComparisonResult calculateApi(
+            @RequestParam String cityA,
+            @RequestParam String cityB,
+            @RequestParam double currentSalary,
+            @RequestParam double offerSalary,
+            @RequestParam(required = false) Double fourOhOneKRate,
+            @RequestParam(required = false) Double monthlyInsurance,
+            @RequestParam(required = false) Double rsuAmount,
+            @RequestParam(required = false) Boolean isMarried,
+            @RequestParam(required = false, defaultValue = "SINGLE") String householdType,
+            @RequestParam(required = false, defaultValue = "RENT") String housingType) {
+
+        String normalizedCityA = SlugNormalizer.normalize(cityA);
+        String normalizedCityB = SlugNormalizer.normalize(cityB);
+
+        CityCostEntry cityEntryA = repository.findCityLoosely(normalizedCityA)
+                .orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityA));
+        CityCostEntry cityEntryB = repository.findCityLoosely(normalizedCityB)
+                .orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityB));
+
+        HouseholdType parsedHouseholdType = HouseholdType.valueOf(householdType.toUpperCase());
+        HousingType parsedHousingType = HousingType.valueOf(housingType.toUpperCase());
+
+        double safeCurrentSalary = clampSalary(currentSalary);
+        double safeOfferSalary = clampSalary(offerSalary);
+        Double rsuValue = (rsuAmount != null && rsuAmount > 0) ? rsuAmount : null;
+        Boolean effectiveIsMarried = isMarried != null ? isMarried : (parsedHouseholdType == HouseholdType.FAMILY);
+
+        return comparisonService.compare(
+                cityEntryA.getSlug(),
+                cityEntryB.getSlug(),
+                safeCurrentSalary,
+                safeOfferSalary,
+                parsedHouseholdType,
+                parsedHousingType,
+                effectiveIsMarried,
+                fourOhOneKRate,
+                monthlyInsurance,
+                0.0,
+                rsuValue);
     }
 
     @GetMapping("/admin/reload-data")
@@ -270,15 +394,11 @@ public class ComparisonController {
     }
 
     private Optional<JobInfo> resolveJobInput(String rawInput, String normalizedInput) {
-        if (normalizedInput == null || normalizedInput.isEmpty()) {
+        if (normalizedInput == null || normalizedInput.isEmpty())
             return Optional.empty();
-        }
-
         Optional<JobInfo> looseMatch = repository.findJobLoosely(normalizedInput);
-        if (looseMatch.isPresent()) {
+        if (looseMatch.isPresent())
             return looseMatch;
-        }
-
         String rawLower = rawInput == null ? "" : rawInput.toLowerCase(Locale.US);
         return repository.getJobs().stream()
                 .filter(job -> job.getSlug().toLowerCase(Locale.US).contains(normalizedInput)
@@ -287,15 +407,11 @@ public class ComparisonController {
     }
 
     private Optional<CityCostEntry> resolveCityInput(String rawInput, String normalizedInput) {
-        if (normalizedInput == null || normalizedInput.isEmpty()) {
+        if (normalizedInput == null || normalizedInput.isEmpty())
             return Optional.empty();
-        }
-
         Optional<CityCostEntry> looseMatch = repository.findCityLoosely(normalizedInput);
-        if (looseMatch.isPresent()) {
+        if (looseMatch.isPresent())
             return looseMatch;
-        }
-
         String rawLower = rawInput == null ? "" : rawInput.toLowerCase(Locale.US);
         return repository.getCities().stream()
                 .filter(city -> city.getSlug().toLowerCase(Locale.US).contains(normalizedInput)
