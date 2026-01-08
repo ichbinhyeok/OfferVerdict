@@ -65,7 +65,8 @@
                 </div>
 
                 <div class="verdict-display">
-                    <div class="verdict-context-label" style="margin-bottom: 0.5rem; font-size: 1.1rem; font-weight: 600; color: var(--gray-500); letter-spacing: -0.01em;">
+                    <div class="verdict-context-label"
+                        style="margin-bottom: 0.5rem; font-size: 1.1rem; font-weight: 600; color: var(--gray-500); letter-spacing: -0.01em;">
                         <span th:if="${job.slug == 'general-professional'}">Verdict for this comparison</span>
                         <span th:unless="${job.slug == 'general-professional'}"
                             th:text="|Verdict for a ${job.title} in ${cityB.city}, ${cityB.state}|">Verdict for a Job in
@@ -150,6 +151,15 @@
                             <span class="value mono line-rent"
                                 th:text="${'-$' + #numbers.formatInteger(result.current.rent * 12, 0, 'COMMA')}">-$36,000</span>
                         </div>
+                        <!-- Hidden Rows for Dynamic Simulation -->
+                        <div class="line-item success-text hidden-row" id="row-equity-current" style="display:none;">
+                            <span class="label">Equity & Bonuses</span>
+                            <span class="value mono line-equity">+$0</span>
+                        </div>
+                        <div class="line-item danger-text hidden-row" id="row-leaks-current" style="display:none;">
+                            <span class="label">Monthly Leaks</span>
+                            <span class="value mono line-leaks">-$0</span>
+                        </div>
                         <div class="line-item success-text highlight-row">
                             <span class="label">Residual (Savings Potential)</span>
                             <span class="value mono line-residual"
@@ -187,6 +197,15 @@
                             <span class="label">Annual Housing</span>
                             <span class="value mono line-rent"
                                 th:text="${'-$' + #numbers.formatInteger(result.offer.rent * 12, 0, 'COMMA')}">-$48,000</span>
+                        </div>
+                        <!-- Hidden Rows for Dynamic Simulation -->
+                        <div class="line-item success-text hidden-row" id="row-equity-offer" style="display:none;">
+                            <span class="label">Equity & Bonuses</span>
+                            <span class="value mono line-equity">+$0</span>
+                        </div>
+                        <div class="line-item danger-text hidden-row" id="row-leaks-offer" style="display:none;">
+                            <span class="label">Monthly Leaks</span>
+                            <span class="value mono line-leaks">-$0</span>
                         </div>
                         <div class="line-item success-text highlight-row">
                             <span class="label">Residual (Savings Potential)</span>

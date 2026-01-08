@@ -32,6 +32,7 @@ public class SingleCityAnalysisService {
                                        Double fourOhOneKRate,
                                        Double monthlyInsurance,
                                        double studentLoanOrChildcare,
+                                       double extraLeaks,
                                        double sideHustle,
                                        boolean isRemote,
                                        boolean isCarOwner,
@@ -46,7 +47,7 @@ public class SingleCityAnalysisService {
                 isMarried != null ? isMarried : (householdType == HouseholdType.FAMILY),
                 fourOhOneKRate,
                 monthlyInsurance,
-                studentLoanOrChildcare > 0 ? studentLoanOrChildcare : null,
+                studentLoanOrChildcare > 0 ? studentLoanOrChildcare * 12 : null, // Convert monthly to annual for Tax Calc
                 0.0); // RSU removed for now to simplify Lab
 
         double netAnnual = taxResult.getNetIncome();
@@ -119,7 +120,7 @@ public class SingleCityAnalysisService {
         // Residual = Net Income + Side Hustle - (Housing + Living + Debt + Commute Cost)
         // Actually, commute cost should be monthly already if calculated over 22 days
         double residual = (netMonthly + sideHustle)
-                - (totalHousingCost + livingCost + studentLoanOrChildcare + monthlyCommuteCost);
+                - (totalHousingCost + livingCost + studentLoanOrChildcare + extraLeaks + monthlyCommuteCost);
 
         double monthlyResidual = residual;
         double yearsToBuyHouse = monthlyResidual > 0 ? (city.getAvgHousePrice() * 0.20) / (monthlyResidual * 12)
@@ -148,6 +149,7 @@ public class SingleCityAnalysisService {
 
         breakdown.setEquityValue(annualEquity);
         breakdown.setSigningBonus(signingBonus);
+        breakdown.setExtraLeaks(extraLeaks); // Set explicit leaks for visibility
         breakdown.setCommuteTime(commuteTime);
         breakdown.setRealHourlyRate(hourlyRate); // Could refine with commute hours added to denominator
 

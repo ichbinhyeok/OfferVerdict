@@ -57,6 +57,17 @@ public class ComparisonBreakdown {
     public void setRealHourlyRate(double realHourlyRate) {
         this.realHourlyRate = realHourlyRate;
     }
+    
+    // Leaks
+    private double extraLeaks;
+
+    public double getExtraLeaks() {
+        return extraLeaks;
+    }
+
+    public void setExtraLeaks(double extraLeaks) {
+        this.extraLeaks = extraLeaks;
+    }
 
     // Delta fields for inline badges (Comparison with the other side)
     private double salaryDiff;

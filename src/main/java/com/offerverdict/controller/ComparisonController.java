@@ -374,7 +374,12 @@ public class ComparisonController {
         Double insurance = isPremiumBenefits ? 100.0 : 400.0;
 
         // Combine Boolean debt with Granular Leaks
-        double totalDebtMonthly = (hasStudentLoan ? 800.0 : 0.0) + otherLeaks;
+        // FIXED: Separate "Other Leaks" from "Student Loan".
+        // Student Loan is a shared reality (exists in both).
+        // Other Leaks (Simulation Lab slider) is strictly an OFFER-side simulation (e.g. lifestyle creep).
+        double sharedDebtMonthly = (hasStudentLoan ? 800.0 : 0.0);
+        double offerLeaksMonthly = otherLeaks; 
+        
         double totalBoostMonthly = sideHustle;
 
         return comparisonService.compare(
@@ -387,7 +392,8 @@ public class ComparisonController {
                 hasDependents,
                 fourOhOneK,
                 insurance,
-                totalDebtMonthly,
+                sharedDebtMonthly, // Shared Debt (Both)
+                offerLeaksMonthly, // Offer Leaks (City B only)
                 totalBoostMonthly,
                 isRemote,
                 isCarOwner,
@@ -395,7 +401,7 @@ public class ComparisonController {
                 equityAnnual,
                 equityMultiplier,
                 commuteTime);
-    }
+
 
     @GetMapping("/admin/reload-data")
     public ResponseEntity<String> reloadData() {

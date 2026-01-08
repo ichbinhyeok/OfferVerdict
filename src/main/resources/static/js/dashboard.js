@@ -139,6 +139,39 @@ function updateLayer2_Evidence(result) {
         if (val_local) val_local.textContent = '-' + fmt(breakdown.localTax * 12);
         if (val_rent) val_rent.textContent = '-' + fmt(breakdown.rent * 12);
         if (val_res) val_res.textContent = fmt(breakdown.residual * 12);
+
+        // --- DYNAMIC ROWS ---
+        const rowEquity = card.querySelector('.hidden-row.success-text');
+        const rowLeaks = card.querySelector('.hidden-row.danger-text');
+
+        // Equity: Annual (from service) + Signing Bonus (from service)
+        // Note: Equity Value in breakdown is annual. Signing Bonus is total (assumed amortized over 1 year)
+        const totalEquityAnnual = (breakdown.equityValue || 0) + (breakdown.signingBonus || 0);
+
+        if (rowEquity) {
+            if (totalEquityAnnual > 0) {
+                rowEquity.style.display = 'flex';
+                const eqVal = rowEquity.querySelector('.value');
+                if (eqVal) eqVal.textContent = '+' + fmt(totalEquityAnnual);
+            } else {
+                rowEquity.style.display = 'none';
+            }
+        }
+
+        // Leaks: Monthly (extraLeaks from slider) * 12 to show annual impact on invalid receipt line?
+        // Wait, standard receipts are ANNUAL. All fmt calls above are * 12.
+        // breakdown.extraLeaks is MONTHLY.
+        const totalLeaksAnnual = (breakdown.extraLeaks || 0) * 12;
+
+        if (rowLeaks) {
+            if (totalLeaksAnnual > 0) {
+                rowLeaks.style.display = 'flex';
+                const leakVal = rowLeaks.querySelector('.value');
+                if (leakVal) leakVal.textContent = '-' + fmt(totalLeaksAnnual);
+            } else {
+                rowLeaks.style.display = 'none';
+            }
+        }
     }
 }
 

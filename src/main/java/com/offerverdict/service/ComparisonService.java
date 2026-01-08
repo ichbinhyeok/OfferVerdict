@@ -57,13 +57,14 @@ public class ComparisonService {
             boolean isRemote,
             boolean isCarOwner) {
         return compare(cityASlug, cityBSlug, currentSalary, offerSalary, householdType, housingType,
-                isMarried, fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, sideHustle, isRemote, isCarOwner,
+                isMarried, fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, 0.0, sideHustle, isRemote, isCarOwner,
                 0.0, 0.0, 1.0, 0.0);
     }
 
     public ComparisonResult compare(String citySlugA, String citySlugB, double salaryA, double salaryB,
             HouseholdType householdType, HousingType housingType, Boolean isMarried,
             Double fourOhOneKRate, Double monthlyInsurance, double studentLoanOrChildcare,
+            double offerSideLeaks,
             double sideHustle, boolean isRemote, boolean isCarOwner,
             double signingBonus, double equityAnnual, double equityMultiplier, double commuteTime) {
 
@@ -76,11 +77,11 @@ public class ComparisonService {
         
         // SingleCityAnalysisService Delegate
         ComparisonBreakdown breakdownA = singleCityAnalysisService.analyze(salaryA, cityA, metrics, householdType, housingType, isMarried,
-                fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, 0.0, false, true,
+                fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, 0.0, 0.0, false, true,
                 0.0, 0.0, 1.0, 0.0);
 
         ComparisonBreakdown breakdownB = singleCityAnalysisService.analyze(salaryB, cityB, metrics, householdType, housingType, isMarried,
-                fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, sideHustle, isRemote, isCarOwner,
+                fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, offerSideLeaks, sideHustle, isRemote, isCarOwner,
                 signingBonus, equityAnnual, equityMultiplier, commuteTime);
 
         ComparisonBreakdown current = breakdownA;
