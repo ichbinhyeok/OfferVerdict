@@ -150,7 +150,7 @@
                                 th:text="${'$' + #numbers.formatInteger(result.current.residual * 12, 0, 'COMMA')}">$40,000</span>
                         </div>
                         <div style="margin-top: 1rem; text-align: center;">
-                            <a th:href="${'/salary-check/' + cityA.slug + '/' + #numbers.formatInteger(currentSalary,0,'')}"
+                            <a th:href="${'/salary-check/' + cityA.slug + '/' + #numbers.formatInteger(currentSalary,0,'NONE')}"
                                 class="link-subtle" style="font-size: 0.85rem; color: var(--text-2);">Analyze <span
                                     th:text="${cityA.city}">City</span> Alone &rarr;</a>
                         </div>
@@ -188,7 +188,7 @@
                                 th:text="${'$' + #numbers.formatInteger(result.offer.residual * 12, 0, 'COMMA')}">$40,000</span>
                         </div>
                         <div style="margin-top: 1rem; text-align: center;">
-                            <a th:href="${'/salary-check/' + cityB.slug + '/' + #numbers.formatInteger(offerSalary,0,'')}"
+                            <a th:href="${'/salary-check/' + cityB.slug + '/' + #numbers.formatInteger(offerSalary,0,'NONE')}"
                                 class="link-subtle" style="font-size: 0.85rem; color: var(--text-2);">Analyze <span
                                     th:text="${cityB.city}">City</span> Alone &rarr;</a>
                         </div>
