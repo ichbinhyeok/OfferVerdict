@@ -277,6 +277,246 @@
         "utilities": 110,
         "misc": 170
       }
+    },
+    {
+      "city": "Nashville",
+      "state": "TN",
+      "slug": "nashville-tn",
+      "priority": 1,
+      "tier": 2,
+      "avgRent": 1800,
+      "colIndex": 102,
+      "medianIncome": 62000,
+      "avgHousePrice": 450000,
+      "details": {
+        "groceries": 380,
+        "transport": 100,
+        "utilities": 140,
+        "misc": 190
+      },
+      "lifestyle": {
+        "sunnyDays": 208,
+        "walkScore": 29,
+        "crimeRate": 45,
+        "avgCommute": 28,
+        "bikeScore": 30
+      }
+    },
+    {
+      "city": "Charlotte",
+      "state": "NC",
+      "slug": "charlotte-nc",
+      "priority": 1,
+      "tier": 2,
+      "avgRent": 1700,
+      "colIndex": 98,
+      "medianIncome": 68000,
+      "avgHousePrice": 410000,
+      "details": {
+        "groceries": 390,
+        "transport": 100,
+        "utilities": 130,
+        "misc": 180
+      },
+      "lifestyle": {
+        "sunnyDays": 218,
+        "walkScore": 26,
+        "crimeRate": 40,
+        "avgCommute": 25,
+        "bikeScore": 30
+      }
+    },
+    {
+      "city": "San Diego",
+      "state": "CA",
+      "slug": "san-diego-ca",
+      "priority": 1,
+      "tier": 1,
+      "avgRent": 2800,
+      "colIndex": 145,
+      "medianIncome": 85000,
+      "avgHousePrice": 900000,
+      "details": {
+        "groceries": 500,
+        "transport": 130,
+        "utilities": 120,
+        "misc": 250
+      },
+      "lifestyle": {
+        "sunnyDays": 266,
+        "walkScore": 53,
+        "crimeRate": 25,
+        "avgCommute": 26,
+        "bikeScore": 60
+      }
+    },
+    {
+      "city": "Orlando",
+      "state": "FL",
+      "slug": "orlando-fl",
+      "priority": 2,
+      "tier": 2,
+      "avgRent": 1900,
+      "colIndex": 105,
+      "medianIncome": 58000,
+      "avgHousePrice": 400000,
+      "details": {
+        "groceries": 410,
+        "transport": 110,
+        "utilities": 150,
+        "misc": 200
+      },
+      "lifestyle": {
+        "sunnyDays": 233,
+        "walkScore": 41,
+        "crimeRate": 48,
+        "avgCommute": 30,
+        "bikeScore": 55
+      }
+    },
+    {
+      "city": "Philadelphia",
+      "state": "PA",
+      "slug": "philadelphia-pa",
+      "priority": 2,
+      "tier": 2,
+      "avgRent": 1800,
+      "colIndex": 108,
+      "medianIncome": 60000,
+      "avgHousePrice": 250000,
+      "details": {
+        "groceries": 430,
+        "transport": 120,
+        "utilities": 140,
+        "misc": 210
+      },
+      "lifestyle": {
+        "sunnyDays": 207,
+        "walkScore": 79,
+        "crimeRate": 50,
+        "avgCommute": 35,
+        "bikeScore": 65
+      }
+    },
+    {
+      "city": "Washington",
+      "state": "DC",
+      "slug": "washington-dc",
+      "priority": 1,
+      "tier": 1,
+      "avgRent": 2600,
+      "colIndex": 140,
+      "medianIncome": 90000,
+      "avgHousePrice": 700000,
+      "details": {
+        "groceries": 520,
+        "transport": 130,
+        "utilities": 140,
+        "misc": 280
+      },
+      "lifestyle": {
+        "sunnyDays": 203,
+        "walkScore": 98,
+        "crimeRate": 60,
+        "avgCommute": 35,
+        "bikeScore": 70
+      }
+    },
+    {
+      "city": "Portland",
+      "state": "OR",
+      "slug": "portland-or",
+      "priority": 2,
+      "tier": 2,
+      "avgRent": 1800,
+      "colIndex": 125,
+      "medianIncome": 78000,
+      "avgHousePrice": 550000,
+      "details": {
+        "groceries": 460,
+        "transport": 120,
+        "utilities": 110,
+        "misc": 230
+      },
+      "lifestyle": {
+        "sunnyDays": 144,
+        "walkScore": 67,
+        "crimeRate": 45,
+        "avgCommute": 27,
+        "bikeScore": 82
+      }
+    },
+    {
+      "city": "San Antonio",
+      "state": "TX",
+      "slug": "san-antonio-tx",
+      "priority": 2,
+      "tier": 3,
+      "avgRent": 1400,
+      "colIndex": 92,
+      "medianIncome": 55000,
+      "avgHousePrice": 300000,
+      "details": {
+        "groceries": 350,
+        "transport": 100,
+        "utilities": 140,
+        "misc": 170
+      },
+      "lifestyle": {
+        "sunnyDays": 220,
+        "walkScore": 38,
+        "crimeRate": 42,
+        "avgCommute": 25,
+        "bikeScore": 45
+      }
+    },
+    {
+      "city": "Minneapolis",
+      "state": "MN",
+      "slug": "minneapolis-mn",
+      "priority": 3,
+      "tier": 3,
+      "avgRent": 1600,
+      "colIndex": 105,
+      "medianIncome": 70000,
+      "avgHousePrice": 350000,
+      "details": {
+        "groceries": 400,
+        "transport": 110,
+        "utilities": 130,
+        "misc": 200
+      },
+      "lifestyle": {
+        "sunnyDays": 198,
+        "walkScore": 70,
+        "crimeRate": 40,
+        "avgCommute": 24,
+        "bikeScore": 84
+      }
+    },
+    {
+      "city": "Indianapolis",
+      "state": "IN",
+      "slug": "indianapolis-in",
+      "priority": 3,
+      "tier": 3,
+      "avgRent": 1300,
+      "colIndex": 90,
+      "medianIncome": 58000,
+      "avgHousePrice": 250000,
+      "details": {
+        "groceries": 340,
+        "transport": 100,
+        "utilities": 130,
+        "misc": 160
+      },
+      "lifestyle": {
+        "sunnyDays": 187,
+        "walkScore": 30,
+        "crimeRate": 48,
+        "avgCommute": 25,
+        "bikeScore": 45
+      }
     }
   ]
 }

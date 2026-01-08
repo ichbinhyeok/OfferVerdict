@@ -581,3 +581,121 @@ input[type="range"]:active::-webkit-slider-thumb {
     color: var(--brand-gold);
     transform: translateY(-3px);
 }
+
+/* --- SINGLE CITY SPECIFIC STYLES --- */
+
+.neighbors-section {
+    padding: var(--space-xl) 0;
+    text-align: center;
+}
+
+.neighbor-links {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    margin-top: var(--space-lg);
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.current-marker {
+    padding: 0.75rem 1.5rem;
+    background: var(--gray-900);
+    color: var(--white);
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-800);
+}
+
+.btn-outline {
+    padding: 0.75rem 1.5rem;
+    background: var(--white);
+    color: var(--gray-700);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all var(--duration-fast);
+}
+
+.btn-outline:hover {
+    border-color: var(--gray-900);
+    color: var(--gray-900);
+    transform: translateY(-2px);
+}
+
+.retention-section {
+    background: var(--gray-50);
+    padding: 5rem 0;
+    text-align: center;
+    border-top: 1px solid var(--gray-100);
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.retention-section h2 {
+    font-size: 2rem;
+    margin-bottom: var(--space-sm);
+    color: var(--gray-900);
+}
+
+.retention-section p {
+    color: var(--gray-500);
+    margin-bottom: var(--space-lg);
+}
+
+.btn-primary {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background: var(--premium-gold);
+    /* Or brand color */
+    color: var(--gray-900);
+    font-weight: 800;
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: transform var(--duration-fast);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid transparent;
+    /* Ensure consistent box model */
+}
+
+/* Fallback if premium-gold var isn't perfectly set for button bg */
+.btn-primary {
+    background: var(--gray-900);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Clean up the single analysis grid */
+.single-analysis-grid {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.analysis-box {
+    margin-top: 2rem;
+    background: var(--white);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-100);
+    box-shadow: var(--shadow-sm);
+    text-align: left;
+}
+
+.analysis-box p {
+    font-size: 1.05rem;
+    color: var(--gray-700);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+}
+
+.analysis-box strong {
+    color: var(--gray-900);
+    font-weight: 700;
+}

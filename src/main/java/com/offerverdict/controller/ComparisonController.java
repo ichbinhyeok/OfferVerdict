@@ -105,8 +105,14 @@ public class ComparisonController {
         model.addAttribute("title", "OfferVerdict | Reality-check your job move");
         model.addAttribute("metaDescription", "Compare your actual buying power with taxes and cost of living.");
         model.addAttribute("jobsByCategory", groupJobsByCategory());
+        model.addAttribute("citiesByState", groupCitiesByState());
 
         return "index";
+    }
+
+    private Map<String, List<CityCostEntry>> groupCitiesByState() {
+        return repository.getCities().stream()
+                .collect(Collectors.groupingBy(CityCostEntry::getState, TreeMap::new, Collectors.toList()));
     }
 
     @GetMapping("/{job}-salary-{cityA}-vs-{cityB}")

@@ -1,159 +1,26 @@
 [
-  {
-    "title": "Software Engineer",
-    "slug": "software-engineer",
-    "category": "Engineering",
-    "major": true
-  },
-  {
-    "title": "Backend Engineer",
-    "slug": "backend-engineer",
-    "category": "Engineering"
-  },
-  {
-    "title": "Frontend Engineer",
-    "slug": "frontend-engineer",
-    "category": "Engineering"
-  },
-  {
-    "title": "Fullstack Engineer",
-    "slug": "fullstack-engineer",
-    "category": "Engineering"
-  },
-  {
-    "title": "Mobile Developer",
-    "slug": "mobile-developer",
-    "category": "Engineering"
-  },
-  {
-    "title": "DevOps Engineer",
-    "slug": "devops-engineer",
-    "category": "Engineering"
-  },
-  {
-    "title": "Data Scientist",
-    "slug": "data-scientist",
-    "category": "Data & AI",
-    "major": true
-  },
-  {
-    "title": "Machine Learning Engineer",
-    "slug": "ml-engineer",
-    "category": "Data & AI"
-  },
-  {
-    "title": "Product Manager",
-    "slug": "product-manager",
-    "category": "Product",
-    "major": true
-  },
-  {
-    "title": "UX/UI Designer",
-    "slug": "ux-ui-designer",
-    "category": "Design"
-  },
-  {
-    "title": "Graphic Designer",
-    "slug": "graphic-designer",
-    "category": "Design"
-  },
-  {
-    "title": "Marketing Manager",
-    "slug": "marketing-manager",
-    "category": "Marketing"
-  },
-  {
-    "title": "Digital Marketer",
-    "slug": "digital-marketer",
-    "category": "Marketing"
-  },
-  {
-    "title": "Sales Representative",
-    "slug": "sales-representative",
-    "category": "Sales",
-    "major": true
-  },
-  {
-    "title": "Account Executive",
-    "slug": "account-executive",
-    "category": "Sales"
-  },
-  {
-    "title": "Customer Success Manager",
-    "slug": "csm",
-    "category": "Sales"
-  },
-  {
-    "title": "Business Analyst",
-    "slug": "business-analyst",
-    "category": "Business"
-  },
-  {
-    "title": "Management Consultant",
-    "slug": "management-consultant",
-    "category": "Business"
-  },
-  {
-    "title": "Financial Analyst",
-    "slug": "financial-analyst",
-    "category": "Finance",
-    "major": true
-  },
-  {
-    "title": "Accountant",
-    "slug": "accountant",
-    "category": "Finance"
-  },
-  {
-    "title": "Investment Banker",
-    "slug": "investment-banker",
-    "category": "Finance"
-  },
-  {
-    "title": "HR Manager",
-    "slug": "hr-manager",
-    "category": "Operations"
-  },
-  {
-    "title": "Recruiter",
-    "slug": "recruiter",
-    "category": "Operations"
-  },
-  {
-    "title": "Project Manager",
-    "slug": "project-manager",
-    "category": "Operations"
-  },
-  {
-    "title": "Office Manager",
-    "slug": "office-manager",
-    "category": "Operations"
-  },
-  {
-    "title": "Registered Nurse",
-    "slug": "registered-nurse",
-    "category": "Healthcare",
-    "major": true
-  },
-  {
-    "title": "Pharmacist",
-    "slug": "pharmacist",
-    "category": "Healthcare"
-  },
-  {
-    "title": "Teacher",
-    "slug": "teacher",
-    "category": "Education",
-    "major": true
-  },
-  {
-    "title": "Legal Counsel",
-    "slug": "legal-counsel",
-    "category": "Legal"
-  },
-  {
-    "title": "Content Strategist",
-    "slug": "content-strategist",
-    "category": "Marketing"
-  }
+  { "title": "Software Engineer", "slug": "software-engineer", "category": "Tech", "major": true },
+  { "title": "Web Developer", "slug": "web-developer", "category": "Tech" },
+  { "title": "Registered Nurse (RN)", "slug": "registered-nurse", "category": "Healthcare", "major": true },
+  { "title": "Physician / Doctor", "slug": "doctor", "category": "Healthcare" },
+  { "title": "Pharmacist", "slug": "pharmacist", "category": "Healthcare" },
+  { "title": "Teacher / Educator", "slug": "teacher", "category": "Education", "major": true },
+  { "title": "University Professor", "slug": "professor", "category": "Education" },
+  { "title": "Electrician", "slug": "electrician", "category": "Trades", "major": true },
+  { "title": "Plumber", "slug": "plumber", "category": "Trades" },
+  { "title": "Construction Manager", "slug": "construction-manager", "category": "Trades" },
+  { "title": "Police Officer", "slug": "police-officer", "category": "Public Service", "major": true },
+  { "title": "Firefighter", "slug": "firefighter", "category": "Public Service" },
+  { "title": "Accountant / CPA", "slug": "accountant", "category": "Finance", "major": true },
+  { "title": "Financial Analyst", "slug": "financial-analyst", "category": "Finance" },
+  { "title": "Marketing Manager", "slug": "marketing-manager", "category": "Business", "major": true },
+  { "title": "Sales Representative", "slug": "sales-representative", "category": "Business", "major": true },
+  { "title": "HR Manager", "slug": "hr-manager", "category": "Business" },
+  { "title": "Lawyer / Attorney", "slug": "lawyer", "category": "Legal", "major": true },
+  { "title": "Architect", "slug": "architect", "category": "Design" },
+  { "title": "Real Estate Agent", "slug": "real-estate-agent", "category": "Sales" },
+  { "title": "Chef / Head Cook", "slug": "chef", "category": "Service" },
+  { "title": "Truck Driver", "slug": "truck-driver", "category": "Logistics", "major": true },
+  { "title": "Pilot", "slug": "pilot", "category": "Logistics" },
+  { "title": "General Professional", "slug": "general-professional", "category": "General", "major": true }
 ]

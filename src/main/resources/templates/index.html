@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="/css/tokens.css">
     <link rel="stylesheet" href="/css/core.css">
     <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="/css/autocomplete.css">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,12 +44,22 @@
                 <div class="occupation-header">
                     <div class="form-group" style="text-align: center;">
                         <label class="form-label">Your Occupation</label>
-                        <input type="text" name="job" list="job-list" class="form-input"
-                            placeholder="e.g. Software Engineer"
-                            style="text-align: center; max-width: 450px; margin: 0 auto;" required>
-                        <datalist id="job-list">
-                            <option th:each="job : ${jobs}" th:value="${job.title}">
-                        </datalist>
+                        <!-- Custom Autocomplete Wrapper -->
+                        <div class="autocomplete-wrapper">
+                            <input type="text" id="jobInput" name="job" class="form-input"
+                                placeholder="e.g. Software Engineer" autocomplete="off" style="text-align: center;"
+                                required>
+                            <div id="jobDropdown" class="autocomplete-dropdown">
+                                <!-- Items injected by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Data Injection for JS -->
+                        <script th:inline="javascript">
+                            /*<![CDATA[*/
+                            window.jobCategories = /*[[${jobsByCategory}]]*/ {};
+                            /*]]>*/
+                        </script>
                     </div>
                 </div>
 
@@ -60,8 +71,12 @@
                     <div class="area-city-current">
                         <div class="form-group">
                             <label class="form-label">Location</label>
-                            <input type="text" name="cityA" list="city-list" class="form-input"
-                                placeholder="e.g. San Francisco" required>
+                            <!-- Custom City A Autocomplete -->
+                            <div class="autocomplete-wrapper">
+                                <input type="text" id="cityInputA" name="cityA" class="form-input"
+                                    placeholder="e.g. San Francisco" autocomplete="off" required>
+                                <div id="cityDropdownA" class="autocomplete-dropdown"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="area-salary-current">
@@ -81,8 +96,12 @@
                     <div class="area-city-offer">
                         <div class="form-group">
                             <label class="form-label">Location</label>
-                            <input type="text" name="cityB" list="city-list" class="form-input"
-                                placeholder="e.g. Austin" required>
+                            <!-- Custom City B Autocomplete -->
+                            <div class="autocomplete-wrapper">
+                                <input type="text" id="cityInputB" name="cityB" class="form-input"
+                                    placeholder="e.g. Austin" autocomplete="off" required>
+                                <div id="cityDropdownB" class="autocomplete-dropdown"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="area-salary-offer">
@@ -101,9 +120,13 @@
                     </p>
                 </div>
 
-                <datalist id="city-list">
-                    <option th:each="city : ${cities}" th:value="${city.city + ', ' + city.state}">
-                </datalist>
+                <!-- Unified Data Injection -->
+                <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    window.jobCategories = /*[[${jobsByCategory}]]*/ {};
+                    window.citiesByState = /*[[${citiesByState}]]*/ {};
+                    /*]]>*/
+                </script>
             </form>
         </main>
 
@@ -111,6 +134,7 @@
             <p>© 2026 OfferVerdict. Know your worth, anywhere.</p>
         </footer>
     </div>
+    <script src="/js/autocomplete.js"></script>
 </body>
 
 </html>

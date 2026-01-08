@@ -65,6 +65,12 @@
                 </div>
 
                 <div class="verdict-display">
+                    <div class="verdict-context-label" style="margin-bottom: 0.5rem; font-size: 1.1rem; font-weight: 600; color: var(--gray-500); letter-spacing: -0.01em;">
+                        <span th:if="${job.slug == 'general-professional'}">Verdict for this comparison</span>
+                        <span th:unless="${job.slug == 'general-professional'}"
+                            th:text="|Verdict for a ${job.title} in ${cityB.city}, ${cityB.state}|">Verdict for a Job in
+                            City</span>
+                    </div>
                     <h1 class="verdict-text animate-pop" th:text="${result.verdictCopy}"
                         th:classappend="${result.verdict.name()}">DON'T GO</h1>
                     <div class="verdict-sub" th:text="${result.valueDiffMsg}">You get poorer.</div>
