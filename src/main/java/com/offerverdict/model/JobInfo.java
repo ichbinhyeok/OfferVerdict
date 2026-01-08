@@ -4,6 +4,7 @@ public class JobInfo {
     private String title;
     private String slug;
     private String category;
+    private boolean major = false; // Default false
 
     public JobInfo() {
     }
@@ -36,5 +37,13 @@ public class JobInfo {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public boolean isMajor() {
+        return major;
+    }
+
+    public void setMajor(boolean major) {
+        this.major = major;
     }
 }

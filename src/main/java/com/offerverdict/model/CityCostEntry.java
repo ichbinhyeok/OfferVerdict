@@ -15,6 +15,10 @@ public class CityCostEntry {
     private Map<String, Double> details;
     private Map<String, Double> lifestyle;
 
+    // SEO Filtering Fields
+    private int priority = 99; // Default low priority
+    private int tier = 3;      // Default Tier 3 (standard)
+
     public CityCostEntry() {
     }
 
@@ -105,5 +109,21 @@ public class CityCostEntry {
     @JsonProperty("lifestyle")
     public void setLifestyle(Map<String, Double> lifestyle) {
         this.lifestyle = lifestyle;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public int getTier() {
+        return tier;
+    }
+
+    public void setTier(int tier) {
+        this.tier = tier;
     }
 }

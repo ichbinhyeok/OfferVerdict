@@ -94,21 +94,40 @@ public class SitemapController {
         // 1. Static Pages
         paths.add(comparisonService.buildCanonicalUrl("/"));
 
-        // 2. Job x CityA x CityB Comparisons
-        // Generate Clean URLs (No Query Params) - Use Logic Defaults
-        for (JobInfo job : jobs) {
-            for (CityCostEntry cityA : cities) {
-                for (CityCostEntry cityB : cities) {
+        // 2. Single City Analysis (Salary Check) - [NEW STRATEGY]
+        // Filter: Priority Cities Only & Salary Buckets
+        List<CityCostEntry> topCities = cities.stream()
+                .filter(c -> c.getPriority() <= 2) // Priority 1 & 2
+                .toList();
+
+        int salaryMin = appProperties.getSeoSalaryBucketMin();
+        int salaryMax = appProperties.getSeoSalaryBucketMax();
+        int interval = appProperties.getSeoSalaryBucketInterval();
+
+        for (CityCostEntry city : topCities) {
+            for (int salary = salaryMin; salary <= salaryMax; salary += interval) {
+                String path = "/salary-check/" + city.getSlug() + "/" + salary;
+                paths.add(comparisonService.buildCanonicalUrl(path));
+            }
+        }
+
+        // 3. Job x CityA x CityB Comparisons - [OPTIMIZED]
+        // Instead of ALL combinations, focus on High Priority Pairs or Major Jobs
+        List<JobInfo> majorJobs = jobs.stream().filter(JobInfo::isMajor).toList();
+
+        for (JobInfo job : majorJobs) {
+            for (CityCostEntry cityA : topCities) {
+                for (CityCostEntry cityB : topCities) {
                     if (!cityA.getSlug().equals(cityB.getSlug())) {
-                        String path = "/" + job.getSlug() + "-salary-" + cityA.getSlug() + "-vs-" + cityB.getSlug();
-                        paths.add(comparisonService.buildCanonicalUrl(path));
+                        // Logic: Only generate if City A or B is Tier 1
+                        if (cityA.getTier() == 1 || cityB.getTier() == 1) {
+                            String path = "/" + job.getSlug() + "-salary-" + cityA.getSlug() + "-vs-" + cityB.getSlug();
+                            paths.add(comparisonService.buildCanonicalUrl(path));
+                        }
                     }
                 }
             }
         }
-
-        // 3. Tax Comparisons (State A vs State B)
-        // TODO: Add tax comparisons once TaxComparisonController is active
 
         return paths.stream().distinct().collect(Collectors.toList());
     }

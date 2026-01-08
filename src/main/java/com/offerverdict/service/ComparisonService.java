@@ -23,21 +23,24 @@ import java.util.stream.Collectors;
 @Service
 public class ComparisonService {
     private final DataRepository repository;
-    private final TaxCalculatorService taxCalculatorService;
+    private final TaxCalculatorService taxCalculatorService; // Kept for helper method
     private final AppProperties appProperties;
     private final FinancialEngine financialEngine;
     private final VerdictAdviser verdictAdviser;
+    private final SingleCityAnalysisService singleCityAnalysisService;
 
     public ComparisonService(DataRepository repository,
             TaxCalculatorService taxCalculatorService,
             AppProperties appProperties,
             FinancialEngine financialEngine,
-            VerdictAdviser verdictAdviser) {
+            VerdictAdviser verdictAdviser,
+            SingleCityAnalysisService singleCityAnalysisService) {
         this.repository = repository;
         this.taxCalculatorService = taxCalculatorService;
         this.appProperties = appProperties;
         this.financialEngine = financialEngine;
         this.verdictAdviser = verdictAdviser;
+        this.singleCityAnalysisService = singleCityAnalysisService;
     }
 
     public ComparisonResult compare(String cityASlug,
@@ -70,19 +73,18 @@ public class ComparisonService {
 
         // 1. Build Financial Breakdowns (The Evidence)
         // [AUTHORITY UPGRADE]: Current is FIXED, Offer is SIMULATED
-        ComparisonBreakdown breakdownA = buildBreakdown(salaryA, cityA, householdType, housingType, isMarried,
+        
+        // SingleCityAnalysisService Delegate
+        ComparisonBreakdown breakdownA = singleCityAnalysisService.analyze(salaryA, cityA, metrics, householdType, housingType, isMarried,
                 fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, 0.0, false, true,
-                0.0, 0.0, 1.0, 0.0, metrics);
+                0.0, 0.0, 1.0, 0.0);
 
-        ComparisonBreakdown breakdownB = buildBreakdown(salaryB, cityB, householdType, housingType, isMarried,
+        ComparisonBreakdown breakdownB = singleCityAnalysisService.analyze(salaryB, cityB, metrics, householdType, housingType, isMarried,
                 fourOhOneKRate, monthlyInsurance, studentLoanOrChildcare, sideHustle, isRemote, isCarOwner,
-                signingBonus, equityAnnual, equityMultiplier, commuteTime, metrics);
+                signingBonus, equityAnnual, equityMultiplier, commuteTime);
 
         ComparisonBreakdown current = breakdownA;
         ComparisonBreakdown offer = breakdownB;
-
-        breakdownA.setGrossSalary(salaryA);
-        breakdownB.setGrossSalary(salaryB);
 
         // 2. Initialize Result & Verdict (The Hook)
         ComparisonResult result = new ComparisonResult();
@@ -194,150 +196,7 @@ public class ComparisonService {
         return result;
     }
 
-    private ComparisonBreakdown buildBreakdown(double salary,
-            CityCostEntry city,
-            HouseholdType householdType,
-            HousingType housingType,
-            Boolean isMarried,
-            Double fourOhOneKRate,
-            Double monthlyInsurance,
-            double studentLoanOrChildcare,
-            double sideHustle,
-            boolean isRemote,
-            boolean isCarOwner,
-            double signingBonus,
-            double equityAnnual,
-            double equityMultiplier,
-            double commuteTime,
-            AuthoritativeMetrics metrics) {
-
-        TaxCalculatorService.TaxResult taxResult = taxCalculatorService.calculateTax(
-                salary,
-                city.getState(),
-                isMarried != null ? isMarried : (householdType == HouseholdType.FAMILY),
-                fourOhOneKRate,
-                monthlyInsurance,
-                studentLoanOrChildcare > 0 ? studentLoanOrChildcare : null,
-                0.0); // RSU removed for now to simplify Lab
-
-        double netAnnual = taxResult.getNetIncome();
-
-        // --- NEW AUTHORITATIVE ENRICHMENT ---
-        double localTaxAnnual = financialEngine.calculateLocalTax(salary, city.getSlug(), metrics);
-        double insuranceAnnual = isCarOwner ? financialEngine.calculateCarInsurance(city.getState(), metrics) : 0.0;
-
-        // Amortized signing bonus & Equity scenario
-        double annualEquity = equityAnnual * equityMultiplier;
-        double amortizedSigning = signingBonus / 1.0; // Assume 1 year for first-year view
-
-        double totalAnnualNet = netAnnual - localTaxAnnual - insuranceAnnual + annualEquity + amortizedSigning;
-        double netMonthly = totalAnnualNet / 12.0;
-
-        // Commute Time-Value Cost
-        double hourlyRate = salary / 2080.0;
-        double netHourlyRate = (netAnnual / 2080.0) * 0.8; // conservative net hourly
-        double monthlyCommuteCost = (commuteTime * 2 * 22 / 60.0) * netHourlyRate;
-
-        double householdMultiplier = householdType == HouseholdType.FAMILY ? 1.4 : 1.0;
-
-        double rent;
-        double housingCost = 0.0;
-
-        // Use CityCost.json data directly
-        double cityAvgRent = city.getAvgRent() > 0 ? city.getAvgRent() : 2000.0; // Fallback
-
-        switch (housingType) {
-            case RENT:
-                rent = cityAvgRent;
-                break;
-            case OWN:
-                rent = 0.0;
-                housingCost = (city.getAvgHousePrice() * 0.015) / 12.0;
-                break;
-            case PARENTS:
-                rent = 0.0;
-                housingCost = 300.0;
-                break;
-            default:
-                rent = cityAvgRent;
-        }
-
-        double livingCost = calculateLivingCost(city, householdType);
-        double groceries, transport, utilities, misc;
-
-        if (city.getDetails() != null && !city.getDetails().isEmpty()) {
-            groceries = city.getDetails().getOrDefault("groceries", 0.0) * householdMultiplier;
-            transport = city.getDetails().getOrDefault("transport", 0.0) * householdMultiplier;
-            utilities = city.getDetails().getOrDefault("utilities", 0.0) * householdMultiplier;
-            misc = city.getDetails().getOrDefault("misc", 0.0) * householdMultiplier;
-
-            // Remote Work Discount (70% reduction in transport)
-            if (isRemote) {
-                transport *= 0.3;
-            }
-
-            livingCost = groceries + transport + utilities + misc;
-        } else {
-            groceries = livingCost * 0.30;
-            transport = livingCost * 0.15;
-            if (isRemote)
-                transport *= 0.3;
-            utilities = livingCost * 0.10;
-            misc = livingCost - (groceries + transport + utilities);
-        }
-
-        double totalHousingCost = rent + housingCost;
-        // Residual = Net Income + Side Hustle - (Housing + Living + Debt + Commute
-        // Cost)
-        double residual = (netMonthly + sideHustle)
-                - (totalHousingCost + livingCost + studentLoanOrChildcare + (monthlyCommuteCost / 12.0));
-
-        // Actually, commute cost should be monthly already if calculated over 22 days
-        residual = (netMonthly + sideHustle)
-                - (totalHousingCost + livingCost + studentLoanOrChildcare + monthlyCommuteCost);
-
-        double monthlyResidual = residual;
-        double yearsToBuyHouse = monthlyResidual > 0 ? (city.getAvgHousePrice() * 0.20) / (monthlyResidual * 12)
-                : 99.0;
-        double monthsToBuyTesla = monthlyResidual > 0 ? 50000.0 / monthlyResidual : 99.0;
-
-        // Starbucks Index: $6/coffee * 22 working days = $132 potential savings
-        double starbucksSavings = 6.0 * 22.0;
-
-        ComparisonBreakdown breakdown = new ComparisonBreakdown();
-        breakdown.setCityName(city.getCity());
-        breakdown.setNetMonthly(netMonthly);
-        breakdown.setRent(totalHousingCost);
-        breakdown.setLivingCost(livingCost);
-        breakdown.setResidual(residual);
-        breakdown.setGroceries(groceries);
-        breakdown.setTransport(transport);
-        breakdown.setUtilities(utilities);
-        breakdown.setMisc(misc);
-        breakdown.setLocalTax(localTaxAnnual / 12.0);
-        breakdown.setInsurance(insuranceAnnual / 12.0);
-        breakdown.setYearsToBuyHouse(yearsToBuyHouse);
-        breakdown.setMonthsToBuyTesla(monthsToBuyTesla);
-        breakdown.setStarbucksSavings(starbucksSavings);
-
-        breakdown.setEquityValue(annualEquity);
-        breakdown.setSigningBonus(signingBonus);
-        breakdown.setCommuteTime(commuteTime);
-        breakdown.setRealHourlyRate(hourlyRate); // Could refine with commute hours added to denominator
-
-        if (taxResult != null) {
-            breakdown.setTaxResult(taxResult);
-        }
-
-        return breakdown;
-    }
-
-    // Logic absorbed from CostCalculatorService
-    private double calculateLivingCost(CityCostEntry city, HouseholdType householdType) {
-        double baselineLivingCost = appProperties.getBaselineLivingCost();
-        double multiplier = householdType == HouseholdType.FAMILY ? 1.4 : 1.0;
-        return baselineLivingCost * (city.getColIndex() / 100.0) * multiplier;
-    }
+    // buildBreakdown and calculateLivingCost removed (moved to SingleCityAnalysisService)
 
     // Logic absorbed from PurchasingPowerService
     private void calculateVerdict(ComparisonResult result) {

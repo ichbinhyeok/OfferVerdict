@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Is $100k good in Austin?</title>
+
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/core.css">
+    <link rel="stylesheet" href="/css/result.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- SEO: Canonical Tag -->
+    <link rel="canonical" th:href="${canonicalUrl}">
+    <meta name="description" th:content="${metaDescription}">
+</head>
+
+<body class="theme-lucid">
+
+    <nav class="top-nav">
+        <div class="container">
+            <a href="/" class="logo">OfferVerdict</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- LAYER 1: VERDICT -->
+        <section class="verdict-section" th:classappend="${verdict == T(com.offerverdict.model.Verdict).GO ? 'premium-gold' : (verdict == T(com.offerverdict.model.Verdict).NO_GO ? 'harsh-red' : 'neutral-blue')}">
+            <div class="container">
+                <div class="verdict-header">
+                    <span class="badge-source">SINGLE CITY ANALYSIS</span>
+                </div>
+
+                <div class="verdict-display">
+                    <h1 class="verdict-text animate-pop" th:text="${verdict}">GO</h1>
+                    <div class="verdict-sub" th:text="${verdictMsg}">This salary offers a strong lifestyle.</div>
+                    
+                    <div class="leverage-card">
+                         <div class="leverage-content">
+                             <p class="leverage-msg" th:text="${introText}">Congratulations! This is a powerful income.</p>
+                         </div>
+                    </div>
+                </div>
+
+                <div class="financial-impact">
+                    <div class="impact-label">Estimated Monthly Residual (Savings)</div>
+                    <div class="impact-value" th:text="${'$' + #numbers.formatInteger(result.residual, 0, 'COMMA') + '/mo'}">$2,500/mo</div>
+                </div>
+
+                <!-- Ad Slot: Top -->
+                <div class="ad-container-top" id="ad-top-verdict">
+                    <div class="ad-label">ADVERTISEMENT</div>
+                    <div class="ad-placeholder">
+                        <span class="ad-hint">Premium Financial Partner Slot</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LAYER 2: BREAKDOWN -->
+        <section class="evidence-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>The Breakdown</h2>
+                    <p th:text="${'Where your $' + #numbers.formatInteger(salary, 0, 'COMMA') + ' actually goes in ' + city.city + '.'}">Where your money goes.</p>
+                </div>
+
+                <div class="receipt-grid" style="grid-template-columns: 1fr; max-width: 600px; margin: 0 auto;">
+                    <div class="receipt-card">
+                        <div class="card-header">
+                            <h3 th:text="${city.city}">Austin</h3>
+                            <span class="badge">Stats</span>
+                        </div>
+                        <div class="line-item">
+                            <span class="label">Gross Monthly</span>
+                            <span class="value mono" th:text="${'$' + #numbers.formatInteger(salary/12, 0, 'COMMA')}">$8,333</span>
+                        </div>
+                        <div class="line-item danger-text">
+                            <span class="label">Taxes (Est.)</span>
+                            <span class="value mono" th:text="${'-$' + #numbers.formatInteger((result.taxResult.totalTax + (result.localTax*12))/12, 0, 'COMMA')}">-$2,000</span>
+                        </div>
+                        <div class="line-item warning-text">
+                            <span class="label">Housing (Avg. Rent)</span>
+                            <span class="value mono" th:text="${'-$' + #numbers.formatInteger(result.rent, 0, 'COMMA')}">-$1,900</span>
+                        </div>
+                        <div class="line-item">
+                            <span class="label">Living Costs</span>
+                            <span class="value mono" th:text="${'-$' + #numbers.formatInteger(result.livingCost, 0, 'COMMA')}">-$1,200</span>
+                        </div>
+                        <div class="line-item success-text highlight-row">
+                            <span class="label">True Residual</span>
+                            <span class="value mono" th:text="${'$' + #numbers.formatInteger(result.residual, 0, 'COMMA')}">$3,233</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analysis-box" style="margin-top: 2rem; background: var(--surface-2); padding: 1.5rem; border-radius: var(--radius-md);">
+                    <p><strong>Housing Check:</strong> <span th:text="${housingWarning}">Housing costs are reasonable.</span></p>
+                    <p style="margin-top: 0.5rem;"><strong>Verdict:</strong> <span th:text="${analysisText}">This is a solid financial move.</span></p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SALARY NEIGHBORS (Internal Linking) -->
+        <section class="neighbors-section" style="padding: 4rem 0;">
+             <div class="container">
+                 <h3>Salary Scenarios in <span th:text="${city.city}">Austin</span></h3>
+                 <div class="neighbor-links" style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap;">
+                     <a th:if="${prevSalaryUrl}" th:href="${prevSalaryUrl}" class="btn-outline">
+                        See <span th:text="${'$' + #numbers.formatInteger(salary - 10000, 0, 'COMMA')}">$90k</span> Scenario
+                     </a>
+                     <span class="current-marker" style="padding: 0.75rem 1.5rem; background: var(--text-1); color: var(--surface-1); border-radius: 99px; font-weight: 700;">
+                        Current: <span th:text="${'$' + #numbers.formatInteger(salary, 0, 'COMMA')}">$100k</span>
+                     </span>
+                     <a th:href="${nextSalaryUrl}" class="btn-outline">
+                        See <span th:text="${'$' + #numbers.formatInteger(salary + 10000, 0, 'COMMA')}">$110k</span> Scenario
+                     </a>
+                 </div>
+             </div>
+        </section>
+
+        <!-- RETENTION & CROSS-LINK -->
+        <section class="retention-section" style="background: var(--surface-2); padding: 4rem 0; text-align: center;">
+            <div class="container">
+                <h2>Thinking of moving?</h2>
+                <p>Compare this salary specifically against another city.</p>
+                <a th:href="${compareUrl}" class="btn-primary" style="margin-top: 1rem; display: inline-block;">Compare with Popular Cities</a>
+            </div>
+        </section>
+        
+        <!-- Ad Slot: Bottom -->
+        <div class="container">
+            <div class="ad-container-bottom" id="ad-bottom-reality" style="margin-bottom: 2rem;">
+                <div class="ad-label">ADVERTISEMENT</div>
+                <div class="ad-placeholder">
+                    <span class="ad-hint">Relocation & Career Partner Slot</span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2026 OfferVerdict.</p>
+            </div>
+        </footer>
+    </main>
+</body>
+</html>

@@ -10,6 +10,12 @@ app:
   sitemapChunkSize: 25
   devReloadEnabled: true
 
+seo:
+  salary-bucket:
+    interval: 10000
+    min: 30000
+    max: 500000
+
 logging:
   level:
     root: INFO

@@ -11,6 +11,11 @@ public class AppProperties {
     private int sitemapChunkSize = 25;
     private boolean devReloadEnabled = false;
 
+    // SEO / Salary Bucket Config
+    private int seoSalaryBucketInterval = 10000;
+    private int seoSalaryBucketMin = 30000;
+    private int seoSalaryBucketMax = 500000;
+
     public String getPublicBaseUrl() {
         return publicBaseUrl;
     }
@@ -41,5 +46,29 @@ public class AppProperties {
 
     public void setDevReloadEnabled(boolean devReloadEnabled) {
         this.devReloadEnabled = devReloadEnabled;
+    }
+
+    public int getSeoSalaryBucketInterval() {
+        return seoSalaryBucketInterval;
+    }
+
+    public void setSeoSalaryBucketInterval(int seoSalaryBucketInterval) {
+        this.seoSalaryBucketInterval = seoSalaryBucketInterval;
+    }
+
+    public int getSeoSalaryBucketMin() {
+        return seoSalaryBucketMin;
+    }
+
+    public void setSeoSalaryBucketMin(int seoSalaryBucketMin) {
+        this.seoSalaryBucketMin = seoSalaryBucketMin;
+    }
+
+    public int getSeoSalaryBucketMax() {
+        return seoSalaryBucketMax;
+    }
+
+    public void setSeoSalaryBucketMax(int seoSalaryBucketMax) {
+        this.seoSalaryBucketMax = seoSalaryBucketMax;
     }
 }
