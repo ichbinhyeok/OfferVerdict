@@ -24,6 +24,12 @@ body {
     padding: 0 var(--space-lg);
 }
 
+@media (max-width: 600px) {
+    .container {
+        padding: 0 var(--space-md);
+    }
+}
+
 /* Typography Refinement */
 h1,
 h2,

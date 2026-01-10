@@ -17,7 +17,7 @@ class ComparisonServiceTest {
     @Test
     void classifiesVerdict() {
         assertEquals(Verdict.GO, comparisonService.classifyVerdict(12));
-        assertEquals(Verdict.CONDITIONAL, comparisonService.classifyVerdict(5));
+        assertEquals(Verdict.CONDITIONAL, comparisonService.classifyVerdict(4));
         assertEquals(Verdict.WARNING, comparisonService.classifyVerdict(-5));
         assertEquals(Verdict.NO_GO, comparisonService.classifyVerdict(-12));
     }

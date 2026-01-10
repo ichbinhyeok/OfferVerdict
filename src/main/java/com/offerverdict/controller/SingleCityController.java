@@ -34,11 +34,11 @@ public class SingleCityController {
     private final VerdictAdviser verdictAdviser;
 
     public SingleCityController(DataRepository repository,
-                                SingleCityAnalysisService analysisService,
-                                ComparisonService comparisonService,
-                                DynamicContentService dynamicContentService,
-                                AppProperties appProperties,
-                                VerdictAdviser verdictAdviser) {
+            SingleCityAnalysisService analysisService,
+            ComparisonService comparisonService,
+            DynamicContentService dynamicContentService,
+            AppProperties appProperties,
+            VerdictAdviser verdictAdviser) {
         this.repository = repository;
         this.analysisService = analysisService;
         this.comparisonService = comparisonService;
@@ -48,9 +48,9 @@ public class SingleCityController {
     }
 
     @GetMapping("/salary-check/{citySlug}/{salaryInt}")
-    public Object singleCityAnalysis(@PathVariable String citySlug,
-                                     @PathVariable int salaryInt,
-                                     Model model) {
+    public Object singleCityAnalysis(@PathVariable("citySlug") String citySlug,
+            @PathVariable("salaryInt") int salaryInt,
+            Model model) {
 
         // 1. SEO Rounding Check (301 Redirect)
         int interval = appProperties.getSeoSalaryBucketInterval();
@@ -58,7 +58,8 @@ public class SingleCityController {
 
         if (!isAligned) {
             int roundedSalary = (int) (Math.round((double) salaryInt / interval) * interval);
-            if (roundedSalary == 0) roundedSalary = interval; // Avoid 0
+            if (roundedSalary == 0)
+                roundedSalary = interval; // Avoid 0
 
             String redirectUrl = "/salary-check/" + citySlug + "/" + roundedSalary;
             RedirectView redirectView = new RedirectView(redirectUrl);
@@ -70,7 +71,7 @@ public class SingleCityController {
         CityCostEntry city = repository.getCity(citySlug);
         if (city == null) {
             // Spring Boot usually handles 404 if template not found, or define error page
-            return "error/404"; 
+            return "error/404";
         }
         AuthoritativeMetrics metrics = repository.getAuthoritativeMetrics();
 
@@ -85,6 +86,7 @@ public class SingleCityController {
                 0.05, // 5% 401k default
                 150.0, // insurance
                 0.0, // no debt default
+                0.0, // extra leaks
                 0.0, // side hustle
                 false, // remote
                 true, // car owner
@@ -96,11 +98,15 @@ public class SingleCityController {
         Verdict verdict;
         double residual = result.getResidual();
         double net = result.getNetMonthly();
-        
-        if (residual < 0) verdict = Verdict.NO_GO;
-        else if (residual / net < 0.15) verdict = Verdict.WARNING;
-        else if (residual / net < 0.30) verdict = Verdict.CONDITIONAL;
-        else verdict = Verdict.GO;
+
+        if (residual < 0)
+            verdict = Verdict.NO_GO;
+        else if (residual / net < 0.15)
+            verdict = Verdict.WARNING;
+        else if (residual / net < 0.30)
+            verdict = Verdict.CONDITIONAL;
+        else
+            verdict = Verdict.GO;
 
         String verdictMsg = verdictAdviser.generateVerdictMessage(verdict, 0, city.getCity());
 
@@ -133,8 +139,10 @@ public class SingleCityController {
 
         // SEO Meta
         model.addAttribute("title", "Is $" + salaryInt + " a good salary in " + city.getCity() + "? - OfferVerdict");
-        model.addAttribute("metaDescription", "See the real take-home pay and lifestyle breakdown for a $" + salaryInt + " salary in " + city.getCity() + ", " + city.getState() + ".");
-        model.addAttribute("canonicalUrl", comparisonService.buildCanonicalUrl("/salary-check/" + citySlug + "/" + salaryInt));
+        model.addAttribute("metaDescription", "See the real take-home pay and lifestyle breakdown for a $" + salaryInt
+                + " salary in " + city.getCity() + ", " + city.getState() + ".");
+        model.addAttribute("canonicalUrl",
+                comparisonService.buildCanonicalUrl("/salary-check/" + citySlug + "/" + salaryInt));
 
         return "single-verdict";
     }

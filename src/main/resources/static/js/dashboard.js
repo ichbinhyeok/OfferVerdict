@@ -141,11 +141,11 @@ function updateLayer2_Evidence(result) {
         if (val_res) val_res.textContent = fmt(breakdown.residual * 12);
 
         // --- DYNAMIC ROWS ---
-        const rowEquity = card.querySelector('.hidden-row.success-text');
-        const rowLeaks = card.querySelector('.hidden-row.danger-text');
+        const rowEquity = card.querySelector('.hidden-row .line-equity')?.parentElement;
+        const rowLeaks = card.querySelector('.hidden-row .line-leaks')?.parentElement;
+        const rowTransport = card.querySelector('.hidden-row .line-transport')?.parentElement;
 
         // Equity: Annual (from service) + Signing Bonus (from service)
-        // Note: Equity Value in breakdown is annual. Signing Bonus is total (assumed amortized over 1 year)
         const totalEquityAnnual = (breakdown.equityValue || 0) + (breakdown.signingBonus || 0);
 
         if (rowEquity) {
@@ -158,9 +158,20 @@ function updateLayer2_Evidence(result) {
             }
         }
 
-        // Leaks: Monthly (extraLeaks from slider) * 12 to show annual impact on invalid receipt line?
-        // Wait, standard receipts are ANNUAL. All fmt calls above are * 12.
-        // breakdown.extraLeaks is MONTHLY.
+        // Transport & Insurance (New Visibility)
+        // Show if > 0.
+        const totalTransportAnnual = ((breakdown.transport || 0) + (breakdown.insurance || 0)) * 12;
+        if (rowTransport) {
+            if (totalTransportAnnual > 0) {
+                rowTransport.style.display = 'flex';
+                const trVal = rowTransport.querySelector('.value');
+                if (trVal) trVal.textContent = '-' + fmt(totalTransportAnnual);
+            } else {
+                rowTransport.style.display = 'none';
+            }
+        }
+
+        // Leaks (New Visibility)
         const totalLeaksAnnual = (breakdown.extraLeaks || 0) * 12;
 
         if (rowLeaks) {
@@ -179,6 +190,7 @@ function updateLayer3_Feeling(result) {
     const realityCards = document.querySelectorAll('.reality-card');
     const fmt = (num) => '$' + Math.round(num).toLocaleString();
 
+    // 1. Tesla Index
     if (realityCards[0]) {
         const strongs = realityCards[0].querySelectorAll('strong');
         if (strongs.length >= 2) {
@@ -187,6 +199,7 @@ function updateLayer3_Feeling(result) {
         }
     }
 
+    // 2. American Dream (House)
     if (realityCards[1]) {
         const strongs = realityCards[1].querySelectorAll('strong');
         if (strongs.length >= 2) {
@@ -195,16 +208,42 @@ function updateLayer3_Feeling(result) {
         }
     }
 
-    // Wealth Buffer Update
+    // 3. Real Hourly Value (New)
+    const hourlyA = document.querySelector('.line-hourly-a');
+    const hourlyB = document.querySelector('.line-hourly-b');
+    if (hourlyA) hourlyA.textContent = '$' + result.current.realHourlyRate.toFixed(2) + '/hr';
+    if (hourlyB) hourlyB.textContent = '$' + result.offer.realHourlyRate.toFixed(2) + '/hr';
+
+    // 4. Wealth Buffer Update
     const wealthVal = document.querySelector('.line-wealth');
     const investmentB = document.querySelector('.investment-row strong');
     if (wealthVal) wealthVal.textContent = result.wealthBufferMsg;
     if (investmentB) investmentB.textContent = fmt(result.investmentB);
 }
 
+// UX: Equity Logic
+const equitySlider = document.querySelector('input[name="equityAnnual"]');
+const growthSlider = document.querySelector('input[name="equityMultiplier"]');
+
+if (growthSlider && equitySlider) {
+    growthSlider.addEventListener('input', () => {
+        if (parseInt(equitySlider.value) === 0) {
+            // Auto-suggest $10k if user plays with growth but has 0 equity
+            equitySlider.value = 10000;
+            const valSpan = document.getElementById('val-equityannual');
+            if (valSpan) valSpan.textContent = '$10,000';
+            // Trigger recalc
+            debouncedRunSimulation();
+        }
+    });
+}
+
 // 5. Monetization & Traffic Tools
 function shareOnX() {
-    const text = encodeURIComponent(`My OfferVerdict for this move: ${document.querySelector('.verdict-text').textContent}. ${document.querySelector('.verdict-sub').textContent} #OfferVerdict #Career`);
+    const verdict = document.querySelector('.verdict-text').textContent;
+    const gain = document.querySelector('.impact-value').textContent;
+    // Construct compelling text: "My OfferVerdict: GO. Monthly Cash Flow: +$2,000. #OfferVerdict"
+    const text = encodeURIComponent(`My OfferVerdict: ${verdict}. Monthly Cash Flow impact: ${gain}. Find your real hourly value here: #OfferVerdict #Career`);
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(window.location.href)}`, '_blank');
 }
 
@@ -214,6 +253,49 @@ function shareOnLinkedIn() {
 
 function copyLink() {
     navigator.clipboard.writeText(window.location.href).then(() => {
-        alert("Link copied! Share the truth.");
+        showToast("Link copied to clipboard!");
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        showToast("Failed to copy link.");
     });
+}
+
+function showToast(message) {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+
+    // Add styles dynamically (if not in CSS)
+    Object.assign(toast.style, {
+        position: 'fixed',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        backgroundColor: 'var(--gray-900)',
+        color: 'var(--white)',
+        padding: '12px 24px',
+        borderRadius: '8px',
+        zIndex: '10000',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        fontFamily: 'var(--font-main)',
+        fontSize: '0.9rem',
+        opacity: '0',
+        transition: 'opacity 0.3s ease, transform 0.3s ease'
+    });
+
+    document.body.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(-50%) translateY(-10px)';
+    });
+
+    // Remove after 3s
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }

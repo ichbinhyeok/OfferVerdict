@@ -16,30 +16,30 @@ public class SingleCityAnalysisService {
     private final AppProperties appProperties;
 
     public SingleCityAnalysisService(TaxCalculatorService taxCalculatorService,
-                                     FinancialEngine financialEngine,
-                                     AppProperties appProperties) {
+            FinancialEngine financialEngine,
+            AppProperties appProperties) {
         this.taxCalculatorService = taxCalculatorService;
         this.financialEngine = financialEngine;
         this.appProperties = appProperties;
     }
 
     public ComparisonBreakdown analyze(double salary,
-                                       CityCostEntry city,
-                                       AuthoritativeMetrics metrics,
-                                       HouseholdType householdType,
-                                       HousingType housingType,
-                                       Boolean isMarried,
-                                       Double fourOhOneKRate,
-                                       Double monthlyInsurance,
-                                       double studentLoanOrChildcare,
-                                       double extraLeaks,
-                                       double sideHustle,
-                                       boolean isRemote,
-                                       boolean isCarOwner,
-                                       double signingBonus,
-                                       double equityAnnual,
-                                       double equityMultiplier,
-                                       double commuteTime) {
+            CityCostEntry city,
+            AuthoritativeMetrics metrics,
+            HouseholdType householdType,
+            HousingType housingType,
+            Boolean isMarried,
+            Double fourOhOneKRate,
+            Double monthlyInsurance,
+            double studentLoanOrChildcare,
+            double extraLeaks,
+            double sideHustle,
+            boolean isRemote,
+            boolean isCarOwner,
+            double signingBonus,
+            double equityAnnual,
+            double equityMultiplier,
+            double commuteTime) {
 
         TaxCalculatorService.TaxResult taxResult = taxCalculatorService.calculateTax(
                 salary,
@@ -47,7 +47,8 @@ public class SingleCityAnalysisService {
                 isMarried != null ? isMarried : (householdType == HouseholdType.FAMILY),
                 fourOhOneKRate,
                 monthlyInsurance,
-                studentLoanOrChildcare > 0 ? studentLoanOrChildcare * 12 : null, // Convert monthly to annual for Tax Calc
+                studentLoanOrChildcare > 0 ? studentLoanOrChildcare * 12 : null, // Convert monthly to annual for Tax
+                                                                                 // Calc
                 0.0); // RSU removed for now to simplify Lab
 
         double netAnnual = taxResult.getNetIncome();
@@ -104,23 +105,35 @@ public class SingleCityAnalysisService {
             // Remote Work Discount (70% reduction in transport)
             if (isRemote) {
                 transport *= 0.3;
+            } else if (!isCarOwner) {
+                // If not car owner (and not remote), assume public transit is cheaper (70% cost
+                // of car ownership baseline)
+                // This gives a "cash reward" for selling the car
+                transport *= 0.3;
             }
 
             livingCost = groceries + transport + utilities + misc;
         } else {
             groceries = livingCost * 0.30;
             transport = livingCost * 0.15;
-            if (isRemote)
+            if (isRemote) {
                 transport *= 0.3;
+            } else if (!isCarOwner) {
+                transport *= 0.3;
+            }
             utilities = livingCost * 0.10;
             misc = livingCost - (groceries + transport + utilities);
         }
 
         double totalHousingCost = rent + housingCost;
-        // Residual = Net Income + Side Hustle - (Housing + Living + Debt + Commute Cost)
-        // Actually, commute cost should be monthly already if calculated over 22 days
+
+        // Residual = Net Income + Side Hustle - (Housing + Living + Debt)
+        // [LOGIC CHANGE]: Subtracted 'monthlyCommuteCost' (Time Value) removed from
+        // CASH calculation.
+        // Commute Time is a "Quality of Life" penalty, not a cash penalty (unless we
+        // track gas specifically, which is in Transport).
         double residual = (netMonthly + sideHustle)
-                - (totalHousingCost + livingCost + studentLoanOrChildcare + extraLeaks + monthlyCommuteCost);
+                - (totalHousingCost + livingCost + studentLoanOrChildcare + extraLeaks);
 
         double monthlyResidual = residual;
         double yearsToBuyHouse = monthlyResidual > 0 ? (city.getAvgHousePrice() * 0.20) / (monthlyResidual * 12)
@@ -147,11 +160,22 @@ public class SingleCityAnalysisService {
         breakdown.setMonthsToBuyTesla(monthsToBuyTesla);
         breakdown.setStarbucksSavings(starbucksSavings);
 
+        breakdown.setMonthsToBuyTesla(monthsToBuyTesla);
+        breakdown.setStarbucksSavings(starbucksSavings);
+
         breakdown.setEquityValue(annualEquity);
         breakdown.setSigningBonus(signingBonus);
         breakdown.setExtraLeaks(extraLeaks); // Set explicit leaks for visibility
         breakdown.setCommuteTime(commuteTime);
-        breakdown.setRealHourlyRate(hourlyRate); // Could refine with commute hours added to denominator
+
+        // [LOGIC CHANGE]: Real Hourly Rate = Net Monthly / (Work Hours + Commute Hours)
+        // Work Hours = ~173 (2080/12)
+        // Commute Hours = (commuteTime * 2 * 22) / 60
+        double workHoursMonthly = 2080.0 / 12.0;
+        double commuteHoursMonthly = (commuteTime * 2 * 22) / 60.0;
+        double trueHourlyRate = netMonthly / (workHoursMonthly + commuteHoursMonthly);
+
+        breakdown.setRealHourlyRate(trueHourlyRate);
 
         if (taxResult != null) {
             breakdown.setTaxResult(taxResult);

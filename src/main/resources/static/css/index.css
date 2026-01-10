@@ -186,18 +186,65 @@
 
 @media (max-width: 768px) {
     .journey-grid {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "header-p" "city-p" "salary-p"
-            "arrow"
-            "header-f" "city-f" "salary-f";
+        display: flex;
+        /* Switch to flex for easier vertical stacking control */
+        flex-direction: column;
+        align-items: center;
+        /* Override desktop 'start' alignment */
+        gap: 0;
+        width: 100%;
+    }
+
+    /* Ensure areas take full width to allow internal centering to work */
+    .journey-grid>div {
+        width: 100%;
+    }
+
+    /* Hide redundant headers in mobile flow if desired, or keep them */
+    .area-header-current,
+    .area-header-offer {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .area-header-current {
+        margin-top: 0;
     }
 
     .journey-arrow {
+        align-self: center;
         transform: rotate(90deg);
+        margin: 1.5rem 0;
+        font-size: 1.5rem;
     }
 
     .journey-card {
-        padding: 2rem;
+        padding: 1.5rem;
+        /* Reduce padding for mobile */
+    }
+
+    .landing-title {
+        font-size: 2rem;
+        /* Reduce title size */
+    }
+
+    /* Center alignment for mobile "Journey" feel */
+    .journey-grid .form-group {
+        text-align: center;
+    }
+
+    .journey-grid .form-label {
+        display: inline-block;
+        /* Allows centering */
+    }
+
+    /* Force input text and box centering */
+    .journey-grid .form-input {
+        text-align: center;
+        max-width: 450px;
+        /* Match autocomplete wrapper */
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
     }
 }

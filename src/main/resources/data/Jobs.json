@@ -1,26 +1,255 @@
 [
-  { "title": "Software Engineer", "slug": "software-engineer", "category": "Tech", "major": true },
-  { "title": "Web Developer", "slug": "web-developer", "category": "Tech" },
-  { "title": "Registered Nurse (RN)", "slug": "registered-nurse", "category": "Healthcare", "major": true },
-  { "title": "Physician / Doctor", "slug": "doctor", "category": "Healthcare" },
-  { "title": "Pharmacist", "slug": "pharmacist", "category": "Healthcare" },
-  { "title": "Teacher / Educator", "slug": "teacher", "category": "Education", "major": true },
-  { "title": "University Professor", "slug": "professor", "category": "Education" },
-  { "title": "Electrician", "slug": "electrician", "category": "Trades", "major": true },
-  { "title": "Plumber", "slug": "plumber", "category": "Trades" },
-  { "title": "Construction Manager", "slug": "construction-manager", "category": "Trades" },
-  { "title": "Police Officer", "slug": "police-officer", "category": "Public Service", "major": true },
-  { "title": "Firefighter", "slug": "firefighter", "category": "Public Service" },
-  { "title": "Accountant / CPA", "slug": "accountant", "category": "Finance", "major": true },
-  { "title": "Financial Analyst", "slug": "financial-analyst", "category": "Finance" },
-  { "title": "Marketing Manager", "slug": "marketing-manager", "category": "Business", "major": true },
-  { "title": "Sales Representative", "slug": "sales-representative", "category": "Business", "major": true },
-  { "title": "HR Manager", "slug": "hr-manager", "category": "Business" },
-  { "title": "Lawyer / Attorney", "slug": "lawyer", "category": "Legal", "major": true },
-  { "title": "Architect", "slug": "architect", "category": "Design" },
-  { "title": "Real Estate Agent", "slug": "real-estate-agent", "category": "Sales" },
-  { "title": "Chef / Head Cook", "slug": "chef", "category": "Service" },
-  { "title": "Truck Driver", "slug": "truck-driver", "category": "Logistics", "major": true },
-  { "title": "Pilot", "slug": "pilot", "category": "Logistics" },
-  { "title": "General Professional", "slug": "general-professional", "category": "General", "major": true }
+  {
+    "title": "Software Engineer",
+    "slug": "software-engineer",
+    "category": "Tech",
+    "major": true
+  },
+  {
+    "title": "Data Scientist",
+    "slug": "data-scientist",
+    "category": "Tech"
+  },
+  {
+    "title": "Product Manager",
+    "slug": "product-manager",
+    "category": "Tech",
+    "major": true
+  },
+  {
+    "title": "Web Developer",
+    "slug": "web-developer",
+    "category": "Tech"
+  },
+  {
+    "title": "UX / UI Designer",
+    "slug": "ux-designer",
+    "category": "Tech"
+  },
+  {
+    "title": "Registered Nurse (RN)",
+    "slug": "registered-nurse",
+    "category": "Healthcare",
+    "major": true
+  },
+  {
+    "title": "Physician / Doctor",
+    "slug": "doctor",
+    "category": "Healthcare"
+  },
+  {
+    "title": "Pharmacist",
+    "slug": "pharmacist",
+    "category": "Healthcare"
+  },
+  {
+    "title": "Physical Therapist",
+    "slug": "physical-therapist",
+    "category": "Healthcare"
+  },
+  {
+    "title": "Dental Hygienist",
+    "slug": "dental-hygienist",
+    "category": "Healthcare"
+  },
+  {
+    "title": "Medical Assistant",
+    "slug": "medical-assistant",
+    "category": "Healthcare"
+  },
+  {
+    "title": "Paramedic / EMT",
+    "slug": "paramedic",
+    "category": "Healthcare"
+  },
+  {
+    "title": "Teacher / Educator",
+    "slug": "teacher",
+    "category": "Education",
+    "major": true
+  },
+  {
+    "title": "University Professor",
+    "slug": "professor",
+    "category": "Education"
+  },
+  {
+    "title": "Social Worker",
+    "slug": "social-worker",
+    "category": "Public Service"
+  },
+  {
+    "title": "Police Officer",
+    "slug": "police-officer",
+    "category": "Public Service",
+    "major": true
+  },
+  {
+    "title": "Firefighter",
+    "slug": "firefighter",
+    "category": "Public Service"
+  },
+  {
+    "title": "Librarian",
+    "slug": "librarian",
+    "category": "Education"
+  },
+  {
+    "title": "Accountant / CPA",
+    "slug": "accountant",
+    "category": "Finance",
+    "major": true
+  },
+  {
+    "title": "Financial Analyst",
+    "slug": "financial-analyst",
+    "category": "Finance"
+  },
+  {
+    "title": "Project Manager",
+    "slug": "project-manager",
+    "category": "Business",
+    "major": true
+  },
+  {
+    "title": "Marketing Manager",
+    "slug": "marketing-manager",
+    "category": "Business",
+    "major": true
+  },
+  {
+    "title": "HR Manager",
+    "slug": "hr-manager",
+    "category": "Business"
+  },
+  {
+    "title": "Business Analyst",
+    "slug": "business-analyst",
+    "category": "Business"
+  },
+  {
+    "title": "Sales Representative",
+    "slug": "sales-representative",
+    "category": "Sales",
+    "major": true
+  },
+  {
+    "title": "Real Estate Agent",
+    "slug": "real-estate-agent",
+    "category": "Sales"
+  },
+  {
+    "title": "Administrative Assistant",
+    "slug": "admin-assistant",
+    "category": "Office"
+  },
+  {
+    "title": "Office Manager",
+    "slug": "office-manager",
+    "category": "Office"
+  },
+  {
+    "title": "Customer Service Rep",
+    "slug": "customer-service",
+    "category": "Office"
+  },
+  {
+    "title": "Electrician",
+    "slug": "electrician",
+    "category": "Trades",
+    "major": true
+  },
+  {
+    "title": "Plumber",
+    "slug": "plumber",
+    "category": "Trades"
+  },
+  {
+    "title": "HVAC Technician",
+    "slug": "hvac-technician",
+    "category": "Trades"
+  },
+  {
+    "title": "Automotive Mechanic",
+    "slug": "mechanic",
+    "category": "Trades"
+  },
+  {
+    "title": "Carpenter",
+    "slug": "carpenter",
+    "category": "Trades"
+  },
+  {
+    "title": "Welder",
+    "slug": "welder",
+    "category": "Trades"
+  },
+  {
+    "title": "Construction Manager",
+    "slug": "construction-manager",
+    "category": "Trades"
+  },
+  {
+    "title": "Truck Driver",
+    "slug": "truck-driver",
+    "category": "Logistics",
+    "major": true
+  },
+  {
+    "title": "Warehouse Associate",
+    "slug": "warehouse-worker",
+    "category": "Logistics"
+  },
+  {
+    "title": "Pilot",
+    "slug": "pilot",
+    "category": "Logistics"
+  },
+  {
+    "title": "Chef / Head Cook",
+    "slug": "chef",
+    "category": "Service"
+  },
+  {
+    "title": "Bartender",
+    "slug": "bartender",
+    "category": "Service"
+  },
+  {
+    "title": "Server / Waitstaff",
+    "slug": "server",
+    "category": "Service"
+  },
+  {
+    "title": "Retail Store Manager",
+    "slug": "retail-manager",
+    "category": "Service"
+  },
+  {
+    "title": "Hair Stylist",
+    "slug": "hair-stylist",
+    "category": "Service"
+  },
+  {
+    "title": "Architect",
+    "slug": "architect",
+    "category": "Design"
+  },
+  {
+    "title": "Graphic Designer",
+    "slug": "graphic-designer",
+    "category": "Design"
+  },
+  {
+    "title": "Lawyer / Attorney",
+    "slug": "lawyer",
+    "category": "Legal",
+    "major": true
+  },
+  {
+    "title": "General Professional",
+    "slug": "general-professional",
+    "category": "General",
+    "major": true
+  }
 ]

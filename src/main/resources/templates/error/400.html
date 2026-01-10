@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Invalid request</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/core.css}">
 </head>
+
 <body>
-<div class="container">
-    <div class="panel">
-        <h1>400 – Fix the inputs.</h1>
-        <p th:text="${message}">The request is invalid.</p>
+    <div class="container">
+        <div class="panel">
+            <h1>400 – Fix the inputs.</h1>
+            <p th:text="${message}">The request is invalid.</p>
+        </div>
     </div>
-</div>
 </body>
+
 </html>

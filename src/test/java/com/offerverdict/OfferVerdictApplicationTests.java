@@ -1,4 +1,4 @@
-package org.example.offerverdict;
+package com.offerverdict;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

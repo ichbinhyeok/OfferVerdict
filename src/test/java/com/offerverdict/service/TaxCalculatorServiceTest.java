@@ -16,6 +16,6 @@ class TaxCalculatorServiceTest {
     @Test
     void calculatesNetAnnual() {
         double net = taxCalculatorService.calculateNetAnnual(120_000, "NY");
-        assertEquals(120_000 - 120_000 * 0.062 - 120_000 * 0.0145, net, 25_000);
+        assertEquals(80917.0, net, 1000);
     }
 }

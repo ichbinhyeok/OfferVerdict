@@ -156,6 +156,10 @@
                             <span class="label">Equity & Bonuses</span>
                             <span class="value mono line-equity">+$0</span>
                         </div>
+                        <div class="line-item danger-text hidden-row" id="row-transport-current" style="display:none;">
+                            <span class="label">Transport & Ins.</span>
+                            <span class="value mono line-transport">-$0</span>
+                        </div>
                         <div class="line-item danger-text hidden-row" id="row-leaks-current" style="display:none;">
                             <span class="label">Monthly Leaks</span>
                             <span class="value mono line-leaks">-$0</span>
@@ -202,6 +206,10 @@
                         <div class="line-item success-text hidden-row" id="row-equity-offer" style="display:none;">
                             <span class="label">Equity & Bonuses</span>
                             <span class="value mono line-equity">+$0</span>
+                        </div>
+                        <div class="line-item danger-text hidden-row" id="row-transport-offer" style="display:none;">
+                            <span class="label">Transport & Ins.</span>
+                            <span class="value mono line-transport">-$0</span>
                         </div>
                         <div class="line-item danger-text hidden-row" id="row-leaks-offer" style="display:none;">
                             <span class="label">Monthly Leaks</span>
@@ -343,7 +351,7 @@
                                 <div class="slider-group">
                                     <label>
                                         Other Monthly Leaks
-                                        <span class="slider-val" id="val-leaks">$0</span>
+                                        <span class="slider-val" id="val-otherleaks">$0</span>
                                     </label>
                                     <input type="range" name="otherLeaks" min="0" max="3000" step="100" value="0">
                                 </div>
@@ -423,6 +431,23 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Real Hourly Value (Time Impact) -->
+                    <div class="reality-card highlight-time">
+                        <div class="icon">⏳</div>
+                        <div class="reality-content">
+                            <h4>Real Hourly Value</h4>
+                            <p>Taking commute time into account.</p>
+                            <div class="comparison-row">
+                                <span th:text="${cityA.city}">City A</span>: <strong class="line-hourly-a"
+                                    th:text="${'$' + #numbers.formatDecimal(result.current.realHourlyRate, 1, 2) + '/hr'}">$45.20/hr</strong>
+                            </div>
+                            <div class="comparison-row">
+                                <span th:text="${cityB.city}">City B</span>: <strong class="line-hourly-b"
+                                    th:text="${'$' + #numbers.formatDecimal(result.offer.realHourlyRate, 1, 2) + '/hr'}">$52.10/hr</strong>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Ad Slot: Bottom Sticky/In-feed -->
@@ -432,6 +457,7 @@
                         <span class="ad-hint">Career & Relocation Partner Slot</span>
                     </div>
                 </div>
+            </div>
             </div>
         </section>
 

@@ -54,11 +54,11 @@ public class ComparisonController {
     }
 
     @GetMapping({ "/", "/start" })
-    public Object home(@RequestParam(required = false) String job,
-            @RequestParam(required = false) String cityA,
-            @RequestParam(required = false) String cityB,
-            @RequestParam(required = false) Double currentSalary,
-            @RequestParam(required = false) Double offerSalary,
+    public Object home(@RequestParam(name = "job", required = false) String job,
+            @RequestParam(name = "cityA", required = false) String cityA,
+            @RequestParam(name = "cityB", required = false) String cityB,
+            @RequestParam(name = "currentSalary", required = false) Double currentSalary,
+            @RequestParam(name = "offerSalary", required = false) Double offerSalary,
             RedirectAttributes redirectAttributes,
             Model model) {
 
@@ -116,25 +116,37 @@ public class ComparisonController {
     }
 
     @GetMapping("/{job}-salary-{cityA}-vs-{cityB}")
-    public Object compare(@PathVariable String job,
-            @PathVariable String cityA,
-            @PathVariable String cityB,
+    public Object compare(@PathVariable("job") String job,
+            @PathVariable("cityA") String cityA,
+            @PathVariable("cityB") String cityB,
             // OPTIONAL PARAMS FOR SEO SUPPORT
-            @RequestParam(required = false) Double currentSalary,
-            @RequestParam(required = false) Double offerSalary,
-            @RequestParam(required = false) Double fourOhOneKRate,
-            @RequestParam(required = false) Double monthlyInsurance,
-            @RequestParam(required = false) Double rsuAmount,
-            @RequestParam(required = false) Boolean isMarried,
+            @RequestParam(name = "currentSalary", required = false) Double currentSalary,
+            @RequestParam(name = "offerSalary", required = false) Double offerSalary,
+            @RequestParam(name = "fourOhOneKRate", required = false) Double fourOhOneKRate,
+            @RequestParam(name = "monthlyInsurance", required = false) Double monthlyInsurance,
+            @RequestParam(name = "rsuAmount", required = false) Double rsuAmount,
+            @RequestParam(name = "isMarried", required = false) Boolean isMarried,
             RedirectAttributes redirectAttributes,
             Model model) {
 
+        System.out.println("DEBUG: Entering compare method with job=" + job);
         String normalizedJob = SlugNormalizer.normalize(job);
+        System.out.println("DEBUG: Normalized job=" + normalizedJob);
         String normalizedCityA = SlugNormalizer.normalize(cityA);
         String normalizedCityB = SlugNormalizer.normalize(cityB);
 
         JobInfo jobInfo = repository.findJobLoosely(normalizedJob)
-                .orElseThrow(() -> new ResourceNotFoundException("Unknown job slug: " + job));
+                .orElseGet(() -> {
+                    // Start of Custom Job Logic
+                    System.out.println("DEBUG: Creating CUSTOM JOB for " + job);
+                    JobInfo custom = new JobInfo();
+                    custom.setTitle(job); // Use raw input as title
+                    custom.setSlug(normalizedJob);
+                    custom.setCategory("Custom");
+                    return custom;
+                });
+
+        // City lookups must be strict
         CityCostEntry cityEntryA = repository.findCityLoosely(normalizedCityA)
                 .orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityA));
         CityCostEntry cityEntryB = repository.findCityLoosely(normalizedCityB)
@@ -246,20 +258,84 @@ public class ComparisonController {
     }
 
     private double getMedianSalary(String jobSlug, String citySlug) {
-        // Fallback if no median data found: $100,000
-        // Ideally SalaryDataService provides this.
-        // Since SalaryDataService.getPercentileLabel exists, we can introspect...
-        // But SalaryDataService in previous step didn't have specific getMedian method
-        // exposed efficiently
-        // Actually, we can assume a default roughly around 100k or try to match.
-        // For 'software-engineer', default is higher.
-        if (jobSlug.contains("engineer") || jobSlug.contains("developer"))
+        // --- REALISTIC SALARY ESTIMATES (2025/2026 Baseline) ---
+        // These are national medians used when specific city data is missing
+
+        // High Income (> $110k)
+        if (jobSlug.contains("doctor") || jobSlug.contains("physician"))
+            return 220000;
+        if (jobSlug.contains("pilot"))
+            return 130000;
+        if (jobSlug.contains("lawyer") || jobSlug.contains("attorney"))
             return 140000;
+        if (jobSlug.contains("manager") && (jobSlug.contains("product") || jobSlug.contains("engineering")))
+            return 145000;
+        if (jobSlug.contains("software") || jobSlug.contains("data-scientist"))
+            return 135000;
+        if (jobSlug.contains("pharmacist"))
+            return 125000;
+
+        // Upper Middle (> $80k)
         if (jobSlug.contains("manager"))
-            return 120000;
-        if (jobSlug.contains("analyst"))
-            return 90000;
-        return 100000;
+            return 95000; // General managers
+        if (jobSlug.contains("project-manager"))
+            return 105000;
+        if (jobSlug.contains("physical-therapist"))
+            return 95000;
+        if (jobSlug.contains("ux-designer"))
+            return 95000;
+        if (jobSlug.contains("cybersecurity") || jobSlug.contains("devops"))
+            return 115000;
+        if (jobSlug.contains("engineer"))
+            return 100000; // Generic engineer
+
+        // Middle Income (> $60k)
+        if (jobSlug.contains("nurse") || jobSlug.contains("rn"))
+            return 82000;
+        if (jobSlug.contains("dental-hygienist"))
+            return 85000;
+        if (jobSlug.contains("accountant") || jobSlug.contains("analyst"))
+            return 75000;
+        if (jobSlug.contains("police") || jobSlug.contains("firefighter"))
+            return 70000;
+        if (jobSlug.contains("teacher") || jobSlug.contains("professor"))
+            return 65000;
+        if (jobSlug.contains("electrician") || jobSlug.contains("plumber") || jobSlug.contains("leads"))
+            return 65000;
+        if (jobSlug.contains("hr-") || jobSlug.contains("marketing"))
+            return 70000;
+
+        // Skilled Trade / Admin (> $45k)
+        if (jobSlug.contains("mechanic") || jobSlug.contains("hvac") || jobSlug.contains("welder"))
+            return 55000;
+        if (jobSlug.contains("carpenter") || jobSlug.contains("truck"))
+            return 55000;
+        if (jobSlug.contains("admin") || jobSlug.contains("office-manager"))
+            return 52000;
+        if (jobSlug.contains("sales-rep") || jobSlug.contains("real-estate"))
+            return 60000; // Variable
+        if (jobSlug.contains("paramedic"))
+            return 50000;
+        if (jobSlug.contains("graphic-designer"))
+            return 55000;
+        if (jobSlug.contains("social-worker"))
+            return 58000;
+
+        // Service / Entry (> $30k)
+        if (jobSlug.contains("medical-assistant") || jobSlug.contains("dental-assistant"))
+            return 38000;
+        if (jobSlug.contains("customer-service"))
+            return 42000;
+        if (jobSlug.contains("warehouse"))
+            return 38000;
+        if (jobSlug.contains("bartender") || jobSlug.contains("server") || jobSlug.contains("waitstaff"))
+            return 45000; // Including tips
+        if (jobSlug.contains("retail") || jobSlug.contains("cook") || jobSlug.contains("chef"))
+            return 35000;
+        if (jobSlug.contains("stylist"))
+            return 40000;
+
+        return 75000; // Fallback National Median
     }
 
     private double clampSalary(double salary) {
@@ -345,23 +421,23 @@ public class ComparisonController {
     @GetMapping("/api/calculate")
     @ResponseBody
     public ComparisonResult calculateApi(
-            @RequestParam String cityASlug,
-            @RequestParam String cityBSlug,
-            @RequestParam double currentSalary,
-            @RequestParam double offerSalary,
-            @RequestParam(required = false, defaultValue = "false") boolean isPremiumBenefits,
-            @RequestParam(required = false, defaultValue = "false") boolean isHomeOwner,
-            @RequestParam(required = false, defaultValue = "false") boolean hasStudentLoan,
-            @RequestParam(required = false, defaultValue = "false") boolean hasDependents,
-            @RequestParam(required = false, defaultValue = "0") double sideHustle,
-            @RequestParam(required = false, defaultValue = "0") double otherLeaks,
-            @RequestParam(required = false, defaultValue = "false") boolean isRemote,
-            @RequestParam(required = false, defaultValue = "false") boolean isTaxOptimized,
-            @RequestParam(required = false, defaultValue = "true") boolean isCarOwner,
-            @RequestParam(required = false, defaultValue = "0") double signingBonus,
-            @RequestParam(required = false, defaultValue = "0") double equityAnnual,
-            @RequestParam(required = false, defaultValue = "1.0") double equityMultiplier,
-            @RequestParam(required = false, defaultValue = "0") double commuteTime) {
+            @RequestParam("cityASlug") String cityASlug,
+            @RequestParam("cityBSlug") String cityBSlug,
+            @RequestParam("currentSalary") double currentSalary,
+            @RequestParam("offerSalary") double offerSalary,
+            @RequestParam(name = "isPremiumBenefits", required = false, defaultValue = "false") boolean isPremiumBenefits,
+            @RequestParam(name = "isHomeOwner", required = false, defaultValue = "false") boolean isHomeOwner,
+            @RequestParam(name = "hasStudentLoan", required = false, defaultValue = "false") boolean hasStudentLoan,
+            @RequestParam(name = "hasDependents", required = false, defaultValue = "false") boolean hasDependents,
+            @RequestParam(name = "sideHustle", required = false, defaultValue = "0") double sideHustle,
+            @RequestParam(name = "otherLeaks", required = false, defaultValue = "0") double otherLeaks,
+            @RequestParam(name = "isRemote", required = false, defaultValue = "false") boolean isRemote,
+            @RequestParam(name = "isTaxOptimized", required = false, defaultValue = "false") boolean isTaxOptimized,
+            @RequestParam(name = "isCarOwner", required = false, defaultValue = "true") boolean isCarOwner,
+            @RequestParam(name = "signingBonus", required = false, defaultValue = "0") double signingBonus,
+            @RequestParam(name = "equityAnnual", required = false, defaultValue = "0") double equityAnnual,
+            @RequestParam(name = "equityMultiplier", required = false, defaultValue = "1.0") double equityMultiplier,
+            @RequestParam(name = "commuteTime", required = false, defaultValue = "0") double commuteTime) {
 
         CityCostEntry cityEntryA = repository.getCity(cityASlug);
         CityCostEntry cityEntryB = repository.getCity(cityBSlug);
@@ -376,10 +452,11 @@ public class ComparisonController {
         // Combine Boolean debt with Granular Leaks
         // FIXED: Separate "Other Leaks" from "Student Loan".
         // Student Loan is a shared reality (exists in both).
-        // Other Leaks (Simulation Lab slider) is strictly an OFFER-side simulation (e.g. lifestyle creep).
+        // Other Leaks (Simulation Lab slider) is strictly an OFFER-side simulation
+        // (e.g. lifestyle creep).
         double sharedDebtMonthly = (hasStudentLoan ? 800.0 : 0.0);
-        double offerLeaksMonthly = otherLeaks; 
-        
+        double offerLeaksMonthly = otherLeaks;
+
         double totalBoostMonthly = sideHustle;
 
         return comparisonService.compare(
@@ -401,7 +478,7 @@ public class ComparisonController {
                 equityAnnual,
                 equityMultiplier,
                 commuteTime);
-
+    }
 
     @GetMapping("/admin/reload-data")
     public ResponseEntity<String> reloadData() {
@@ -418,11 +495,9 @@ public class ComparisonController {
         Optional<JobInfo> looseMatch = repository.findJobLoosely(normalizedInput);
         if (looseMatch.isPresent())
             return looseMatch;
-        String rawLower = rawInput == null ? "" : rawInput.toLowerCase(Locale.US);
-        return repository.getJobs().stream()
-                .filter(job -> job.getSlug().toLowerCase(Locale.US).contains(normalizedInput)
-                        || job.getTitle().toLowerCase(Locale.US).startsWith(rawLower))
-                .findFirst();
+
+        // Custom Fallback
+        return Optional.of(new JobInfo(rawInput, normalizedInput, "Custom"));
     }
 
     private Optional<CityCostEntry> resolveCityInput(String rawInput, String normalizedInput) {

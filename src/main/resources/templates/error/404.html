@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Not Found</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/core.css}">
 </head>
+
 <body>
-<div class="container">
-    <div class="panel">
-        <h1>404 – We don't know that route.</h1>
-        <p th:text="${message}">The page you want is missing.</p>
-        <p><a th:href="@{/}">Go home</a></p>
+    <div class="container">
+        <div class="panel">
+            <h1>404 – We don't know that route.</h1>
+            <p th:text="${message}">The page you want is missing.</p>
+            <p><a th:href="@{/}">Go home</a></p>
+        </div>
     </div>
-</div>
 </body>
+
 </html>
