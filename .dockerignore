@@ -1,0 +1,10 @@
+.git
+.gitignore
+.gradle
+build
+bin
+.idea
+.vscode
+*.md
+*.txt
+!gradle/wrapper/gradle-wrapper.jar
