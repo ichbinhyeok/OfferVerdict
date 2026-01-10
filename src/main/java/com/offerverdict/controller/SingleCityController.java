@@ -123,6 +123,12 @@ public class SingleCityController {
         }
         nextSalaryUrl = "/salary-check/" + citySlug + "/" + (salaryInt + interval);
 
+        // 6b. State-based City Links (Internal Linking Grid)
+        List<CityCostEntry> relatedCities = repository.getCities().stream()
+                .filter(c -> c.getState().equalsIgnoreCase(city.getState()) && !c.getSlug().equals(citySlug))
+                .limit(5)
+                .toList();
+
         // 7. Data for Template
         model.addAttribute("city", city);
         model.addAttribute("result", result);
@@ -135,7 +141,12 @@ public class SingleCityController {
 
         model.addAttribute("prevSalaryUrl", prevSalaryUrl);
         model.addAttribute("nextSalaryUrl", nextSalaryUrl);
+        model.addAttribute("relatedCities", relatedCities);
         model.addAttribute("compareUrl", "/software-engineer-salary-" + citySlug + "-vs-austin-tx"); // Default CTA
+
+        // Legal Shield: Contextual Disclaimer
+        model.addAttribute("contextualDisclaimer",
+                "*Figures are estimates based on public data. Actual costs vary by neighborhood and lifestyle.");
 
         // SEO Meta
         model.addAttribute("title", "Is $" + salaryInt + " a good salary in " + city.getCity() + "? - OfferVerdict");

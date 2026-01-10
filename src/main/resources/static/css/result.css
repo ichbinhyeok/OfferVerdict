@@ -743,3 +743,62 @@ input[type="range"]:active::-webkit-slider-thumb {
     color: var(--gray-900);
     font-weight: 700;
 }
+
+/* Related Cities Section (Internal Linking Grid) */
+.related-cities-section {
+    padding: var(--space-xl) 0;
+    background: var(--gray-50);
+    text-align: center;
+}
+
+.related-cities-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-sm);
+    color: var(--gray-900);
+}
+
+.related-cities-section p {
+    color: var(--gray-600);
+    margin-bottom: var(--space-lg);
+}
+
+.city-links-grid {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.city-link-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: all var(--duration-fast);
+    min-width: 120px;
+}
+
+.city-link-card:hover {
+    border-color: var(--gray-900);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.city-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.city-state {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    font-weight: 600;
+}

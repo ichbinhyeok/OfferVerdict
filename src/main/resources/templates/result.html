@@ -94,6 +94,10 @@
                     <div class="impact-label">Monthly Cash Flow Impact</div>
                     <div class="impact-value" th:text="${result.monthlyGainStr != null ? result.monthlyGainStr : '$0'}">
                         -$1,200</div>
+                    <div class="contextual-disclaimer"
+                        style="margin-top: 12px; font-size: 0.85rem; color: #666; font-style: italic;">
+                        *Figures are estimates based on public data. Actual costs vary by neighborhood and lifestyle.
+                    </div>
                 </div>
 
                 <!-- Ad Slot: Primary High-CTR (Financial Offer) -->
@@ -463,11 +467,8 @@
 
 
 
-        <footer class="footer">
-            <div class="container">
-                <p>&copy; 2026 OfferVerdict. Built on Truth.</p>
-            </div>
-        </footer>
+        <!-- Footer with Legal Disclaimer -->
+        <div th:replace="~{fragments/footer :: footer}"></div>
     </main>
 
     <script src="/js/dashboard.js"></script>

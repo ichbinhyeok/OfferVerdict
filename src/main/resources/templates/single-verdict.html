@@ -20,6 +20,38 @@
     <!-- SEO: Canonical Tag -->
     <link rel="canonical" th:href="${canonicalUrl}">
     <meta name="description" th:content="${metaDescription}">
+
+    <!-- JSON-LD Structured Data for SEO -->
+    <script type="application/ld+json" th:inline="javascript">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": /*[[${title}]]*/ "Is $100k good in Austin?",
+        "description": /*[[${metaDescription}]]*/ "Salary analysis",
+        "author": {
+            "@type": "Organization",
+            "name": "OfferVerdict"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "OfferVerdict"
+        },
+        "mainEntity": {
+            "@type": "MonetaryAmount",
+            "currency": "USD",
+            "value": /*[[${salary}]]*/ 100000
+        },
+        "about": {
+            "@type": "Place",
+            "name": /*[[${city.city}]]*/ "Austin",
+            "address": {
+                "@type": "PostalAddress",
+                "addressRegion": /*[[${city.state}]]*/ "TX",
+                "addressCountry": "US"
+            }
+        }
+    }
+    </script>
 </head>
 
 <body class="theme-lucid">
@@ -55,6 +87,10 @@
                     <div class="impact-label">Estimated Monthly Residual (Savings)</div>
                     <div class="impact-value"
                         th:text="${'$' + #numbers.formatInteger(result.residual, 0, 'COMMA') + '/mo'}">$2,500/mo</div>
+                    <div class="contextual-disclaimer"
+                        style="margin-top: 12px; font-size: 0.85rem; color: #666; font-style: italic;">
+                        <span th:text="${contextualDisclaimer}">*Figures are estimates based on public data.</span>
+                    </div>
                 </div>
 
                 <!-- Ad Slot: Top -->
@@ -135,6 +171,22 @@
                     </span>
                     <a th:href="${nextSalaryUrl}" class="btn-outline">
                         See <span th:text="${'$' + #numbers.formatInteger(salary + 10000, 0, 'COMMA')}">$110k</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- STATE-BASED CITY LINKS (Internal Linking Grid) -->
+        <section class="related-cities-section" th:if="${relatedCities != null and !relatedCities.isEmpty()}">
+            <div class="container">
+                <h3>Compare with other cities in <span th:text="${city.state}">Texas</span></h3>
+                <p>See how this salary compares in nearby cities:</p>
+                <div class="city-links-grid">
+                    <a th:each="relatedCity : ${relatedCities}"
+                        th:href="@{/salary-check/{slug}/{amount}(slug=${relatedCity.slug}, amount=${salary})}"
+                        class="city-link-card">
+                        <span class="city-name" th:text="${relatedCity.city}">Dallas</span>
+                        <span class="city-state" th:text="${relatedCity.state}">TX</span>
                     </a>
                 </div>
             </div>
