@@ -1,4 +1,8 @@
 <div th:fragment="analytics" xmlns:th="http://www.thymeleaf.org">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3533137832089555"
+        crossorigin="anonymous"></script>
+
     <!-- Google Tag Manager (Placeholder) -->
     <script th:if="${@environment.getProperty('google.analytics.enabled') == 'true'}">
         (function (w, d, s, l, i) {
