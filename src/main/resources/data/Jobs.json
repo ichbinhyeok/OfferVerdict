@@ -8,7 +8,8 @@
   {
     "title": "Data Scientist",
     "slug": "data-scientist",
-    "category": "Tech"
+    "category": "Tech",
+    "major": true
   },
   {
     "title": "Product Manager",
@@ -19,7 +20,8 @@
   {
     "title": "Web Developer",
     "slug": "web-developer",
-    "category": "Tech"
+    "category": "Tech",
+    "major": true
   },
   {
     "title": "UX / UI Designer",
@@ -40,12 +42,14 @@
   {
     "title": "Pharmacist",
     "slug": "pharmacist",
-    "category": "Healthcare"
+    "category": "Healthcare",
+    "major": true
   },
   {
     "title": "Physical Therapist",
     "slug": "physical-therapist",
-    "category": "Healthcare"
+    "category": "Healthcare",
+    "major": true
   },
   {
     "title": "Dental Hygienist",
@@ -136,7 +140,8 @@
   {
     "title": "Real Estate Agent",
     "slug": "real-estate-agent",
-    "category": "Sales"
+    "category": "Sales",
+    "major": true
   },
   {
     "title": "Administrative Assistant",
@@ -162,7 +167,8 @@
   {
     "title": "Plumber",
     "slug": "plumber",
-    "category": "Trades"
+    "category": "Trades",
+    "major": true
   },
   {
     "title": "HVAC Technician",
@@ -249,7 +255,6 @@
   {
     "title": "General Professional",
     "slug": "general-professional",
-    "category": "General",
-    "major": true
+    "category": "General"
   }
 ]
