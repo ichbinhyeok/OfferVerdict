@@ -35,3 +35,17 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### OS & System Files ###
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+### Logs ###
+*.log
+
+### Secrets & Local Config ###
+.env
+secrets.properties
+local.properties
