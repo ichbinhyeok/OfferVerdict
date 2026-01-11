@@ -24,7 +24,7 @@ public class HubController {
                 .sorted(Comparator.comparing(CityCostEntry::getPriority) // Priority sort first
                         .thenComparing(CityCostEntry::getCity))
                 .toList();
-                
+
         model.addAttribute("cities", cities);
         model.addAttribute("title", "City-to-city salary tradeoffs");
         model.addAttribute("metaDescription", "See which cities stretch your paycheck with our verdict engine.");

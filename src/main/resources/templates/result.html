@@ -548,6 +548,86 @@
             </div>
         </section>
 
+        <!-- SEO Enhancement: Narrative Context (Helpful Content) -->
+        <section class="insight-section"
+            style="padding: 3rem 0; background: var(--bg-page); border-top: 1px solid var(--border-subtle);">
+            <div class="container" style="max-width: 800px;">
+                <div class="content-block" style="font-size: 1.1rem; line-height: 1.7; color: var(--text-2);">
+                    <h3 style="color: var(--text-1); font-size: 1.5rem; margin-bottom: 1rem;">Why this comparison
+                        matters</h3>
+                    <p style="margin-bottom: 2rem;">
+                        Moving from <strong th:text="${cityA.city}">City A</strong> to <strong
+                            th:text="${cityB.city}">City B</strong>
+                        is a complex financial decision, especially for a <strong th:text="${job.title}">Job</strong>.
+                        While <span th:text="${cityB.city}">City B</span> might offer higher nominal salaries, the
+                        interplay of
+                        <span th:if="${result.offer.taxResult.stateTax > 0}">state taxes, </span>
+                        housing costs, and local purchasing power can significantly alter your real standards of living.
+                        This analysis isolates your "disposable margin" to reveal if a move actually builds wealth or
+                        just increases throughput.
+                    </p>
+
+                    <h3 style="color: var(--text-1); font-size: 1.5rem; margin-bottom: 1rem;">What most people overlook
+                    </h3>
+                    <p>
+                        When relocating for a <span th:text="${job.title}">Job</span> role, it's easy to fixate on the
+                        gross annual offer.
+                        However, the "Hidden Inflation" of lifestyle costs in <span th:text="${cityB.city}">City
+                            B</span>—specifically
+                        rent multipliers and insurance variances—often eats into that raise.
+                        Our <strong>Wealth Buffer Index</strong> (shown above) accounts for these leakages to show you
+                        the true long-term impact on your net worth.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEO Enhancement: Internal Linking Grid (The Bridge) -->
+        <section class="internal-linking-section"
+            style="padding: 3rem 0; background: var(--surface-1); border-top: 1px solid var(--border-subtle);">
+            <div class="container">
+                <div class="section-title" style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.5rem;">People also compared</h2>
+                    <p>Explore other scenarios to make the best decision.</p>
+                </div>
+
+                <div class="linking-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <!-- Same City, Different Jobs -->
+                    <div class="link-column">
+                        <h4
+                            style="margin-bottom: 1rem; color: var(--text-2); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Other Professions in <span th:text="${cityB.city}">City B</span>
+                        </h4>
+                        <ul class="link-list" style="list-style: none; padding: 0;">
+                            <li th:each="link : ${otherJobLinks}" style="margin-bottom: 0.75rem;">
+                                <a th:href="${link.url}" th:text="${link.text}" class="link-subtle"
+                                    style="color: var(--brand-primary); text-decoration: none; font-weight: 500;">
+                                    Software Engineer vs Teacher
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Same Job, Different Cities -->
+                    <div class="link-column">
+                        <h4
+                            style="margin-bottom: 1rem; color: var(--text-2); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Compare <span th:text="${job.title}">Job</span> in other cities
+                        </h4>
+                        <ul class="link-list" style="list-style: none; padding: 0;">
+                            <li th:each="link : ${otherCityLinks}" style="margin-bottom: 0.75rem;">
+                                <a th:href="${link.url}" th:text="${link.text}" class="link-subtle"
+                                    style="color: var(--brand-primary); text-decoration: none; font-weight: 500;">
+                                    Austin vs Dallas
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
 
         <!-- Footer with Legal Disclaimer -->
         <div th:replace="~{fragments/footer :: footer}"></div>

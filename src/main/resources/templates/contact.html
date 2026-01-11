@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Contact Us</title>
+    <meta name="description" th:content="${metaDescription}">
+
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/core.css">
+    <link rel="stylesheet" href="/css/result.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="theme-lucid">
+
+    <nav class="top-nav">
+        <div class="container">
+            <a href="/" class="logo">OfferVerdict</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- Hero -->
+        <section class="section-hero" style="background: var(--surface-1); padding: 4rem 0 2rem 0; text-align: center;">
+            <div class="container" style="max-width: 800px;">
+                <span class="badge"
+                    style="background: var(--brand-primary); color: white; padding: 4px 12px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Contact</span>
+                <h1 style="font-size: 2.5rem; margin-top: 1.5rem; letter-spacing: -0.03em;">Get in Touch</h1>
+                <p style="font-size: 1.25rem; color: var(--text-2); margin-top: 1rem;">We'd love to hear from you.</p>
+            </div>
+        </section>
+
+        <!-- Contact Box -->
+        <section class="section-contact" style="padding: 3rem 0; background: var(--bg-page);">
+            <div class="container" style="max-width: 600px;">
+                <div class="contact-card"
+                    style="background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 3rem; text-align: center; box-shadow: var(--shadow-sm);">
+                    <div class="icon" style="font-size: 3rem; margin-bottom: 1.5rem;">📧</div>
+                    <h3 style="margin-bottom: 1rem; color: var(--gray-900);">Email Us</h3>
+                    <p style="color: var(--gray-600); margin-bottom: 2rem; line-height: 1.6;">
+                        Have feedback, found a bug, or just want to share your success story?
+                    </p>
+                    <a href="mailto:spainhyeok@gmail.com"
+                        style="display: inline-block; font-size: 1.25rem; font-weight: 600; color: var(--brand-primary); text-decoration: none; padding: 0.5rem 1rem; background: var(--surface-1); border-radius: 8px;">
+                        spainhyeok@gmail.com
+                    </a>
+
+                    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--gray-100);">
+                        <p style="font-size: 0.9rem; color: var(--gray-500);">
+                            Based in Seoul, Korea.<br>
+                            Operating globally.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+</body>
+
+</html>

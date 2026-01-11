@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">About Us</title>
+    <meta name="description" th:content="${metaDescription}">
+
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/core.css">
+    <link rel="stylesheet" href="/css/result.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="theme-lucid">
+
+    <nav class="top-nav">
+        <div class="container">
+            <a href="/" class="logo">OfferVerdict</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- Hero -->
+        <section class="section-hero" style="background: var(--surface-1); padding: 4rem 0 2rem 0; text-align: center;">
+            <div class="container" style="max-width: 800px;">
+                <span class="badge"
+                    style="background: var(--brand-primary); color: white; padding: 4px 12px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">About
+                    the Creator</span>
+                <h1 style="font-size: 2.5rem; margin-top: 1.5rem; letter-spacing: -0.03em;">Why I Built This</h1>
+                <p style="font-size: 1.25rem; color: var(--text-2); margin-top: 1rem;">A personal note from Gabi.</p>
+            </div>
+        </section>
+
+        <!-- Story Content -->
+        <section class="section-story" style="padding: 3rem 0; background: var(--bg-page);">
+            <div class="container" style="max-width: 720px;">
+                <div class="content-block" style="font-size: 1.125rem; line-height: 1.8; color: var(--gray-800);">
+                    <p>Hi, I'm <strong>Gabi</strong>.</p>
+
+                    <p>A few years ago, I received what looked like a dream job offer. The salary was 30% higher than
+                        what I was making. I packed my bags, moved across the country, and expected my life to upgrade
+                        significantly.</p>
+
+                    <p><strong>I was wrong.</strong></p>
+
+                    <p>Between state taxes I hadn't calculated, a ridiculous increase in car insurance, and housing
+                        costs that were double what Zillow estimated, my "raise" effectively vanished. I was making more
+                        money on paper, but I felt poorer.</p>
+
+                    <hr style="margin: 2.5rem 0; border: 0; border-top: 1px solid var(--border-subtle);">
+
+                    <h3>OfferVerdict is the Tool I Wish I Had</h3>
+                    <p>I built OfferVerdict to solve this specific pain point. Most "cost of living calculators" just
+                        give you a generic percentage match. They don't tell you about the local tax nuances, the
+                        specific housing market reality, or the wealth-building potential over 10 years.</p>
+
+                    <p>My goal is simple: <strong>To help you make the best financial decision of your career, with eyes
+                            wide open.</strong></p>
+                </div>
+
+                <div style="margin-top: 4rem; text-align: center;">
+                    <a href="/contact" class="btn btn-primary">Get in Touch</a>
+                </div>
+            </div>
+        </section>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+</body>
+
+</html>

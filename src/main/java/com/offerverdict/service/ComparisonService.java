@@ -11,6 +11,7 @@ import com.offerverdict.model.HousingType;
 import com.offerverdict.model.JobInfo;
 import com.offerverdict.model.LifestyleMetrics;
 import com.offerverdict.model.Verdict;
+import com.offerverdict.model.LinkDTO;
 import com.offerverdict.util.SlugNormalizer;
 import org.springframework.stereotype.Service;
 
@@ -282,30 +283,59 @@ public class ComparisonService {
         return (residualB - residualA) / Math.abs(residualA) * 100.0;
     }
 
-    public List<String> relatedCityComparisons(String jobSlug,
+    public List<LinkDTO> relatedCityComparisons(String jobSlug,
             String baseCitySlug,
             String offerCitySlug,
             String queryString) {
         String canonicalJob = jobSlug;
         CityCostEntry origin = repository.getCity(baseCitySlug);
+
+        // Helper to format job title for display (naive but works for slugs)
+        String jobTitle = formatSlugToTitle(jobSlug);
+
         return repository.getCities().stream()
                 .filter(c -> !c.getSlug().equals(origin.getSlug()))
                 .filter(c -> !c.getSlug().equals(offerCitySlug))
                 .filter(c -> SlugNormalizer.isCanonicalCitySlug(c.getSlug()))
                 .sorted(Comparator.comparing(CityCostEntry::getSlug))
                 .limit(5)
-                .map(c -> "/" + canonicalJob + "-salary-" + origin.getSlug() + "-vs-" + c.getSlug() + queryString)
+                .map(c -> {
+                    String url = "/" + canonicalJob + "-salary-" + origin.getSlug() + "-vs-" + c.getSlug()
+                            + queryString;
+                    // SEO-Strong Anchor Text: "Software Engineer salary in Austin vs Dallas"
+                    String text = String.format("%s salary in %s vs %s", jobTitle, origin.getCity(), c.getCity());
+                    return new LinkDTO(url, text);
+                })
                 .toList();
     }
 
-    public List<String> relatedJobComparisons(String cityASlug,
+    public List<LinkDTO> relatedJobComparisons(String cityASlug,
             String cityBSlug,
             String queryString) {
+        CityCostEntry cityA = repository.getCity(cityASlug);
+        CityCostEntry cityB = repository.getCity(cityBSlug);
+
         return repository.getJobs().stream()
                 .limit(5)
-                .map(JobInfo::getSlug)
-                .map(slug -> "/" + slug + "-salary-" + cityASlug + "-vs-" + cityBSlug + queryString)
+                .map(job -> {
+                    String url = "/" + job.getSlug() + "-salary-" + cityASlug + "-vs-" + cityBSlug + queryString;
+                    // SEO-Strong Anchor Text: "Software Engineer vs Teacher in Austin"
+                    String text = String.format("%s vs %s cost of living", job.getTitle(), cityB.getCity());
+                    return new LinkDTO(url, text);
+                })
                 .collect(Collectors.toList());
+    }
+
+    private String formatSlugToTitle(String slug) {
+        // Simple helper to make slugs readable if JobInfo isn't available
+        // But for jobs we usually have JobInfo.
+        // For this context, let's just capitalize dashes.
+        // Ideally we would look up the JobInfo, but for speed:
+        if (slug == null)
+            return "";
+        return java.util.Arrays.stream(slug.split("-"))
+                .map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
+                .collect(Collectors.joining(" "));
     }
 
     public String buildCanonicalUrl(String path) {
