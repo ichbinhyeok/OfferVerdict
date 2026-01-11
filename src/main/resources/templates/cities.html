@@ -10,19 +10,68 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
 </head>
 
-<body>
-    <div class="container">
-        <div class="panel">
-            <h1>Compare cities</h1>
-            <ul class="related-list">
-                <li th:each="city : ${cities}">
-                    <a th:href="@{'/software-engineer-salary-' + ${city.slug} + '-vs-new-york-ny?currentSalary=120000&offerSalary=150000'}"
-                        th:text="${city.city + ', ' + city.state}"></a>
-                </li>
-            </ul>
+<body class="theme-lucid">
+    <nav class="top-nav">
+        <div class="container">
+            <a href="/" class="logo">OfferVerdict</a>
         </div>
-        <div class="footer">Not financial or tax advice.</div>
-    </div>
+    </nav>
+
+    <main class="main-content">
+        <section
+            style="padding: 4rem 0; background: var(--surface-1); border-bottom: 1px solid var(--border-subtle); text-align: center;">
+            <div class="container">
+                <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">OfferVerdict Directory</h1>
+                <p style="color: var(--text-2); font-size: 1.25rem;">Explore our database of jobs and cities.</p>
+            </div>
+        </section>
+
+        <section style="padding: 4rem 0;">
+            <div class="container">
+                <div class="directory-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 4rem;">
+
+                    <!-- Jobs Column -->
+                    <div class="dir-column">
+                        <h2
+                            style="font-size: 1.5rem; border-bottom: 2px solid var(--brand-primary); padding-bottom: 1rem; margin-bottom: 2rem; display: inline-block;">
+                            Browse by Job</h2>
+                        <ul style="list-style: none; padding: 0; columns: 1;">
+                            <li th:each="job : ${jobs}" style="margin-bottom: 1rem;">
+                                <a th:href="@{'/job/' + ${job.slug}}"
+                                    style="text-decoration: none; font-size: 1.1rem; color: var(--text-1); font-weight: 500; display: block; padding: 0.5rem; border-radius: 6px; transition: background 0.1s;"
+                                    onmouseover="this.style.background='var(--surface-2)'"
+                                    onmouseout="this.style.background='transparent'">
+                                    <span th:text="${job.title}">Software Engineer</span>
+                                    <span style="color: var(--text-3); font-size: 0.9em;">→</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Cities Column -->
+                    <div class="dir-column">
+                        <h2
+                            style="font-size: 1.5rem; border-bottom: 2px solid var(--brand-primary); padding-bottom: 1rem; margin-bottom: 2rem; display: inline-block;">
+                            Browse by City</h2>
+                        <ul style="list-style: none; padding: 0; columns: 1;">
+                            <li th:each="city : ${cities}" style="margin-bottom: 1rem;">
+                                <a th:href="@{'/salary-check/' + ${city.slug} + '/100000'}"
+                                    style="text-decoration: none; font-size: 1.1rem; color: var(--text-1); font-weight: 500; display: block; padding: 0.5rem; border-radius: 6px; transition: background 0.1s;"
+                                    onmouseover="this.style.background='var(--surface-2)'"
+                                    onmouseout="this.style.background='transparent'">
+                                    <span th:text="${city.city + ', ' + city.state}">Austin, TX</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
 </body>
 
 </html>
