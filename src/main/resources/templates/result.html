@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/tokens.css">
     <link rel="stylesheet" href="/css/core.css">
     <link rel="stylesheet" href="/css/result.css">
+    <link rel="stylesheet" href="/css/seo-enhancements.css">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +21,8 @@
     <!-- SEO -->
     <meta name="description" th:content="${metaDescription}">
     <link rel="canonical" th:href="${canonicalUrl}">
+    <!-- SEO Enhancement: Conditional noindex for low-value combinations -->
+    <meta th:if="${!shouldIndex}" name="robots" content="noindex, follow">
 
     <!-- Open Graph / Viral Meta -->
     <meta property="og:title" th:content="${ogTitle}" />
@@ -465,6 +468,85 @@
             </div>
         </section>
 
+        <!-- SEO Enhancement: City Context Section -->
+        <section class="city-context-section" th:if="${cityBContext != null}">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Understanding <span th:text="${cityB.city}">City</span></h2>
+                    <p>Key insights about living and working in <span th:text="${cityB.city}">City</span>.</p>
+                </div>
+
+                <div class="reality-grid">
+                    <div class="reality-card">
+                        <div class="icon">🏢</div>
+                        <div class="reality-content">
+                            <h4>Job Market</h4>
+                            <p th:text="${cityBContext.jobMarketSummary}">Job market information...</p>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">🏘️</div>
+                        <div class="reality-content">
+                            <h4>Housing Market</h4>
+                            <p th:text="${cityBContext.housingTrends}">Housing trends...</p>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">🏭</div>
+                        <div class="reality-content">
+                            <h4>Industry Focus</h4>
+                            <p th:text="${cityBContext.industryFocus}">Industry information...</p>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">🌟</div>
+                        <div class="reality-content">
+                            <h4>Quality of Life</h4>
+                            <p th:text="${cityBContext.qualityOfLife}">Quality of life...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEO Enhancement: Job Context Section -->
+        <section class="job-context-section" th:if="${jobContext != null and job.slug != 'general-professional'}">
+            <div class="container">
+                <div class="section-title">
+                    <h2><span th:text="${job.title}">Job</span> Career Insights</h2>
+                    <p>National outlook and career information for this profession.</p>
+                </div>
+
+                <div class="reality-grid">
+                    <div class="reality-card highlight">
+                        <div class="icon">📊</div>
+                        <div class="reality-content">
+                            <h4>National Outlook</h4>
+                            <p th:text="${jobContext.nationalOutlook}">National job market outlook...</p>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">🎓</div>
+                        <div class="reality-content">
+                            <h4>Skill Requirements</h4>
+                            <p th:text="${jobContext.skillRequirements}">Required skills...</p>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">📈</div>
+                        <div class="reality-content">
+                            <h4>Career Growth</h4>
+                            <p th:text="${jobContext.careerGrowth}">Career progression...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
 
         <!-- Footer with Legal Disclaimer -->

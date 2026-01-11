@@ -3,6 +3,7 @@ package com.offerverdict.controller;
 import com.offerverdict.config.AppProperties;
 import com.offerverdict.data.DataRepository;
 import com.offerverdict.exception.ResourceNotFoundException;
+import com.offerverdict.service.ContentEnrichmentService;
 import com.offerverdict.model.CityCostEntry;
 import com.offerverdict.model.ComparisonResult;
 import com.offerverdict.model.HouseholdType;
@@ -42,15 +43,18 @@ public class ComparisonController {
     private final ComparisonService comparisonService;
     private final AppProperties appProperties;
     private final ObjectMapper objectMapper;
+    private final ContentEnrichmentService contentEnrichmentService;
 
     public ComparisonController(DataRepository repository,
             ComparisonService comparisonService,
             AppProperties appProperties,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            ContentEnrichmentService contentEnrichmentService) {
         this.repository = repository;
         this.comparisonService = comparisonService;
         this.appProperties = appProperties;
         this.objectMapper = objectMapper;
+        this.contentEnrichmentService = contentEnrichmentService;
     }
 
     @GetMapping({ "/", "/start" })
@@ -152,6 +156,23 @@ public class ComparisonController {
         CityCostEntry cityEntryB = repository.findCityLoosely(normalizedCityB)
                 .orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityB));
 
+        // SEO Enhancement: Enforce alphabetical city order to prevent duplicate content
+        // Example: austin-vs-dallas (canonical) vs dallas-vs-austin (redirect)
+        boolean shouldSwapCities = cityEntryA.getSlug().compareTo(cityEntryB.getSlug()) > 0;
+        if (shouldSwapCities) {
+            // Swap cities and redirect to canonical URL
+            String canonicalSwappedPath = "/" + jobInfo.getSlug() + "-salary-" + cityEntryB.getSlug() + "-vs-"
+                    + cityEntryA.getSlug();
+            RedirectView redirectView = new RedirectView(canonicalSwappedPath, true);
+            // Swap salary params too
+            if (currentSalary != null && offerSalary != null) {
+                addRedirectParams(redirectAttributes, offerSalary, currentSalary, fourOhOneKRate, monthlyInsurance,
+                        rsuAmount, isMarried);
+            }
+            redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
+            return redirectView;
+        }
+
         String canonicalPath = "/" + jobInfo.getSlug() + "-salary-" + cityEntryA.getSlug() + "-vs-"
                 + cityEntryB.getSlug();
 
@@ -178,6 +199,22 @@ public class ComparisonController {
             offerSalary = getMedianSalary(jobInfo.getSlug(), cityEntryB.getSlug());
         }
 
+        // SEO Enhancement: Canonicalize salaries to $5K buckets to reduce
+        // near-duplicates
+        // Example: $102,500 -> $100,000 (canonical)
+        double canonicalCurrentSalary = canonicalizeSalary(currentSalary);
+        double canonicalOfferSalary = canonicalizeSalary(offerSalary);
+
+        if (currentSalary != canonicalCurrentSalary || offerSalary != canonicalOfferSalary) {
+            // Redirect to canonical salary bucket
+            RedirectView redirectView = new RedirectView(canonicalPath, true);
+            addRedirectParams(redirectAttributes, canonicalCurrentSalary, canonicalOfferSalary, fourOhOneKRate,
+                    monthlyInsurance, rsuAmount, isMarried);
+            redirectView.setStatusCode(HttpStatus.FOUND); // 302 for query param changes
+            return redirectView;
+        }
+
+        // Ensure non-null for calculation
         HouseholdType parsedHouseholdType = HouseholdType.SINGLE;
         HousingType parsedHousingType = HousingType.RENT;
 
@@ -253,6 +290,15 @@ public class ComparisonController {
                 comparisonService.getTaxBreakdown(safeCurrentSalary, cityEntryA.getState()));
         model.addAttribute("offerTaxBreakdown",
                 comparisonService.getTaxBreakdown(safeOfferSalary, cityEntryB.getState()));
+
+        // SEO Enhancement: Determine if this page should be indexed
+        boolean shouldIndex = shouldIndexThisPage(jobInfo, cityEntryA, cityEntryB, safeCurrentSalary, safeOfferSalary);
+        model.addAttribute("shouldIndex", shouldIndex);
+
+        // SEO Enhancement: Add contextual content
+        model.addAttribute("cityAContext", contentEnrichmentService.getCityContext(cityEntryA.getSlug()).orElse(null));
+        model.addAttribute("cityBContext", contentEnrichmentService.getCityContext(cityEntryB.getSlug()).orElse(null));
+        model.addAttribute("jobContext", contentEnrichmentService.getJobContext(jobInfo.getSlug()).orElse(null));
 
         return "result";
     }
@@ -338,6 +384,42 @@ public class ComparisonController {
         return 75000; // Fallback National Median
     }
 
+    /**
+     * SEO Enhancement: Canonicalize salary to nearest $5K bucket.
+     * Reduces near-duplicate pages (e.g., $102,500 vs $100,000).
+     */
+    private double canonicalizeSalary(double salary) {
+        int bucket = 5000;
+        return Math.round(salary / bucket) * bucket;
+    }
+
+    /**
+     * SEO Enhancement: Determine if this page combination should be indexed.
+     * Prevents indexing of low-value combinations to avoid thin content penalties.
+     */
+    private boolean shouldIndexThisPage(JobInfo job, CityCostEntry cityA, CityCostEntry cityB,
+            double currentSalary, double offerSalary) {
+        // Don't index if both cities are low-priority (Tier 3+)
+        if (cityA.getTier() >= 3 && cityB.getTier() >= 3) {
+            return false;
+        }
+
+        // Don't index if job is not "major" and both cities are not Tier 1
+        if (!job.isMajor() && cityA.getTier() > 1 && cityB.getTier() > 1) {
+            return false;
+        }
+
+        // Don't index extreme salary outliers (< $20k or > $500k)
+        if (currentSalary < 20000 || currentSalary > 500000) {
+            return false;
+        }
+        if (offerSalary < 20000 || offerSalary > 500000) {
+            return false;
+        }
+
+        return true; // Index this page
+    }
+
     private double clampSalary(double salary) {
         return Math.min(Math.max(salary, MIN_SALARY), MAX_SALARY);
     }
@@ -374,10 +456,10 @@ public class ComparisonController {
         return data;
     }
 
-    private String toJson(Map<String, Object> payload) {
+    private String toJson(Object obj) {
         try {
-            return objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException e) {
+            return objectMapper.writeValueAsString(obj);
+        } catch (Exception e) {
             return "{}";
         }
     }

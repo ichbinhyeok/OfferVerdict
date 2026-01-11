@@ -1,0 +1,287 @@
+/* SEO Enhancement Sections - Improved Design */
+
+/* City Context & Job Context Sections */
+.city-context-section,
+.job-context-section {
+    padding: var(--space-xl) 0;
+    background: linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%);
+}
+
+.city-context-section .section-title,
+.job-context-section .section-title {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+}
+
+.city-context-section .section-title h2,
+.job-context-section .section-title h2 {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: var(--gray-900);
+    margin-bottom: var(--space-sm);
+}
+
+.city-context-section .section-title p,
+.job-context-section .section-title p {
+    font-size: 1.1rem;
+    color: var(--gray-600);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Enhanced Reality Cards for SEO Content */
+.city-context-section .reality-card,
+.job-context-section .reality-card {
+    background: var(--white);
+    padding: var(--space-xl);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid var(--gray-100);
+}
+
+.city-context-section .reality-card:hover,
+.job-context-section .reality-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    border-color: var(--gray-200);
+}
+
+/* Icon Styling with Gradients */
+.city-context-section .reality-card .icon,
+.job-context-section .reality-card .icon {
+    font-size: 2.5rem !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    width: 72px !important;
+    height: 72px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: var(--radius-lg) !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    transition: transform 0.3s ease !important;
+}
+
+.city-context-section .reality-card:hover .icon,
+.job-context-section .reality-card:hover .icon {
+    transform: scale(1.1) rotate(5deg) !important;
+}
+
+/* Different gradient for each card type */
+.city-context-section .reality-grid .reality-card:nth-child(1) .icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.city-context-section .reality-grid .reality-card:nth-child(2) .icon {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+}
+
+.city-context-section .reality-grid .reality-card:nth-child(3) .icon {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+}
+
+.city-context-section .reality-grid .reality-card:nth-child(4) .icon {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%) !important;
+}
+
+.job-context-section .reality-grid .reality-card:nth-child(1) .icon {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
+}
+
+.job-context-section .reality-grid .reality-card:nth-child(2) .icon {
+    background: linear-gradient(135deg, #30cfd0 0%, #330867 100%) !important;
+}
+
+.job-context-section .reality-grid .reality-card:nth-child(3) .icon {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+}
+
+/* Content Styling - Better Readability */
+.city-context-section .reality-content h4,
+.job-context-section .reality-content h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: var(--space-md);
+}
+
+.city-context-section .reality-content p,
+.job-context-section .reality-content p {
+    font-size: 0.95rem;
+    color: var(--gray-700);
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* Highlight key phrases */
+.city-context-section .reality-content p strong,
+.job-context-section .reality-content p strong {
+    color: var(--gray-900);
+    font-weight: 600;
+}
+
+/* Highlight card for job context */
+.job-context-section .reality-card.highlight {
+    border: 2px solid #667eea;
+    background: linear-gradient(145deg, var(--white) 0%, #f8f9ff 100%);
+}
+
+.job-context-section .reality-card.highlight .icon {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Enhanced Footer Styling */
+.site-footer {
+    background: linear-gradient(180deg, var(--gray-50) 0%, var(--gray-100) 100%);
+    padding: var(--space-xl) 0;
+    margin-top: var(--space-xl);
+    border-top: 2px solid var(--gray-200);
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+}
+
+.footer-disclaimer {
+    background: var(--white);
+    padding: var(--space-xl);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-lg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--gray-200);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--gray-700);
+}
+
+.footer-disclaimer strong {
+    color: var(--gray-900);
+    font-weight: 700;
+}
+
+.footer-disclaimer a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.footer-disclaimer a:hover {
+    border-bottom-color: #667eea;
+}
+
+.trust-badges {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: var(--space-lg) 0;
+}
+
+.trust-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.trust-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--gray-300);
+}
+
+.footer-nav {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.footer-nav a {
+    color: var(--gray-600);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+}
+
+.footer-nav a:hover {
+    color: var(--gray-900);
+}
+
+.footer-copyright {
+    text-align: center;
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--gray-200);
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+
+.footer-copyright a {
+    color: var(--gray-600);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-copyright a:hover {
+    color: var(--gray-900);
+}
+
+/* Link Subtle Styling */
+.link-subtle {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.link-subtle:hover {
+    border-bottom-color: #667eea;
+    color: #5568d3;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+
+    .city-context-section .reality-card .icon,
+    .job-context-section .reality-card .icon {
+        width: 56px;
+        height: 56px;
+        font-size: 2rem;
+    }
+
+    .city-context-section .reality-card,
+    .job-context-section .reality-card {
+        padding: var(--space-lg);
+    }
+
+    .footer-disclaimer {
+        padding: var(--space-lg);
+        font-size: 0.85rem;
+    }
+
+    .trust-badges {
+        gap: var(--space-sm);
+    }
+
+    .trust-badge {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+}

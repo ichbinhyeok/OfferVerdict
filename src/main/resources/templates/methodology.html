@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Our Methodology - OfferVerdict</title>
+    <meta name="description" th:content="${metaDescription}">
+
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/core.css">
+    <link rel="stylesheet" href="/css/result.css">
+    <link rel="stylesheet" href="/css/seo-enhancements.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="theme-lucid">
+
+    <nav class="top-nav">
+        <div class="container">
+            <a href="/" class="logo">OfferVerdict</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="verdict-section neutral-blue">
+            <div class="container">
+                <div class="verdict-header">
+                    <span class="badge-source">TRANSPARENCY & METHODOLOGY</span>
+                </div>
+
+                <div class="verdict-display">
+                    <h1 class="verdict-text" style="font-size: 2.5rem;">How We Calculate Your Real Buying Power</h1>
+                    <div class="verdict-sub">Data-driven, transparent, and unbiased analysis you can trust.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Sources Section -->
+        <section class="evidence-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Our Data Sources</h2>
+                    <p>We rely exclusively on authoritative, publicly available data from government agencies and
+                        established research organizations.</p>
+                </div>
+
+                <div class="reality-grid">
+                    <div class="reality-card">
+                        <div class="icon">🏛️</div>
+                        <div class="reality-content">
+                            <h4>IRS Tax Tables (2025)</h4>
+                            <p><strong>Updated:</strong> January 2026</p>
+                            <p>We use official federal income tax brackets, standard deductions, and filing status
+                                adjustments published by the Internal Revenue Service. This ensures our tax calculations
+                                reflect actual 2025 tax law. State tax data is sourced from individual state revenue
+                                departments and updated annually.</p>
+                            <p><strong>Why trustworthy:</strong> Official government data, legally binding tax rates.
+                            </p>
+                            <a href="https://www.irs.gov" target="_blank" rel="noopener">Verify Source →</a>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">📊</div>
+                        <div class="reality-content">
+                            <h4>Bureau of Labor Statistics (BLS)</h4>
+                            <p><strong>Updated:</strong> Quarterly</p>
+                            <p>Median salaries by occupation and metropolitan area come from the BLS Occupational
+                                Employment and Wage Statistics (OEWS) program. This data represents surveys of over
+                                200,000 establishments nationwide. We use this for default salary estimates when users
+                                don't provide specific figures.</p>
+                            <p><strong>Why trustworthy:</strong> Largest employment survey in the US, conducted by the
+                                Department of Labor.</p>
+                            <a href="https://www.bls.gov" target="_blank" rel="noopener">Verify Source →</a>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">🏘️</div>
+                        <div class="reality-content">
+                            <h4>Numbeo Cost of Living Index</h4>
+                            <p><strong>Updated:</strong> Continuously (user-contributed)</p>
+                            <p>Housing costs, groceries, transportation, and local purchasing power indices are sourced
+                                from Numbeo, the world's largest cost of living database. Data is crowdsourced from
+                                millions of users and cross-validated against official statistics. We use city-level
+                                averages for rent and living expenses.</p>
+                            <p><strong>Why trustworthy:</strong> Over 1 million data points, cross-validated with
+                                government statistics.</p>
+                            <a href="https://www.numbeo.com" target="_blank" rel="noopener">Verify Source →</a>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">🏛️</div>
+                        <div class="reality-content">
+                            <h4>US Census Bureau</h4>
+                            <p><strong>Updated:</strong> Annually</p>
+                            <p>Population data, household income statistics, and demographic information come from the
+                                US Census Bureau's American Community Survey (ACS). This provides context for
+                                understanding local economic conditions and cost of living variations.</p>
+                            <p><strong>Why trustworthy:</strong> Official government census data, constitutionally
+                                mandated.</p>
+                            <a href="https://www.census.gov" target="_blank" rel="noopener">Verify Source →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calculation Methodology -->
+        <section class="simulator-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Our Calculation Methodology</h2>
+                    <p>We follow a systematic 5-step process to calculate your real buying power.</p>
+                </div>
+
+                <div class="simulator-box">
+                    <div class="lab-container">
+                        <div class="lab-column full-width">
+                            <h3>Step 1: Federal Tax Calculation</h3>
+                            <p>We apply the IRS progressive tax brackets for your filing status (single or married). For
+                                example, a single filer earning $100,000 in 2025 pays:</p>
+                            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                                <li>10% on first $11,600 = $1,160</li>
+                                <li>12% on $11,601 - $47,150 = $4,266</li>
+                                <li>22% on $47,151 - $100,000 = $11,627</li>
+                                <li><strong>Total federal tax: $17,053 (17.05% effective rate)</strong></li>
+                            </ul>
+                            <p style="margin-top: 1rem;">We then subtract the standard deduction ($14,600 for single
+                                filers in 2025) before applying brackets.</p>
+                        </div>
+
+                        <div class="lab-column full-width" style="margin-top: 2rem;">
+                            <h3>Step 2: State and Local Taxes</h3>
+                            <p>Each state has different income tax structures:</p>
+                            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                                <li><strong>No income tax:</strong> Texas, Florida, Nevada, Washington, etc.</li>
+                                <li><strong>Flat rate:</strong> Illinois (4.95%), Pennsylvania (3.07%), etc.</li>
+                                <li><strong>Progressive:</strong> California (1-13.3%), New York (4-10.9%), etc.</li>
+                            </ul>
+                            <p style="margin-top: 1rem;">Some cities also impose local income taxes (e.g., New York City
+                                adds 3.078-3.876%). We calculate these based on official tax tables from each
+                                jurisdiction.</p>
+                        </div>
+
+                        <div class="lab-column full-width" style="margin-top: 2rem;">
+                            <h3>Step 3: Housing Costs</h3>
+                            <p>We estimate monthly housing costs using Numbeo's median rent data for each city. This
+                                represents the typical cost for a one-bedroom apartment in a standard neighborhood. For
+                                example:</p>
+                            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                                <li>San Francisco: ~$3,200/month</li>
+                                <li>Austin: ~$2,100/month</li>
+                                <li>Indianapolis: ~$1,150/month</li>
+                            </ul>
+                            <p style="margin-top: 1rem;"><strong>Important:</strong> Actual rent varies significantly by
+                                neighborhood, apartment size, and amenities. Our estimates represent city-wide averages.
+                            </p>
+                        </div>
+
+                        <div class="lab-column full-width" style="margin-top: 2rem;">
+                            <h3>Step 4: Living Expenses</h3>
+                            <p>We calculate monthly living costs (groceries, utilities, transportation, healthcare)
+                                using
+                                Numbeo's cost of living indices. These are scaled relative to the national average. For
+                                example, if a city's cost of living index is 120, living expenses are approximately 20%
+                                higher than the national average.</p>
+                            <p style="margin-top: 1rem;">We estimate base living expenses at approximately $1,200/month
+                                for a single person, then adjust by the city's cost index.</p>
+                        </div>
+
+                        <div class="lab-column full-width" style="margin-top: 2rem;">
+                            <h3>Step 5: Net Residual (Savings Potential)</h3>
+                            <p>Finally, we calculate your monthly residual:</p>
+                            <p
+                                style="margin-top: 1rem; font-family: 'JetBrains Mono', monospace; background: #f5f5f5; padding: 1rem; border-radius: 8px;">
+                                <strong>Residual = Gross Salary - Federal Tax - State Tax - Local Tax - Housing - Living
+                                    Costs</strong>
+                            </p>
+                            <p style="margin-top: 1rem;">This residual represents your true savings potential or
+                                discretionary spending capacity. We then project this over 10 years with 7% compound
+                                growth to estimate long-term wealth accumulation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- What We Don't Include -->
+        <section class="evidence-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>What We Don't Include</h2>
+                    <p>To maintain simplicity and broad applicability, we intentionally exclude certain factors.</p>
+                </div>
+
+                <div class="reality-grid">
+                    <div class="reality-card">
+                        <div class="icon">⚠️</div>
+                        <div class="reality-content">
+                            <h4>Individual Tax Deductions</h4>
+                            <p>We use only the standard deduction, not itemized deductions (mortgage interest,
+                                charitable
+                                contributions, etc.). Most taxpayers take the standard deduction, making this the most
+                                representative approach.</p>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">💼</div>
+                        <div class="reality-content">
+                            <h4>Employer-Specific Benefits</h4>
+                            <p>401(k) matching, HSA contributions, stock options, and bonuses vary dramatically by
+                                employer. Users can add these via our Simulation Lab, but we don't include them in
+                                default calculations.</p>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">🏘️</div>
+                        <div class="reality-content">
+                            <h4>Neighborhood-Level Variations</h4>
+                            <p>Rent in downtown San Francisco differs vastly from outer neighborhoods. We use city-wide
+                                averages, which may not reflect your specific neighborhood choice.</p>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">🛒</div>
+                        <div class="reality-content">
+                            <h4>Personal Spending Habits</h4>
+                            <p>Lifestyle choices (dining out frequency, travel, hobbies) vary enormously. Our living
+                                cost
+                                estimates represent typical expenses for a single person with moderate spending.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Limitations & Disclaimers -->
+        <section class="simulator-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Important Disclaimers</h2>
+                </div>
+
+                <div class="simulator-box">
+                    <div class="lab-container">
+                        <div class="lab-column full-width">
+                            <h3>⚖️ This Is Not Financial Advice</h3>
+                            <p>OfferVerdict provides <strong>educational estimates</strong> based on publicly available
+                                data. We are not financial advisors, tax professionals, or career counselors. Our
+                                calculations are simplified models designed to help you understand general cost of
+                                living
+                                differences.</p>
+                            <p style="margin-top: 1rem;"><strong>Before making major financial decisions</strong> (job
+                                changes, relocations, salary negotiations), consult with:</p>
+                            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                                <li>Certified Financial Planner (CFP®) for comprehensive financial planning</li>
+                                <li>Certified Public Accountant (CPA) for tax implications</li>
+                                <li>Career counselor for job market insights</li>
+                            </ul>
+                        </div>
+
+                        <div class="lab-column full-width" style="margin-top: 2rem;">
+                            <h3>📊 Estimates, Not Guarantees</h3>
+                            <p>All figures on OfferVerdict are <strong>estimates</strong> based on:</p>
+                            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                                <li>City-wide averages (your actual costs may vary by 20-50%)</li>
+                                <li>Current tax law (subject to change)</li>
+                                <li>Median salary data (your offer may differ significantly)</li>
+                                <li>Typical spending patterns (your lifestyle may differ)</li>
+                            </ul>
+                            <p style="margin-top: 1rem;">Use our tool as a <strong>starting point for research</strong>,
+                                not as definitive financial guidance.</p>
+                        </div>
+
+                        <div class="lab-column full-width" style="margin-top: 2rem;">
+                            <h3>🔄 Data Freshness</h3>
+                            <p>We update our data on the following schedule:</p>
+                            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                                <li><strong>Tax tables:</strong> Annually in January (last updated: <span
+                                        th:text="${lastTaxUpdate}">January 2026</span>)</li>
+                                <li><strong>Cost of living data:</strong> Monthly from Numbeo (last updated: <span
+                                        th:text="${#temporals.format(lastCostUpdate, 'MMMM d, yyyy')}">January 11,
+                                        2026</span>)</li>
+                                <li><strong>Salary benchmarks:</strong> Quarterly from BLS</li>
+                            </ul>
+                            <p style="margin-top: 1rem;">Despite regular updates, economic conditions change rapidly.
+                                Always verify current data for critical decisions.</p>
+                        </div>
+
+                        <div class="lab-column full-width" style="margin-top: 2rem;">
+                            <h3>🎯 Your Situation Is Unique</h3>
+                            <p>Our calculations assume:</p>
+                            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                                <li>Single filer with no dependents (default)</li>
+                                <li>Renting a one-bedroom apartment</li>
+                                <li>Standard deduction (not itemizing)</li>
+                                <li>Moderate spending habits</li>
+                                <li>No significant debt or assets</li>
+                            </ul>
+                            <p style="margin-top: 1rem;">If your situation differs significantly (married, children,
+                                homeowner, high debt, etc.), our estimates may be less accurate. Use the Simulation Lab
+                                to adjust for your specific circumstances.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Update Schedule -->
+        <section class="evidence-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Update Schedule</h2>
+                    <p>We maintain data freshness through regular updates from authoritative sources.</p>
+                </div>
+
+                <table class="comparison-table" style="width: 100%; max-width: 800px; margin: 0 auto;">
+                    <thead>
+                        <tr>
+                            <th>Data Type</th>
+                            <th>Update Frequency</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Federal Tax Tables</td>
+                            <td>Annually (January)</td>
+                            <td th:text="${lastTaxUpdate}">January 2026</td>
+                        </tr>
+                        <tr>
+                            <td>State Tax Tables</td>
+                            <td>Annually (January)</td>
+                            <td th:text="${lastTaxUpdate}">January 2026</td>
+                        </tr>
+                        <tr>
+                            <td>Cost of Living Data</td>
+                            <td>Monthly</td>
+                            <td th:text="${#temporals.format(lastCostUpdate, 'MMMM d, yyyy')}">January 11, 2026</td>
+                        </tr>
+                        <tr>
+                            <td>Salary Benchmarks</td>
+                            <td>Quarterly</td>
+                            <td>January 2026</td>
+                        </tr>
+                        <tr>
+                            <td>Housing Market Data</td>
+                            <td>Monthly</td>
+                            <td th:text="${#temporals.format(lastCostUpdate, 'MMMM d, yyyy')}">January 11, 2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+
+</body>
+
+</html>

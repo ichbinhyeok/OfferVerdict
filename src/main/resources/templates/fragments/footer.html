@@ -1,16 +1,40 @@
 <div th:fragment="footer" class="site-footer">
     <div class="footer-content">
         <div class="footer-disclaimer">
-            <strong>Disclaimer:</strong> Estimates for informational purposes only.
-            Actual costs vary. Consult professionals before making financial decisions.
+            <strong>⚖️ Financial Disclaimer:</strong> OfferVerdict provides <strong>educational estimates</strong> for
+            informational purposes only.
+            All calculations are based on publicly available data from the IRS, Bureau of Labor Statistics, and Numbeo
+            Cost of Living Index.
+            <strong>This is not financial, tax, or career advice.</strong> Actual costs, taxes, and salaries vary
+            significantly based on individual circumstances,
+            neighborhood, lifestyle, and employer. We strongly recommend consulting with a Certified Financial Planner
+            (CFP®) or Certified Public Accountant (CPA)
+            before making major financial decisions such as job changes or relocations.
+            <br><br>
+            <strong>📊 Data Sources:</strong> Federal & state tax tables (IRS, 2025), salary data (BLS OEWS), cost of
+            living indices (Numbeo),
+            housing market data (Zillow, Redfin). Last updated: <span
+                th:text="${#temporals.format(#temporals.createNow(), 'MMMM yyyy')}">January 2026</span>.
+            <br>
+            <a href="/methodology" class="link-subtle">Learn about our methodology →</a>
         </div>
+
         <div class="trust-badges">
-            <span class="trust-badge">🇺🇸 US-wide data</span>
-            <span class="trust-badge">📊 Real-time calculations</span>
-            <span class="trust-badge">🔒 Privacy-first</span>
+            <span class="trust-badge">🏛️ IRS Data 2025</span>
+            <span class="trust-badge">📊 BLS Verified</span>
+            <span class="trust-badge">🔒 Privacy-First</span>
+            <span class="trust-badge">🔄 Updated Monthly</span>
         </div>
+
+        <div class="footer-nav"
+            style="margin-top: 1.5rem; display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+            <a href="/methodology" class="link-subtle">Methodology</a>
+            <a href="mailto:team@offerverdict.com" class="link-subtle">Contact</a>
+        </div>
+
         <div class="footer-copyright">
-            © 2026 OfferVerdict
+            © 2026 OfferVerdict |
+            <a href="mailto:team@offerverdict.com" class="link-subtle">team@offerverdict.com</a>
         </div>
     </div>
 </div>
