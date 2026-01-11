@@ -113,14 +113,17 @@ public class SitemapController {
 
         // 3. Job x CityA x CityB Comparisons - [OPTIMIZED]
         // Instead of ALL combinations, focus on High Priority Pairs or Major Jobs
-        List<JobInfo> majorJobs = jobs.stream().filter(JobInfo::isMajor).toList();
-
-        for (JobInfo job : majorJobs) {
+        for (JobInfo job : jobs) { // Iterate all jobs, filter inside
             for (CityCostEntry cityA : topCities) {
                 for (CityCostEntry cityB : topCities) {
                     if (!cityA.getSlug().equals(cityB.getSlug())) {
-                        // Logic: Only generate if City A or B is Tier 1
-                        if (cityA.getTier() == 1 || cityB.getTier() == 1) {
+
+                        // LOGIC MUST MATCH ComparisonController.shouldIndexThisPage()
+                        // 1. If Job is NOT major, at least one city must be Tier 1
+                        boolean isMajorJob = job.isMajor();
+                        boolean isAtLeastOneTier1 = (cityA.getTier() == 1 || cityB.getTier() == 1);
+
+                        if (isMajorJob || isAtLeastOneTier1) {
                             String path = "/" + job.getSlug() + "-salary-" + cityA.getSlug() + "-vs-" + cityB.getSlug();
                             paths.add(comparisonService.buildCanonicalUrl(path));
                         }

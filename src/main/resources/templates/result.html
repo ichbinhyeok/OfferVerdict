@@ -31,6 +31,26 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" th:content="${ogTitle}">
     <meta name="twitter:description" th:content="${ogDescription}">
+
+    <!-- JSON-LD Structured Data: WebApplication -->
+    <script type="application/ld+json" th:inline="javascript">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": [[${title}]],
+      "url": [[${canonicalUrl}]],
+      "description": [[${metaDescription}]],
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web Browser",
+      "browserRequirements": "Requires JavaScript. Optimized for Chrome, Safari, Edge.",
+      "featureList": "Cost of Living Comparison, Salary Calculator, Purchasing Power Parity",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
 </head>
 
 <body class="theme-lucid">

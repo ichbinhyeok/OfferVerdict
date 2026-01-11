@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -284,7 +285,8 @@ public class ComparisonController {
         model.addAttribute("otherCityLinks", comparisonService.relatedCityComparisons(jobInfo.getSlug(),
                 cityEntryA.getSlug(), cityEntryB.getSlug(), queryString));
         model.addAttribute("structuredDataJson",
-                toJson(buildStructuredData(title, metaDescription, canonicalUrl, result)));
+                toJson(buildStructuredData(title, metaDescription, canonicalUrl, result, cityEntryA, cityEntryB,
+                        offerSalary)));
 
         model.addAttribute("currentTaxBreakdown",
                 comparisonService.getTaxBreakdown(safeCurrentSalary, cityEntryA.getState()));
@@ -399,6 +401,11 @@ public class ComparisonController {
      */
     private boolean shouldIndexThisPage(JobInfo job, CityCostEntry cityA, CityCostEntry cityB,
             double currentSalary, double offerSalary) {
+        // PERMANENTLY NOINDEX Custom / User-Generated Jobs to prevent spam
+        if ("Custom".equalsIgnoreCase(job.getCategory())) {
+            return false;
+        }
+
         // Don't index if both cities are low-priority (Tier 3+)
         if (cityA.getTier() >= 3 && cityB.getTier() >= 3) {
             return false;
@@ -432,7 +439,7 @@ public class ComparisonController {
     }
 
     private Map<String, Object> buildStructuredData(String title, String description, String canonicalUrl,
-            ComparisonResult result) {
+            ComparisonResult result, CityCostEntry cityEntryA, CityCostEntry cityEntryB, double offerSalary) {
         Map<String, Object> webpage = new HashMap<>();
         webpage.put("@context", "https://schema.org");
         webpage.put("@type", "WebPage");
@@ -443,13 +450,52 @@ public class ComparisonController {
         Map<String, Object> faq = new HashMap<>();
         faq.put("@context", "https://schema.org");
         faq.put("@type", "FAQPage");
-        faq.put("mainEntity", List.of(
-                Map.of(
-                        "@type", "Question",
-                        "name", "What is the true cost of living difference?",
-                        "acceptedAnswer", Map.of(
-                                "@type", "Answer",
-                                "text", result.getVerdictCopy()))));
+
+        List<Map<String, Object>> questions = new ArrayList<>();
+
+        // Q1: The Verdict
+        questions.add(Map.of(
+                "@type", "Question",
+                "name", String.format("Is a salary of $%s good in %s vs %s?",
+                        String.format("%,.0f", offerSalary), cityEntryB.getCity(), cityEntryA.getCity()),
+                "acceptedAnswer", Map.of(
+                        "@type", "Answer",
+                        "text", result.getVerdictCopy() + " " + result.getValueDiffMsg())));
+
+        // Q2: Cost of Living Context
+        String housingDiff = result.getOffer().getRent() > result.getCurrent().getRent() ? "higher" : "lower";
+        questions.add(Map.of(
+                "@type", "Question",
+                "name",
+                String.format("Is housing more expensive in %s than %s?", cityEntryB.getCity(), cityEntryA.getCity()),
+                "acceptedAnswer", Map.of(
+                        "@type", "Answer",
+                        "text",
+                        String.format(
+                                "Based on %s data, housing in %s is %s. You would pay roughly $%s/month for a 1-bedroom apartment in %s.",
+                                "2026", cityEntryB.getCity(), housingDiff,
+                                String.format("%,.0f", result.getOffer().getRent()), cityEntryB.getCity()))));
+
+        // Q3: Tax Context
+        double totalTax = (result.getOffer().getTaxResult() != null)
+                ? result.getOffer().getTaxResult().getTotalTax()
+                : 0.0;
+
+        questions.add(Map.of(
+                "@type", "Question",
+                "name",
+                String.format("How much tax will I pay on $%s in %s?", String.format("%,.0f", offerSalary),
+                        cityEntryB.getCity()),
+                "acceptedAnswer", Map.of(
+                        "@type", "Answer",
+                        "text",
+                        String.format(
+                                "For a single filer earning $%s in %s, estimated total tax (Federal + State + Local) is roughly $%s/year. This leaves a monthly take-home of approximately $%s before other expenses.",
+                                String.format("%,.0f", offerSalary), cityEntryB.getCity(),
+                                String.format("%,.0f", totalTax),
+                                String.format("%,.0f", (offerSalary - totalTax) / 12)))));
+
+        faq.put("mainEntity", questions);
 
         Map<String, Object> data = new HashMap<>();
         data.put("@graph", List.of(webpage, faq));

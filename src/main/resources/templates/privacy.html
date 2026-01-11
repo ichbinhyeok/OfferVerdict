@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Privacy Policy - OfferVerdict</title>
+    <meta name="description" th:content="${metaDescription}">
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/core.css">
+    <!-- Using result.css for consistent typography -->
+    <link rel="stylesheet" href="/css/result.css">
+    <meta name="robots" content="noindex">
+</head>
+
+<body class="theme-lucid">
+
+    <nav class="top-nav">
+        <div class="container">
+            <a href="/" class="logo">OfferVerdict</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="insight-section" style="padding: 4rem 0;">
+            <div class="container" style="max-width: 800px;">
+                <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">Privacy Policy</h1>
+                <p style="color: var(--text-2); margin-bottom: 2rem;">Last Updated: January 12, 2026</p>
+
+                <div class="content-block" style="font-size: 1.1rem; line-height: 1.7; color: var(--text-1);">
+
+                    <h3>1. Introduction</h3>
+                    <p>Welcome to OfferVerdict ("we," "our," or "us"). We respect your privacy and are committed to
+                        protecting it through our compliance with this policy. This policy describes the types of
+                        information we may collect from you or that you may provide when you visit the website
+                        OfferVerdict.com (our "Website") and our practices for collecting, using, maintaining,
+                        protected, and disclosing that information.</p>
+
+                    <h3>2. Information We Collect</h3>
+                    <p>We collect several types of information from and about users of our Website, including:</p>
+                    <ul>
+                        <li><strong>Non-personal Identification Information:</strong> We may collect non-personal
+                            identification information about Users whenever they interact with our Site. Non-personal
+                            identification information may include the browser name, the type of computer and technical
+                            information about Users means of connection to our Site, such as the operating system and
+                            the Internet service providers utilized and other similar information.</li>
+                        <li><strong>Web Browser Cookies:</strong> Our Site may use "cookies" to enhance User experience.
+                            User's web browser places cookies on their hard drive for record-keeping purposes and
+                            sometimes to track information about them. User may choose to set their web browser to
+                            refuse cookies, or to alert you when cookies are being sent. If they do so, note that some
+                            parts of the Site may not function properly.</li>
+                    </ul>
+
+                    <h3>3. Google AdSense & DoubleClick Cookie</h3>
+                    <p>Google, as a third-party vendor, uses cookies to serve ads on our Site. Google's use of the DART
+                        cookie enables it to serve ads to our Users based on their visit to our Site and other sites on
+                        the Internet. Users may opt out of the use of the DART cookie by visiting the Google ad and
+                        content network privacy policy at the following URL – <a
+                            href="http://www.google.com/privacy_ads.html" target="_blank"
+                            rel="noopener">http://www.google.com/privacy_ads.html</a></p>
+
+                    <h3>4. How We Use Your Information</h3>
+                    <p>We may use the information we collect from you for the following purposes:</p>
+                    <ul>
+                        <li>To personalize your experience and to allow us to deliver the type of content and product
+                            offerings in which you are most interested.</li>
+                        <li>To improve our website in order to better serve you.</li>
+                        <li>To allow us to better service you in responding to your customer service requests.</li>
+                    </ul>
+
+                    <h3>5. CCPA Privacy Rights (Do Not Sell My Personal Information)</h3>
+                    <p>Under the CCPA, among other rights, California consumers have the right to:</p>
+                    <ul>
+                        <li>Request that a business that collects a consumer's personal data disclose the categories and
+                            specific pieces of personal data that a business has collected about consumers.</li>
+                        <li>Request that a business delete any personal data about the consumer that a business has
+                            collected.</li>
+                        <li>Request that a business that sells a consumer's personal data, not sell the consumer's
+                            personal data.</li>
+                    </ul>
+                    <p>If you make a request, we have one month to respond to you. If you would like to exercise any of
+                        these rights, please contact us.</p>
+
+                    <h3>6. GDPR Data Protection Rights</h3>
+                    <p>We would like to make sure you are fully aware of all of your data protection rights. Every user
+                        is entitled to the following:</p>
+                    <ul>
+                        <li>The right to access – You have the right to request copies of your personal data.</li>
+                        <li>The right to rectification – You have the right to request that we correct any information
+                            you believe is inaccurate.</li>
+                        <li>The right to erasure – You have the right to request that we erase your personal data, under
+                            certain conditions.</li>
+                    </ul>
+
+                    <h3>7. Contact Us</h3>
+                    <p>If you have any questions about this Privacy Policy, the practices of this site, or your dealings
+                        with this site, please contact us at:</p>
+                    <p>Email: <a href="mailto:spainhyeok@gmail.com">spainhyeok@gmail.com</a></p>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+
+</body>
+
+</html>
