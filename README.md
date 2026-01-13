@@ -1,5 +1,11 @@
 # OfferVerdict – Verdict-first relocation math
 
+## Live Demo
+This repository powers the OfferVerdict relocation and cost-of-living comparison tool. Live deployment: https://livingcostcheck.com
+
+The service evaluates whether a job offer in a new city is financially sustainable based on salary, housing, and baseline living expenses.
+
+
 ## How to run locally
 1. **Java 21 + Gradle wrapper:** ensure Java 21 is available.
 2. **Install & run:**  
