@@ -160,6 +160,51 @@
         </section>
 
         <!-- SALARY NEIGHBORS (Internal Linking) -->
+
+        <!-- SEO Enhancement: City Context Section -->
+        <section class="city-context-section" th:if="${cityContext != null}">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Understanding <span th:text="${city.city}">City</span></h2>
+                    <p>Key insights about living and working in <span th:text="${city.city}">City</span>.</p>
+                </div>
+
+                <div class="reality-grid">
+                    <div class="reality-card">
+                        <div class="icon">🏢</div>
+                        <div class="reality-content">
+                            <h4>Job Market</h4>
+                            <p th:text="${cityContext.jobMarketSummary}">Job market information...</p>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">🏘️</div>
+                        <div class="reality-content">
+                            <h4>Housing Market</h4>
+                            <p th:text="${cityContext.housingTrends}">Housing trends...</p>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">🏭</div>
+                        <div class="reality-content">
+                            <h4>Industry Focus</h4>
+                            <p th:text="${cityContext.industryFocus}">Industry information...</p>
+                        </div>
+                    </div>
+
+                    <div class="reality-card">
+                        <div class="icon">🌟</div>
+                        <div class="reality-content">
+                            <h4>Quality of Life</h4>
+                            <p th:text="${cityContext.qualityOfLife}">Quality of life...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- SALARY NEIGHBORS (Internal Linking) -->
         <section class="neighbors-section">
             <div class="container">
@@ -213,11 +258,7 @@
             </div>
         </div>
 
-        <footer class="footer">
-            <div class="container">
-                <p>&copy; 2026 OfferVerdict.</p>
-            </div>
-        </footer>
+        <div th:replace="~{fragments/footer :: footer}"></div>
     </main>
 </body>
 

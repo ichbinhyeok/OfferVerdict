@@ -51,6 +51,44 @@
       }
     }
     </script>
+
+    <!-- FAQPage Schema (Static for Stability) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [{
+        "@type": "Question",
+        "name": "How are these relocation cost calculations made?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We calculate potential savings by subtracting estimated taxes (Federal, State, and Local) and cost of living expenses (Housing, Transport, Essentials) from the gross salary. This reveals your 'Disposable Margin' rather than justcomparing gross income."
+        }
+      }, {
+        "@type": "Question",
+        "name": "How accurate are these estimates?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Figures are statistical estimates based on averages for the selected city and salary level. Your actual personal expenses (lifestyle, debt, specific housing choices) will vary. This tool provides a baseline for comparison, not a guaranteed financial outcome."
+        }
+      }, {
+        "@type": "Question",
+        "name": "What data sources are used?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We aggregate data from authoritative sources including the IRS (2025 Tax Brackets), Bureau of Labor Statistics (Wage Data), and Numbeo (Cost of Living Indices) to ensure high-fidelity estimates."
+        }
+      }, {
+        "@type": "Question",
+        "name": "Should I rely on this for financial decisions?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. OfferVerdict is an educational simulation tool. You should consult with a Certified Financial Planner (CFP®) or CPA before making major career or relocation decisions."
+        }
+      }]
+    }
+    </script>
+
     <!-- Analytics -->
     <div th:replace="~{fragments/analytics :: analytics}"></div>
 </head>
@@ -650,6 +688,61 @@
             </div>
         </section>
 
+
+
+        <!-- FAQ Section (SEO: FAQPage) -->
+        <section class="faq-section"
+            style="padding: 3rem 0; background: var(--bg-page); border-top: 1px solid var(--border-subtle);">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Frequently Asked Questions</h2>
+                    <p>Common questions about our salary analysis.</p>
+                </div>
+
+                <div class="faq-grid" style="display: grid; gap: 1.5rem; max-width: 800px; margin: 0 auto;">
+                    <div class="faq-item">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-1);">How are these
+                            relocation cost calculations made?</h3>
+                        <p style="color: var(--text-2); line-height: 1.6;">We use a "Reverse-Disposable" method. Instead
+                            of just comparing salaries, we subtract estimated taxes (based on 2025 IRS & State tables)
+                            and local cost of living indices (Housing, Transport, Groceries) from your offer. This
+                            isolates your potential "Wealth Buffer" or savings capacity. See our <a href="/methodology"
+                                style="color: var(--brand-primary); text-decoration: underline;">Methodology</a> for the
+                            full breakdown.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-1);">How accurate are
+                            these estimates?</h3>
+                        <p style="color: var(--text-2); line-height: 1.6;">They are high-fidelity estimates based on
+                            statistical averages. While we account for local tax rates and cost of living differences,
+                            your specific lifestyle (debt, spending habits, housing choice) will ultimately determine
+                            your personal bottom line. Treat this as a strategic baseline, not a bank statement.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-1);">What data sources
+                            are used?</h3>
+                        <p style="color: var(--text-2); line-height: 1.6;">We rely strictly on authoritative public
+                            data: <strong>IRS</strong> for federal taxes, state revenue departments for local taxes,
+                            <strong>Bureau of Labor Statistics (BLS)</strong> for wage benchmarks, and
+                            <strong>Numbeo</strong> for granular cost-of-living indices. For more details, visit our <a
+                                href="/methodology"
+                                style="color: var(--brand-primary); text-decoration: underline;">Methodology</a> page.
+                        </p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-1);">Should I rely on
+                            this for financial decisions?</h3>
+                        <p style="color: var(--text-2); line-height: 1.6;"><strong>No.</strong> This tool is for
+                            educational and informational simulation only. It does not constitute financial advice.
+                            Always consult a Certified Financial Planner (CFP®) or CPA before making life-altering
+                            career or relocation moves.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Footer with Legal Disclaimer -->
         <div th:replace="~{fragments/footer :: footer}"></div>

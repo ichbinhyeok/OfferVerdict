@@ -32,19 +32,22 @@ public class SingleCityController {
     private final DynamicContentService dynamicContentService;
     private final AppProperties appProperties;
     private final VerdictAdviser verdictAdviser;
+    private final com.offerverdict.service.ContentEnrichmentService enrichmentService;
 
     public SingleCityController(DataRepository repository,
             SingleCityAnalysisService analysisService,
             ComparisonService comparisonService,
             DynamicContentService dynamicContentService,
             AppProperties appProperties,
-            VerdictAdviser verdictAdviser) {
+            VerdictAdviser verdictAdviser,
+            com.offerverdict.service.ContentEnrichmentService enrichmentService) {
         this.repository = repository;
         this.analysisService = analysisService;
         this.comparisonService = comparisonService;
         this.dynamicContentService = dynamicContentService;
         this.appProperties = appProperties;
         this.verdictAdviser = verdictAdviser;
+        this.enrichmentService = enrichmentService;
     }
 
     @GetMapping("/salary-check/{citySlug}/{salaryInt}")
@@ -143,6 +146,9 @@ public class SingleCityController {
         model.addAttribute("nextSalaryUrl", nextSalaryUrl);
         model.addAttribute("relatedCities", relatedCities);
         model.addAttribute("compareUrl", "/software-engineer-salary-" + citySlug + "-vs-austin-tx"); // Default CTA
+
+        // 7b. City Context Enrichment (New enhancement)
+        enrichmentService.getCityContext(citySlug).ifPresent(ctx -> model.addAttribute("cityContext", ctx));
 
         // Legal Shield: Contextual Disclaimer
         model.addAttribute("contextualDisclaimer",
