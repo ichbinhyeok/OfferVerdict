@@ -1,0 +1,108 @@
+<svg width="800" height="500" viewBox="0 0 800 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Brighter Data Halftone -->
+    <pattern id="halftone" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
+      <circle cx="7" cy="7" r="3.5" fill="#c7d2fe" fill-opacity="0.8"/>
+    </pattern>
+    
+    <!-- Flow Gradient -->
+    <linearGradient id="flowGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#818cf8" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Detailed US Map Silhouette -->
+    <path id="us-shape" d="
+      M 70,60 
+      L 350,50 
+      L 450,110 
+      L 550,90 
+      L 650,40 
+      L 740,30 
+      L 760,100 
+      L 720,130 
+      L 750,180 
+      L 700,280 
+      L 680,420 
+      L 600,400 
+      L 500,420 
+      L 450,450 
+      L 400,420 
+      L 350,440 
+      L 250,380 
+      L 150,370 
+      L 80,410 
+      L 40,320 
+      L 20,150 
+      L 70,60 
+      Z" />
+      
+    <clipPath id="us-clip">
+      <use href="#us-shape"/>
+    </clipPath>
+  </defs>
+
+  <!-- Map Body (Texture) -->
+  <g clip-path="url(#us-clip)">
+    <rect width="800" height="500" fill="url(#halftone)" />
+  </g>
+  
+  <!-- Strong Map Outline -->
+  <use href="#us-shape" stroke="#a5b4fc" stroke-width="2.5" stroke-opacity="0.9" fill="none" 
+       filter="drop-shadow(0 0 4px #4f46e5)"/>
+
+  <!-- --- Story Elements --- -->
+
+  <!-- Origin: SF (West) -->
+  <g transform="translate(45, 230)">
+    <!-- Pulse Ring -->
+    <circle r="15" stroke="#ffffff" stroke-width="1" opacity="0">
+       <animate attributeName="r" values="6;20" dur="2.5s" repeatCount="indefinite"/>
+       <animate attributeName="opacity" values="0.8;0" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Solid Node -->
+    <circle r="6" fill="#ffffff">
+       <animate attributeName="r" values="6;8;6" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Destination: Austin (Central/South) -->
+  <g transform="translate(380, 400)">
+     <circle r="5" fill="#a5b4fc">
+       <animate attributeName="fill" values="#a5b4fc;#ffffff;#a5b4fc" dur="3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Destination: NYC (East) -->
+  <g transform="translate(710, 140)">
+     <circle r="5" fill="#a5b4fc">
+       <animate attributeName="fill" values="#a5b4fc;#ffffff;#a5b4fc" dur="3s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+
+  <!-- Path 1: SF -> Austin -->
+  <path id="pathSF-AUS" d="M45,230 Q200,300 380,400" stroke="url(#flowGrad)" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="8 8" opacity="0.6" />
+  
+  <!-- Moving Particle 1 -->
+  <circle r="4" fill="#ffffff" filter="drop-shadow(0 0 4px white)">
+     <animateMotion dur="4s" repeatCount="indefinite" rotate="auto">
+        <mpath href="#pathSF-AUS"/>
+     </animateMotion>
+     <animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite" />
+  </circle>
+
+
+  <!-- Path 2: SF -> NYC (Cross Country) -->
+  <path id="pathSF-NYC" d="M45,230 Q380,100 710,140" stroke="url(#flowGrad)" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="8 8" opacity="0.6" />
+  
+  <!-- Moving Particle 2 -->
+  <circle r="4" fill="#ffffff" filter="drop-shadow(0 0 4px white)">
+     <animateMotion dur="6s" repeatCount="indefinite" rotate="auto" begin="1s">
+        <mpath href="#pathSF-NYC"/>
+     </animateMotion>
+     <animate attributeName="opacity" values="0;1;0" dur="6s" repeatCount="indefinite" begin="1s" />
+  </circle>
+
+</svg>

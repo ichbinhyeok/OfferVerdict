@@ -1,250 +1,366 @@
-/* 
+/*
    OfferVerdict: Landing Page (Index) Styles
    Aesthetic: Premium, Lucid, Interactive.
 */
 
 .landing-container {
-    min-height: 90vh;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-xl) var(--space-lg);
-    background: radial-gradient(circle at top right, #e0e7ff 0%, var(--bg-page) 60%);
+    min-height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background: var(--bg-page);
+    position: relative;
+    /* Context for absolute nav */
 }
 
-.landing-header {
-    text-align: center;
-    margin-bottom: var(--space-xl);
+/* Global Navigation */
+.landing-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 50;
+    padding: 1.5rem 3rem;
+    box-sizing: border-box;
+}
+
+.nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: white;
+    text-decoration: none;
+    letter-spacing: -0.02em;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: white;
+}
+
+/* Mobile Nav Tweak */
+@media (max-width: 768px) {
+    .landing-nav {
+        padding: 1rem 1.5rem;
+    }
+
+    .nav-logo,
+    .nav-link {
+        color: white;
+    }
+
+    /* Ensure visibility on dark mobile top */
+}
+
+/* --- Left Split: Visual & Story --- */
+.split-left {
+    flex: 1;
+    position: relative;
+    /* Darker, richer gradient for contrast */
+    background: radial-gradient(circle at 20% 40%, #312e81 0%, #020617 80%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    overflow: hidden;
+    color: white;
+}
+
+.hero-background {
+    position: absolute;
+    top: 54%;
+    /* Lowered to align text with upper map area */
+    left: 48%;
+    /* Slight shift right */
+    transform: translate(-50%, -50%);
+    width: 95%;
+    /* Slightly larger */
+    height: 95%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.8;
+    /* Increased visibility */
+}
+
+.hero-background svg {
+    width: 100%;
+    height: 100%;
+    /* Soft Glow spread */
+    filter: drop-shadow(0 0 30px rgba(79, 70, 229, 0.4));
+    overflow: visible;
+    /* To allow glow/dots to bleed slightly if needed */
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+    max-width: 550px;
+    text-align: left;
+    /* Heavy shadow to ensure text pops off the map visuals */
+    text-shadow: 0 4px 30px rgba(2, 6, 23, 0.9);
 }
 
 .landing-title {
-    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
     font-weight: 900;
-    color: var(--gray-900);
-    margin: 0 0 var(--space-md);
-    line-height: 1.05;
-    letter-spacing: -0.05em;
+    color: white;
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.landing-subtitle {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1.25rem;
+    color: #e2e8f0;
+    font-weight: 700;
+    /* Bolder as requested */
+    line-height: 1.6;
+    max-width: 500px;
+    margin-top: 2rem;
+
+    /* Elegant Accent */
+    border-left: 3px solid #6366f1;
+    padding-left: 1.25rem;
+
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+    background: linear-gradient(135deg, #818cf8 0%, #c4b5fd 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-.landing-subtitle {
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
-    color: var(--gray-500);
-    font-weight: 500;
-    max-width: 600px;
-    margin: 0 auto;
+/* --- Right Split: Action --- */
+.split-right {
+    flex: 1;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    /* Add extra padding on left to separate from split line */
+    padding-left: 4rem;
+    position: relative;
 }
 
-/* Journey Card (The Glass Form) */
+/* Journey Card (Comparison Engine UX) */
 .journey-card {
-    background: var(--bg-glass);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--white);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: var(--radius-xl);
-    padding: 3.5rem;
-    box-shadow: var(--shadow-premium);
+    padding: 2rem;
+    /* Compact padding */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 900px;
+    max-width: 520px;
+    /* Reduced width to 520px */
+    position: relative;
+    z-index: 10;
 }
 
 .occupation-header {
-    margin-bottom: 3rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid var(--gray-200);
-}
-
-.journey-grid {
-    display: grid;
-    grid-template-columns: 1fr 60px 1fr;
-    grid-template-areas:
-        "header-p .      header-f"
-        "city-p   arrow  city-f"
-        "salary-p arrow  salary-f";
-    gap: 1.5rem;
-    align-items: start;
-}
-
-.journey-grid h3 {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--gray-400);
     margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+/* Comparison Grid Layout */
+.comparison-grid {
+    display: flex;
+    gap: 0.75rem;
+    align-items: stretch;
+    justify-content: space-between;
+    position: relative;
+}
+
+.comparison-column {
+    flex: 1;
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Distinct Sections */
+.current-status {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.new-offer {
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    position: relative;
+    /* Subtle glow for the 'New' section */
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.1);
+}
+
+.new-offer::before {
+    content: "TARGET";
+    position: absolute;
+    top: -9px;
+    right: 12px;
+    background: #6366f1;
+    color: white;
+    font-size: 0.6rem;
     font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
 }
 
-.area-header-current {
-    grid-area: header-p;
+.column-header h3 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gray-500);
+    margin-bottom: 1rem;
+    font-weight: 800;
+    text-align: center;
 }
 
-.area-city-current {
-    grid-area: city-p;
+/* Arrow between columns */
+.comparison-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    width: 16px;
+    position: relative;
+    z-index: 2;
 }
 
-.area-salary-current {
-    grid-area: salary-p;
-}
-
-.journey-arrow {
-    grid-area: arrow;
-    align-self: center;
-    font-size: 2rem;
-    color: var(--gray-300);
-    margin-top: 2rem;
-}
-
-.area-header-offer {
-    grid-area: header-f;
-}
-
-.area-city-offer {
-    grid-area: city-f;
-}
-
-.area-salary-offer {
-    grid-area: salary-f;
-}
-
-/* Premium Inputs */
+/* Inputs */
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.85rem;
 }
 
 .form-label {
     display: block;
-    font-size: 0.75rem;
-    font-weight: 800;
-    color: var(--gray-700);
-    margin-bottom: 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--gray-600);
+    margin-bottom: 0.3rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .form-input {
     width: 100%;
-    padding: 1rem 1.25rem;
+    padding: 0.65rem 0.75rem;
     border: 1px solid var(--gray-200);
     border-radius: var(--radius-md);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-family: var(--font-sans);
-    transition: all var(--duration-base) var(--ease-out);
+    transition: all 0.2s ease-out;
     background: var(--white);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
     box-sizing: border-box;
 }
 
 .form-input:focus {
     outline: none;
-    border-color: var(--gray-900);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
 .submit-container {
     text-align: center;
-    margin-top: 3.5rem;
-    border-top: 1px solid var(--gray-200);
-    padding-top: 2.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--gray-100);
 }
 
 .btn-large {
-    padding: 1.25rem 4rem;
-    font-size: 1.125rem;
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    background: #4f46e5;
+    color: white;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+    transition: all 0.2s;
 }
 
-/* Animations */
-.animate-in {
-    animation: fadeInUp 0.8s var(--ease-out) both;
+.btn-large:hover {
+    background: #4338ca;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
 }
 
-.delay-2 {
-    animation-delay: 0.2s;
-}
-
-.delay-3 {
-    animation-delay: 0.4s;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@media (max-width: 768px) {
-    .journey-grid {
-        display: flex;
-        /* Switch to flex for easier vertical stacking control */
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+    .landing-container {
         flex-direction: column;
-        align-items: center;
-        /* Override desktop 'start' alignment */
-        gap: 0;
+        height: auto;
+    }
+
+    .split-left {
+        padding: 4rem 1.5rem;
+        min-height: auto;
+    }
+
+    .hero-background {
         width: 100%;
+        left: 50%;
     }
 
-    /* Ensure areas take full width to allow internal centering to work */
-    .journey-grid>div {
-        width: 100%;
-    }
-
-    /* Hide redundant headers in mobile flow if desired, or keep them */
-    .area-header-current,
-    .area-header-offer {
-        margin-top: 2rem;
-        margin-bottom: 1rem;
-    }
-
-    .area-header-current {
-        margin-top: 0;
-    }
-
-    .journey-arrow {
-        align-self: center;
-        transform: rotate(90deg);
-        margin: 1.5rem 0;
-        font-size: 1.5rem;
+    .split-right {
+        padding: 2rem 1.5rem;
+        padding-left: 1.5rem;
+        background: white;
     }
 
     .journey-card {
+        padding: 0;
+        border: none;
+        box-shadow: none;
+        max-width: 100%;
+    }
+
+    .comparison-grid {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .comparison-arrow {
+        transform: rotate(90deg);
+        height: 30px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .comparison-column {
         padding: 1.5rem;
-        /* Reduce padding for mobile */
-    }
-
-    .landing-title {
-        font-size: 2rem;
-        /* Reduce title size */
-    }
-
-    /* Center alignment for mobile "Journey" feel */
-    .journey-grid .form-group {
-        text-align: center;
-    }
-
-    .journey-grid .form-label {
-        display: inline-block;
-        /* Allows centering */
-    }
-
-    /* Force input text and box centering */
-    .journey-grid .form-input {
-        text-align: center;
-        max-width: 450px;
-        /* Match autocomplete wrapper */
-        margin-left: auto;
-        margin-right: auto;
-        display: block;
     }
 }
