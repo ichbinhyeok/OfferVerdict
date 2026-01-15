@@ -127,10 +127,7 @@ public class SingleCityController {
         nextSalaryUrl = "/salary-check/" + citySlug + "/" + (salaryInt + interval);
 
         // 6b. State-based City Links (Internal Linking Grid)
-        List<CityCostEntry> relatedCities = repository.getCities().stream()
-                .filter(c -> c.getState().equalsIgnoreCase(city.getState()) && !c.getSlug().equals(citySlug))
-                .limit(5)
-                .toList();
+        List<CityCostEntry> relatedCities = repository.getRelatedCities(city.getState(), citySlug, 5);
 
         // 7. Data for Template
         model.addAttribute("city", city);

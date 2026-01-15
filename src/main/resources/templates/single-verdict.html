@@ -70,6 +70,18 @@
         <section class="verdict-section"
             th:classappend="${verdict == T(com.offerverdict.model.Verdict).GO ? 'premium-gold' : (verdict == T(com.offerverdict.model.Verdict).NO_GO ? 'harsh-red' : 'neutral-blue')}">
             <div class="container">
+                <!-- BREADCRUMBS -->
+                <nav aria-label="Breadcrumb" class="breadcrumb-nav"
+                    style="margin-bottom: 1.5rem; font-size: 0.9rem; color: #666;">
+                    <a href="/"
+                        style="color: inherit; text-decoration: none; border-bottom: 1px solid transparent;">Home</a>
+                    <span style="margin: 0 0.5rem;">&rsaquo;</span>
+                    <span th:text="${city.state} + ' Cities'">State Cities</span>
+                    <span style="margin: 0 0.5rem;">&rsaquo;</span>
+                    <span th:text="${city.city} + ' Salary Analysis'" style="font-weight: 600; color: #333;">City
+                        Analysis</span>
+                </nav>
+
                 <div class="verdict-header">
                     <span class="badge-source">SINGLE CITY ANALYSIS</span>
                 </div>
@@ -213,18 +225,53 @@
         </section>
 
         <!-- SALARY NEIGHBORS (Internal Linking) -->
-        <section class="neighbors-section">
+        <!-- SALARY NEIGHBORS (Internal Linking) -->
+        <section class="neighbors-section" style="padding: 3rem 0; background: #fafafa; border-top: 1px solid #eee;">
             <div class="container">
-                <h3>Salary Scenarios in <span th:text="${city.city}">Austin</span></h3>
-                <div class="neighbor-links">
-                    <a th:if="${prevSalaryUrl}" th:href="${prevSalaryUrl}" class="btn-outline">
-                        See <span th:text="${'$' + #numbers.formatInteger(salary - 10000, 0, 'COMMA')}">$90k</span>
+                <div class="section-title" style="margin-bottom: 2rem; text-align: center;">
+                    <h3>Explore Salary Ranges</h3>
+                    <p>See how your lifestyle changes with a different income.</p>
+                </div>
+
+                <div class="salary-range-nav"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; max-width: 900px; margin: 0 auto;">
+                    <!-- PREVIOUS -->
+                    <a th:if="${prevSalaryUrl}" th:href="${prevSalaryUrl}" rel="follow" class="range-card prev-range"
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; background: white; border: 1px solid #ddd; border-radius: 12px; text-decoration: none; color: inherit; transition: all 0.2s ease;">
+                        <div>
+                            <span
+                                style="display: block; font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Lower
+                                Range</span>
+                            <span style="display: block; font-size: 1.25rem; font-weight: 700; color: #333;"
+                                th:text="${'$' + #numbers.formatInteger(salary - 10000, 0, 'COMMA')}">$90,000</span>
+                        </div>
+                        <span style="font-size: 1.5rem; color: #ccc;">&larr;</span>
                     </a>
-                    <span class="current-marker">
-                        Current: <span th:text="${'$' + #numbers.formatInteger(salary, 0, 'COMMA')}">$100k</span>
-                    </span>
-                    <a th:href="${nextSalaryUrl}" class="btn-outline">
-                        See <span th:text="${'$' + #numbers.formatInteger(salary + 10000, 0, 'COMMA')}">$110k</span>
+
+                    <!-- CURRENT (Visual Only) -->
+                    <div class="range-card current-range"
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; background: #f0fdf4; border: 2px solid #16a34a; border-radius: 12px;">
+                        <div>
+                            <span
+                                style="display: block; font-size: 0.85rem; color: #15803d; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">Current
+                                Analysis</span>
+                            <span style="display: block; font-size: 1.25rem; font-weight: 800; color: #166534;"
+                                th:text="${'$' + #numbers.formatInteger(salary, 0, 'COMMA')}">$100,000</span>
+                        </div>
+                        <span style="font-size: 1.5rem; color: #16a34a;">&bull;</span>
+                    </div>
+
+                    <!-- NEXT -->
+                    <a th:href="${nextSalaryUrl}" rel="follow" class="range-card next-range"
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; background: white; border: 1px solid #ddd; border-radius: 12px; text-decoration: none; color: inherit; transition: all 0.2s ease;">
+                        <div>
+                            <span
+                                style="display: block; font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Higher
+                                Range</span>
+                            <span style="display: block; font-size: 1.25rem; font-weight: 700; color: #333;"
+                                th:text="${'$' + #numbers.formatInteger(salary + 10000, 0, 'COMMA')}">$110,000</span>
+                        </div>
+                        <span style="font-size: 1.5rem; color: #ccc;">&rarr;</span>
                     </a>
                 </div>
             </div>
@@ -238,9 +285,11 @@
                 <div class="city-links-grid">
                     <a th:each="relatedCity : ${relatedCities}"
                         th:href="@{/salary-check/{slug}/{amount}(slug=${relatedCity.slug}, amount=${salary})}"
-                        class="city-link-card">
-                        <span class="city-name" th:text="${relatedCity.city}">Dallas</span>
-                        <span class="city-state" th:text="${relatedCity.state}">TX</span>
+                        rel="follow" class="city-link-card">
+                        <span class="city-name" style="font-weight: 500;"
+                            th:text="'Is ' + ${'$' + #numbers.formatInteger(salary, 0, 'COMMA')} + ' a good salary in ' + ${relatedCity.city} + '?'">
+                            Is $100,000 a good salary in Dallas?
+                        </span>
                     </a>
                 </div>
             </div>

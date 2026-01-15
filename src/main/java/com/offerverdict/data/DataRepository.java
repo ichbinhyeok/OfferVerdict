@@ -163,6 +163,15 @@ public class DataRepository {
         return cities;
     }
 
+    public List<CityCostEntry> getRelatedCities(String state, String currentCitySlug, int limit) {
+        return cities.stream()
+                .filter(c -> c.getState().equalsIgnoreCase(state))
+                .filter(c -> !SlugNormalizer.normalize(c.getSlug()).equals(SlugNormalizer.normalize(currentCitySlug)))
+                .sorted(Comparator.comparing(CityCostEntry::getCity))
+                .limit(limit)
+                .toList();
+    }
+
     public List<JobInfo> getJobs() {
         return jobs.stream()
                 .sorted(Comparator.comparing(JobInfo::getTitle, String.CASE_INSENSITIVE_ORDER))
