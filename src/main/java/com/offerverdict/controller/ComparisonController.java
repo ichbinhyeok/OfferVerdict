@@ -64,6 +64,7 @@ public class ComparisonController {
             @RequestParam(name = "cityB", required = false) String cityB,
             @RequestParam(name = "currentSalary", required = false) Double currentSalary,
             @RequestParam(name = "offerSalary", required = false) Double offerSalary,
+            @RequestParam(name = "salaryType", required = false, defaultValue = "annual") String salaryType,
             RedirectAttributes redirectAttributes,
             Model model) {
 
@@ -78,10 +79,18 @@ public class ComparisonController {
                 Optional<CityCostEntry> cityMatchB = resolveCityInput(cityB, normalizedCityB);
 
                 if (jobInfo.isPresent() && cityMatchA.isPresent() && cityMatchB.isPresent()) {
-                    if (currentSalary < MIN_SALARY || currentSalary > MAX_SALARY ||
-                            offerSalary < MIN_SALARY || offerSalary > MAX_SALARY) {
+                    // Smart Validation: Account for monthly inputs
+                    double currentMultiplier = ("monthly".equalsIgnoreCase(salaryType) || currentSalary < 12000) ? 12.0
+                            : 1.0;
+                    double offerMultiplier = ("monthly".equalsIgnoreCase(salaryType) || offerSalary < 12000) ? 12.0
+                            : 1.0;
+
+                    if (currentSalary * currentMultiplier < MIN_SALARY || currentSalary * currentMultiplier > MAX_SALARY
+                            ||
+                            offerSalary * offerMultiplier < MIN_SALARY || offerSalary * offerMultiplier > MAX_SALARY) {
                         model.addAttribute("validationMessage",
-                                String.format("Salaries must be between $%,.0f and $%,.0f", MIN_SALARY, MAX_SALARY));
+                                String.format("Salaries must be between $%,.0f and $%,.0f (Annualized)", MIN_SALARY,
+                                        MAX_SALARY));
                     } else {
                         String targetPath = String.format("/%s-salary-%s-vs-%s",
                                 jobInfo.get().getSlug(),
@@ -91,7 +100,8 @@ public class ComparisonController {
                         if (targetPath != null) {
                             RedirectView redirectView = new RedirectView(targetPath, true);
                             redirectView.setStatusCode(HttpStatus.FOUND);
-                            addRedirectParams(redirectAttributes, currentSalary, offerSalary, null, null, null, null);
+                            addRedirectParams(redirectAttributes, currentSalary, offerSalary, salaryType, null, null,
+                                    null, null);
                             return redirectView;
                         }
                     }
@@ -127,6 +137,7 @@ public class ComparisonController {
             // OPTIONAL PARAMS FOR SEO SUPPORT
             @RequestParam(name = "currentSalary", required = false) Double currentSalary,
             @RequestParam(name = "offerSalary", required = false) Double offerSalary,
+            @RequestParam(name = "salaryType", required = false, defaultValue = "annual") String salaryType,
             @RequestParam(name = "fourOhOneKRate", required = false) Double fourOhOneKRate,
             @RequestParam(name = "monthlyInsurance", required = false) Double monthlyInsurance,
             @RequestParam(name = "rsuAmount", required = false) Double rsuAmount,
@@ -167,7 +178,8 @@ public class ComparisonController {
             RedirectView redirectView = new RedirectView(canonicalSwappedPath, true);
             // Swap salary params too
             if (currentSalary != null && offerSalary != null) {
-                addRedirectParams(redirectAttributes, offerSalary, currentSalary, fourOhOneKRate, monthlyInsurance,
+                addRedirectParams(redirectAttributes, offerSalary, currentSalary, salaryType, fourOhOneKRate,
+                        monthlyInsurance,
                         rsuAmount, isMarried);
             }
             redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
@@ -184,7 +196,8 @@ public class ComparisonController {
             RedirectView redirectView = new RedirectView(canonicalPath, true);
             // Pass params if they exist
             if (currentSalary != null && offerSalary != null) {
-                addRedirectParams(redirectAttributes, currentSalary, offerSalary, fourOhOneKRate, monthlyInsurance,
+                addRedirectParams(redirectAttributes, currentSalary, offerSalary, salaryType, fourOhOneKRate,
+                        monthlyInsurance,
                         rsuAmount, isMarried);
             }
             redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
@@ -200,20 +213,45 @@ public class ComparisonController {
             offerSalary = getMedianSalary(jobInfo.getSlug(), cityEntryB.getSlug());
         }
 
-        // SEO Enhancement: Canonicalize salaries to $5K buckets to reduce
-        // near-duplicates
-        // Example: $102,500 -> $100,000 (canonical)
-        double canonicalCurrentSalary = canonicalizeSalary(currentSalary);
-        double canonicalOfferSalary = canonicalizeSalary(offerSalary);
+        // --- SMART SALARY AUTO-DETECTION & CANONICALIZATION ---
 
-        if (currentSalary != canonicalCurrentSalary || offerSalary != canonicalOfferSalary) {
-            // Redirect to canonical salary bucket
-            RedirectView redirectView = new RedirectView(canonicalPath, true);
-            addRedirectParams(redirectAttributes, canonicalCurrentSalary, canonicalOfferSalary, fourOhOneKRate,
-                    monthlyInsurance, rsuAmount, isMarried);
-            redirectView.setStatusCode(HttpStatus.FOUND); // 302 for query param changes
-            return redirectView;
+        // 1. Determine Effective Annual Salary
+        // Logic:
+        // - If explicit "monthly" type: Multiplier = 12
+        // - If explicit "annual" type:
+        // - If < $12,000: Auto-detect as Monthly (Safety Net) -> Multiplier = 12
+        // - If >= $12,000: Trust user (Annual) -> Multiplier = 1
+
+        double currentMultiplier = 1.0;
+        double offerMultiplier = 1.0;
+
+        // Logic for Current Salary
+        if ("monthly".equalsIgnoreCase(salaryType)) {
+            currentMultiplier = 12.0;
+        } else {
+            // Annual (Default) - Check for Safety Net
+            if (currentSalary < 12000) {
+                currentMultiplier = 12.0;
+            }
         }
+
+        // Logic for Offer Salary
+        if ("monthly".equalsIgnoreCase(salaryType)) {
+            offerMultiplier = 12.0;
+        } else {
+            // Annual (Default) - Check for Safety Net
+            if (offerSalary < 12000) {
+                offerMultiplier = 12.0;
+            }
+        }
+
+        double effectiveCurrentSalary = currentSalary * currentMultiplier;
+        double effectiveOfferSalary = offerSalary * offerMultiplier;
+
+        // SEO Enhancement: Canonicalize salaries to $5K buckets ONLY for the URL
+        // generation
+        // But do NOT redirect if the user provided specific input.
+        // We only redirect if salaries were NULL and we used medians.
 
         // Ensure non-null for calculation
         HouseholdType parsedHouseholdType = HouseholdType.SINGLE;
@@ -221,11 +259,12 @@ public class ComparisonController {
 
         Boolean effectiveIsMarried = isMarried != null ? isMarried : (parsedHouseholdType == HouseholdType.FAMILY);
 
-        String validationMessage = validateSalary(currentSalary).orElse(null);
-        validationMessage = validationMessage == null ? validateSalary(offerSalary).orElse(null) : validationMessage;
+        String validationMessage = validateSalary(effectiveCurrentSalary).orElse(null);
+        validationMessage = validationMessage == null ? validateSalary(effectiveOfferSalary).orElse(null)
+                : validationMessage;
 
-        double safeCurrentSalary = clampSalary(currentSalary);
-        double safeOfferSalary = clampSalary(offerSalary);
+        double safeCurrentSalary = clampSalary(effectiveCurrentSalary);
+        double safeOfferSalary = clampSalary(effectiveOfferSalary);
 
         ComparisonResult result = comparisonService.compare(
                 cityEntryA.getSlug(),
@@ -269,16 +308,32 @@ public class ComparisonController {
         model.addAttribute("cityA", cityEntryA);
         model.addAttribute("cityB", cityEntryB);
         model.addAttribute("result", result);
-        model.addAttribute("currentSalary", currentSalary);
-        model.addAttribute("offerSalary", offerSalary);
+
+        // Pass EFFECTIVE (Annualized) salaries for display to ensure math adds up
+        // visually
+        model.addAttribute("currentSalary", effectiveCurrentSalary);
+        model.addAttribute("offerSalary", effectiveOfferSalary);
+
+        // Flag for UI: Did we auto-detect monthly input despite "Annual" default?
+        boolean autoConverted = !"monthly".equalsIgnoreCase(salaryType)
+                && (currentMultiplier > 1.0 || offerMultiplier > 1.0);
+        model.addAttribute("autoConverted", autoConverted);
+
         model.addAttribute("householdType", parsedHouseholdType);
         model.addAttribute("housingType", parsedHousingType);
         model.addAttribute("validationMessage", validationMessage);
         model.addAttribute("cities", repository.getCities());
         model.addAttribute("jobs", repository.getJobs());
 
-        // Build query string only if non-default params present (for linking)
-        String queryString = buildQueryString(currentSalary, offerSalary, fourOhOneKRate, monthlyInsurance, rsuAmount,
+        // Build query string using RAW params to preserve user input in links/forms if
+        // needed
+        // (Or generally, links should probably use the canonical/effective ones?
+        // Actually, for related links, maybe stick to what they typed or effective?
+        // Let's stick to raw for query string to be safe, or effective?
+        // If we use effective, it might clarify future clicks. Let's use effective for
+        // links.)
+        String queryString = buildQueryString(effectiveCurrentSalary, effectiveOfferSalary, fourOhOneKRate,
+                monthlyInsurance, rsuAmount,
                 isMarried);
         model.addAttribute("otherJobLinks",
                 comparisonService.relatedJobComparisons(cityEntryA.getSlug(), cityEntryB.getSlug(), queryString));
@@ -286,7 +341,7 @@ public class ComparisonController {
                 cityEntryA.getSlug(), cityEntryB.getSlug(), queryString));
         model.addAttribute("structuredDataJson",
                 toJson(buildStructuredData(title, metaDescription, canonicalUrl, result, cityEntryA, cityEntryB,
-                        offerSalary)));
+                        effectiveOfferSalary)));
 
         model.addAttribute("currentTaxBreakdown",
                 comparisonService.getTaxBreakdown(safeCurrentSalary, cityEntryA.getState()));
@@ -513,12 +568,15 @@ public class ComparisonController {
     private void addRedirectParams(RedirectAttributes redirectAttributes,
             double currentSalary,
             double offerSalary,
+            String salaryType,
             Double fourOhOneKRate,
             Double monthlyInsurance,
             Double rsuAmount,
             Boolean isMarried) {
         redirectAttributes.addAttribute("currentSalary", currentSalary);
         redirectAttributes.addAttribute("offerSalary", offerSalary);
+        if (salaryType != null && !salaryType.equals("annual"))
+            redirectAttributes.addAttribute("salaryType", salaryType);
         if (fourOhOneKRate != null)
             redirectAttributes.addAttribute("fourOhOneKRate", fourOhOneKRate);
         if (monthlyInsurance != null)
