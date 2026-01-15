@@ -212,7 +212,8 @@
 
                 <div class="receipt-grid">
                     <!-- City A -->
-                    <div class="receipt-card">
+                    <div class="receipt-card"
+                        th:with="gapA=${currentSalary - result.current.taxResult.totalTax - (result.current.localTax * 12) - (result.current.rent * 12) - (result.current.livingCost * 12) - (result.current.residual * 12)}">
                         <div class="card-header">
                             <h3 th:text="${cityA.city}">City A</h3>
                             <span class="badge">Current</span>
@@ -242,6 +243,11 @@
                             <span class="value mono line-living"
                                 th:text="${'-$' + #numbers.formatInteger(result.current.livingCost * 12, 0, 'COMMA')}">-$12,000</span>
                         </div>
+                        <div class="line-item danger-text">
+                            <span class="label">Benefits & 401k</span>
+                            <span class="value mono"
+                                th:text="${'-$' + #numbers.formatInteger(gapA, 0, 'COMMA')}">-$5,000</span>
+                        </div>
                         <!-- Hidden Rows for Dynamic Simulation -->
                         <div class="line-item success-text hidden-row" id="row-equity-current" style="display:none;">
                             <span class="label">Equity & Bonuses</span>
@@ -269,7 +275,8 @@
                     </div>
 
                     <!-- City B -->
-                    <div class="receipt-card">
+                    <div class="receipt-card"
+                        th:with="gapB=${offerSalary - result.offer.taxResult.totalTax - (result.offer.localTax * 12) - (result.offer.rent * 12) - (result.offer.livingCost * 12) - (result.offer.residual * 12)}">
                         <div class="card-header">
                             <h3 th:text="${cityB.city}">City B</h3>
                             <span class="badge brand">Offer</span>
@@ -298,6 +305,11 @@
                             <span class="label">Living Costs (Est.)</span>
                             <span class="value mono line-living"
                                 th:text="${'-$' + #numbers.formatInteger(result.offer.livingCost * 12, 0, 'COMMA')}">-$15,000</span>
+                        </div>
+                        <div class="line-item danger-text">
+                            <span class="label">Benefits & 401k</span>
+                            <span class="value mono"
+                                th:text="${'-$' + #numbers.formatInteger(gapB, 0, 'COMMA')}">-$6,000</span>
                         </div>
                         <!-- Hidden Rows for Dynamic Simulation -->
                         <div class="line-item success-text hidden-row" id="row-equity-offer" style="display:none;">

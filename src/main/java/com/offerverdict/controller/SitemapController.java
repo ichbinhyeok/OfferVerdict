@@ -93,6 +93,12 @@ public class SitemapController {
 
         // 1. Static Pages
         paths.add(comparisonService.buildCanonicalUrl("/"));
+        paths.add(comparisonService.buildCanonicalUrl("/cities"));
+        paths.add(comparisonService.buildCanonicalUrl("/about"));
+        paths.add(comparisonService.buildCanonicalUrl("/privacy"));
+        paths.add(comparisonService.buildCanonicalUrl("/terms"));
+        paths.add(comparisonService.buildCanonicalUrl("/methodology"));
+        paths.add(comparisonService.buildCanonicalUrl("/contact"));
 
         // 2. Single City Analysis (Salary Check) - [SEO OPTIMIZED STRATEGY]
         // Filter: Priority Cities Only & Tiered Salary Buckets

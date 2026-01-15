@@ -136,6 +136,28 @@ p {
     }
 }
 
+/* Footer Navigation Utilities */
+.footer-nav {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.link-subtle {
+    color: var(--gray-500);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.link-subtle:hover {
+    color: var(--gray-900);
+    text-decoration: underline;
+}
+
 /* Buttons Design System */
 .btn {
     display: inline-flex;

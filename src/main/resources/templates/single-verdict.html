@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/tokens.css">
     <link rel="stylesheet" href="/css/core.css">
     <link rel="stylesheet" href="/css/result.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -109,14 +110,15 @@
         <section class="evidence-section">
             <div class="container">
                 <div class="section-title">
-                    <h2>The Breakdown</h2>
+                    <h2>Monthly Breakdown</h2>
                     <p
                         th:text="${'Where your $' + #numbers.formatInteger(salary, 0, 'COMMA') + ' actually goes in ' + city.city + '.'}">
                         Where your money goes.</p>
                 </div>
 
                 <div class="receipt-grid single-analysis-grid">
-                    <div class="receipt-card">
+                    <div class="receipt-card"
+                        th:with="grossMo=${salary/12}, taxMo=${(result.taxResult.totalTax + (result.localTax*12))/12}, gap=${(salary/12) - ((result.taxResult.totalTax + (result.localTax*12))/12) - result.rent - result.livingCost - result.residual}">
                         <div class="card-header">
                             <h3 th:text="${city.city}">Austin</h3>
                             <span class="badge">Stats</span>
@@ -124,12 +126,12 @@
                         <div class="line-item">
                             <span class="label">Gross Monthly</span>
                             <span class="value mono"
-                                th:text="${'$' + #numbers.formatInteger(salary/12, 0, 'COMMA')}">$8,333</span>
+                                th:text="${'$' + #numbers.formatInteger(grossMo, 0, 'COMMA')}">$8,333</span>
                         </div>
                         <div class="line-item danger-text">
                             <span class="label">Taxes (Est.)</span>
                             <span class="value mono"
-                                th:text="${'-$' + #numbers.formatInteger((result.taxResult.totalTax + (result.localTax*12))/12, 0, 'COMMA')}">-$2,000</span>
+                                th:text="${'-$' + #numbers.formatInteger(taxMo, 0, 'COMMA')}">-$2,000</span>
                         </div>
                         <div class="line-item warning-text">
                             <span class="label">Housing (Avg. Rent)</span>
@@ -140,6 +142,11 @@
                             <span class="label">Living Costs</span>
                             <span class="value mono"
                                 th:text="${'-$' + #numbers.formatInteger(result.livingCost, 0, 'COMMA')}">-$1,200</span>
+                        </div>
+                        <div class="line-item danger-text">
+                            <span class="label">Benefits & 401k</span>
+                            <span class="value mono"
+                                th:text="${'-$' + #numbers.formatInteger(gap, 0, 'COMMA')}">-$610</span>
                         </div>
                         <div class="line-item success-text highlight-row">
                             <span class="label">True Residual</span>
@@ -258,8 +265,9 @@
             </div>
         </div>
 
-        <div th:replace="~{fragments/footer :: footer}"></div>
     </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 
 </html>
