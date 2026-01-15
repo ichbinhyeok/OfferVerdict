@@ -19,8 +19,7 @@ public class MethodologyController {
         model.addAttribute("metaDescription",
                 "Learn how OfferVerdict calculates cost of living comparisons using IRS tax data, BLS statistics, and real-time market data.");
         model.addAttribute("lastTaxUpdate", "January 2026");
-        model.addAttribute("lastCostUpdate", java.time.format.DateTimeFormatter
-                .ofPattern("MMMM d, yyyy", java.util.Locale.US).format(java.time.LocalDate.now()));
+        model.addAttribute("lastCostUpdate", java.time.LocalDate.now());
         return "methodology";
     }
 }

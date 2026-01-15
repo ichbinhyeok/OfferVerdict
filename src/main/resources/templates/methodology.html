@@ -294,7 +294,8 @@
                                 <li><strong>Tax tables:</strong> Annually in January (last updated: <span
                                         th:text="${lastTaxUpdate}">January 2026</span>)</li>
                                 <li><strong>Cost of living data:</strong> Monthly from Numbeo (last updated: <span
-                                        th:text="${#temporals.format(lastCostUpdate, 'MMMM d, yyyy')}">January 11,
+                                        th:text="${#temporals.format(lastCostUpdate, 'MMMM d, yyyy', T(java.util.Locale).US)}">January
+                                        11,
                                         2026</span>)</li>
                                 <li><strong>Salary benchmarks:</strong> Quarterly from BLS</li>
                             </ul>
@@ -351,7 +352,8 @@
                         <tr>
                             <td>Cost of Living Data</td>
                             <td>Monthly</td>
-                            <td th:text="${#temporals.format(lastCostUpdate, 'MMMM d, yyyy')}">January 11, 2026</td>
+                            <td th:text="${#temporals.format(lastCostUpdate, 'MMMM d, yyyy', T(java.util.Locale).US)}">
+                                January 11, 2026</td>
                         </tr>
                         <tr>
                             <td>Salary Benchmarks</td>
@@ -361,7 +363,8 @@
                         <tr>
                             <td>Housing Market Data</td>
                             <td>Monthly</td>
-                            <td th:text="${#temporals.format(lastCostUpdate, 'MMMM d, yyyy')}">January 11, 2026</td>
+                            <td th:text="${#temporals.format(lastCostUpdate, 'MMMM d, yyyy', T(java.util.Locale).US)}">
+                                January 11, 2026</td>
                         </tr>
                     </tbody>
                 </table>
