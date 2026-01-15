@@ -35,7 +35,7 @@ public class SitemapController {
 
     @GetMapping(value = "/sitemap-index.xml", produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<String> sitemapIndex() {
-        List<String> urls = buildComparisonUrls();
+        List<SitemapUrl> urls = buildComparisonUrls();
         int chunkSize = appProperties.getSitemapChunkSize();
         // default chunk size 5000 if not set
         if (chunkSize <= 0)
@@ -61,7 +61,7 @@ public class SitemapController {
 
     @GetMapping(value = "/sitemap-{page}.xml", produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<String> sitemapPage(@PathVariable int page) {
-        List<String> urls = buildComparisonUrls();
+        List<SitemapUrl> urls = buildComparisonUrls();
         int chunkSize = appProperties.getSitemapChunkSize();
         if (chunkSize <= 0)
             chunkSize = 5000;
@@ -71,34 +71,74 @@ public class SitemapController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("");
         }
         int to = Math.min(urls.size(), from + chunkSize);
-        List<String> slice = urls.subList(from, to);
+        List<SitemapUrl> slice = urls.subList(from, to);
 
-        String today = LocalDate.now().toString();
         StringBuilder xml = new StringBuilder();
         xml.append("""
                 <?xml version="1.0" encoding="UTF-8"?>
                 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
                 """);
-        for (String url : slice) {
-            xml.append("<url><loc>").append(url).append("</loc><lastmod>").append(today).append("</lastmod></url>");
+        for (SitemapUrl url : slice) {
+            xml.append("<url>")
+                    .append("<loc>").append(url.loc).append("</loc>")
+                    .append("<lastmod>").append(url.lastmod).append("</lastmod>")
+                    .append("<priority>").append(url.priority).append("</priority>")
+                    .append("<changefreq>").append(url.changefreq).append("</changefreq>")
+                    .append("</url>");
         }
         xml.append("</urlset>");
         return respondWithCache(xml.toString());
     }
 
-    private List<String> buildComparisonUrls() {
+    /**
+     * Inner class to hold URL metadata for SEO-optimized sitemaps
+     */
+    private static class SitemapUrl {
+        String loc;
+        String lastmod;
+        String priority;
+        String changefreq;
+
+        SitemapUrl(String loc, String lastmod, String priority, String changefreq) {
+            this.loc = loc;
+            this.lastmod = lastmod;
+            this.priority = priority;
+            this.changefreq = changefreq;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            SitemapUrl that = (SitemapUrl) o;
+            return loc.equals(that.loc);
+        }
+
+        @Override
+        public int hashCode() {
+            return loc.hashCode();
+        }
+    }
+
+    private List<SitemapUrl> buildComparisonUrls() {
         List<JobInfo> jobs = repository.getJobs();
         List<CityCostEntry> cities = repository.getCities();
-        List<String> paths = new ArrayList<>();
+        List<SitemapUrl> urls = new ArrayList<>();
 
-        // 1. Static Pages
-        paths.add(comparisonService.buildCanonicalUrl("/"));
-        paths.add(comparisonService.buildCanonicalUrl("/cities"));
-        paths.add(comparisonService.buildCanonicalUrl("/about"));
-        paths.add(comparisonService.buildCanonicalUrl("/privacy"));
-        paths.add(comparisonService.buildCanonicalUrl("/terms"));
-        paths.add(comparisonService.buildCanonicalUrl("/methodology"));
-        paths.add(comparisonService.buildCanonicalUrl("/contact"));
+        String today = LocalDate.now().toString();
+        String weekAgo = LocalDate.now().minusDays(7).toString();
+        String monthAgo = LocalDate.now().minusMonths(1).toString();
+
+        // 1. Static Pages - Highest Priority
+        urls.add(new SitemapUrl(comparisonService.buildCanonicalUrl("/"), today, "1.0", "daily"));
+        urls.add(new SitemapUrl(comparisonService.buildCanonicalUrl("/cities"), weekAgo, "0.9", "weekly"));
+        urls.add(new SitemapUrl(comparisonService.buildCanonicalUrl("/methodology"), monthAgo, "1.0", "monthly"));
+        urls.add(new SitemapUrl(comparisonService.buildCanonicalUrl("/about"), monthAgo, "0.7", "monthly"));
+        urls.add(new SitemapUrl(comparisonService.buildCanonicalUrl("/privacy"), monthAgo, "0.3", "yearly"));
+        urls.add(new SitemapUrl(comparisonService.buildCanonicalUrl("/terms"), monthAgo, "0.3", "yearly"));
+        urls.add(new SitemapUrl(comparisonService.buildCanonicalUrl("/contact"), monthAgo, "0.5", "monthly"));
 
         // 2. Single City Analysis (Salary Check) - [SEO OPTIMIZED STRATEGY]
         // Filter: Priority Cities Only & Tiered Salary Buckets
@@ -113,7 +153,12 @@ public class SitemapController {
         for (CityCostEntry city : topCities) {
             for (int salary : salaryBuckets) {
                 String path = "/salary-check/" + city.getSlug() + "/" + salary;
-                paths.add(comparisonService.buildCanonicalUrl(path));
+                // Salary check pages: High priority, updated weekly with cost data
+                urls.add(new SitemapUrl(
+                        comparisonService.buildCanonicalUrl(path),
+                        weekAgo,
+                        "0.8",
+                        "weekly"));
             }
         }
 
@@ -131,14 +176,19 @@ public class SitemapController {
 
                         if (isMajorJob || isAtLeastOneTier1) {
                             String path = "/" + job.getSlug() + "-salary-" + cityA.getSlug() + "-vs-" + cityB.getSlug();
-                            paths.add(comparisonService.buildCanonicalUrl(path));
+                            // Comparison pages: Medium-high priority, updated weekly
+                            urls.add(new SitemapUrl(
+                                    comparisonService.buildCanonicalUrl(path),
+                                    weekAgo,
+                                    "0.7",
+                                    "weekly"));
                         }
                     }
                 }
             }
         }
 
-        return paths.stream().distinct().collect(Collectors.toList());
+        return urls.stream().distinct().collect(Collectors.toList());
     }
 
     /**
