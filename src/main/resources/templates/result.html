@@ -35,61 +35,8 @@
     <meta name="twitter:title" th:content="${ogTitle}">
     <meta name="twitter:description" th:content="${ogDescription}">
 
-    <!-- JSON-LD Structured Data: WebApplication -->
-    <script type="application/ld+json" th:inline="javascript">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": [[${title}]],
-      "url": [[${canonicalUrl}]],
-      "description": [[${metaDescription}]],
-      "applicationCategory": "FinanceApplication",
-      "operatingSystem": "Web Browser",
-      "browserRequirements": "Requires JavaScript. Optimized for Chrome, Safari, Edge.",
-      "featureList": "Cost of Living Comparison, Salary Calculator, Purchasing Power Parity",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      }
-    }
-    </script>
-
-    <!-- FAQPage Schema (Static for Stability) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [{
-        "@type": "Question",
-        "name": "How are these relocation cost calculations made?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "We calculate potential savings by subtracting estimated taxes (Federal, State, and Local) and cost of living expenses (Housing, Transport, Essentials) from the gross salary. This reveals your 'Disposable Margin' rather than justcomparing gross income."
-        }
-      }, {
-        "@type": "Question",
-        "name": "How accurate are these estimates?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Figures are statistical estimates based on averages for the selected city and salary level. Your actual personal expenses (lifestyle, debt, specific housing choices) will vary. This tool provides a baseline for comparison, not a guaranteed financial outcome."
-        }
-      }, {
-        "@type": "Question",
-        "name": "What data sources are used?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "We aggregate data from authoritative sources including the IRS (2025 Tax Brackets), Bureau of Labor Statistics (Wage Data), and Numbeo (Cost of Living Indices) to ensure high-fidelity estimates."
-        }
-      }, {
-        "@type": "Question",
-        "name": "Should I rely on this for financial decisions?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "No. OfferVerdict is an educational simulation tool. You should consult with a Certified Financial Planner (CFP®) or CPA before making major career or relocation decisions."
-        }
-      }]
-    }
+    <!-- JSON-LD Structured Data: Dynamic Injection for WebPage, FAQ, Breadcrumb, Dataset -->
+    <script type="application/ld+json" th:utext="${structuredDataJson}">
     </script>
 
     <!-- Analytics -->

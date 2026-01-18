@@ -143,7 +143,12 @@ public class ComparisonController {
             @RequestParam(name = "rsuAmount", required = false) Double rsuAmount,
             @RequestParam(name = "isMarried", required = false) Boolean isMarried,
             RedirectAttributes redirectAttributes,
+            jakarta.servlet.http.HttpServletResponse response,
             Model model) {
+
+        // SEO SIGNAL: Last-Modified Header (Always fresh)
+        response.setHeader(org.springframework.http.HttpHeaders.LAST_MODIFIED,
+                java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME.format(java.time.ZonedDateTime.now()));
 
         System.out.println("DEBUG: Entering compare method with job=" + job);
         String normalizedJob = SlugNormalizer.normalize(job);
@@ -337,11 +342,18 @@ public class ComparisonController {
                 isMarried);
         model.addAttribute("otherJobLinks",
                 comparisonService.relatedJobComparisons(cityEntryA.getSlug(), cityEntryB.getSlug(), queryString));
-        model.addAttribute("otherCityLinks", comparisonService.relatedCityComparisons(jobInfo.getSlug(),
+        model.addAttribute("otherCityLinks", relatedCityComparisons(jobInfo.getSlug(),
                 cityEntryA.getSlug(), cityEntryB.getSlug(), queryString));
-        model.addAttribute("structuredDataJson",
-                toJson(buildStructuredData(title, metaDescription, canonicalUrl, result, cityEntryA, cityEntryB,
-                        effectiveOfferSalary)));
+
+        // Build robust Structured Data (WebPage + FAQ + Breadcrumbs + Dataset)
+        Map<String, Object> schemaMap = buildStructuredData(title, metaDescription, canonicalUrl, result, cityEntryA,
+                cityEntryB, effectiveOfferSalary, jobInfo);
+        model.addAttribute("structuredDataJson", toJson(schemaMap));
+
+        // Pass FAQ list for visible rendering if needed (optional, keeping it in schema
+        // for now)
+        // model.addAttribute("faqList", schemaMap.get("faqList")); // Future
+        // enhancement
 
         model.addAttribute("currentTaxBreakdown",
                 comparisonService.getTaxBreakdown(safeCurrentSalary, cityEntryA.getState()));
@@ -358,6 +370,37 @@ public class ComparisonController {
         model.addAttribute("jobContext", contentEnrichmentService.getJobContext(jobInfo.getSlug()).orElse(null));
 
         return "result";
+    }
+
+    /**
+     * SEO STRATEGY: SILOING
+     * Prioritize cities in the SAME STATE to build topical authority.
+     */
+    private List<com.offerverdict.model.LinkDTO> relatedCityComparisons(String jobSlug,
+            String baseCitySlug,
+            String offerCitySlug,
+            String queryString) {
+        CityCostEntry origin = repository.getCity(baseCitySlug);
+        String jobTitle = jobSlug.replace("-", " "); // Simple un-slugify
+
+        return repository.getCities().stream()
+                .filter(c -> !c.getSlug().equals(origin.getSlug()))
+                .filter(c -> !c.getSlug().equals(offerCitySlug))
+                .filter(c -> SlugNormalizer.isCanonicalCitySlug(c.getSlug()))
+                // SILO LOGIC: Sort by (Same State?) -> (Tier Priority) -> (Name)
+                .sorted(java.util.Comparator
+                        .<CityCostEntry, Boolean>comparing(c -> !c.getState().equals(origin.getState())) // True
+                                                                                                         // (different)
+                                                                                                         // comes last
+                        .thenComparingInt(CityCostEntry::getTier)
+                        .thenComparing(CityCostEntry::getSlug))
+                .limit(6) // Increased to 6 for better internal link density
+                .map(c -> {
+                    String url = "/" + jobSlug + "-salary-" + origin.getSlug() + "-vs-" + c.getSlug() + queryString;
+                    String text = String.format("%s salary in %s vs %s", jobTitle, origin.getCity(), c.getCity());
+                    return new com.offerverdict.model.LinkDTO(url, text);
+                })
+                .collect(Collectors.toList());
     }
 
     private double getMedianSalary(String jobSlug, String citySlug) {
@@ -390,7 +433,8 @@ public class ComparisonController {
         if (jobSlug.contains("cybersecurity") || jobSlug.contains("devops"))
             return 115000;
         if (jobSlug.contains("engineer"))
-            return 100000; // Generic engineer
+            return 100000; // Generic
+                           // engineer
 
         // Middle Income (> $60k)
         if (jobSlug.contains("nurse") || jobSlug.contains("rn"))
@@ -432,13 +476,15 @@ public class ComparisonController {
         if (jobSlug.contains("warehouse"))
             return 38000;
         if (jobSlug.contains("bartender") || jobSlug.contains("server") || jobSlug.contains("waitstaff"))
-            return 45000; // Including tips
+            return 45000; // Including
+                          // tips
         if (jobSlug.contains("retail") || jobSlug.contains("cook") || jobSlug.contains("chef"))
             return 35000;
         if (jobSlug.contains("stylist"))
             return 40000;
 
         return 75000; // Fallback National Median
+
     }
 
     /**
@@ -494,14 +540,68 @@ public class ComparisonController {
     }
 
     private Map<String, Object> buildStructuredData(String title, String description, String canonicalUrl,
-            ComparisonResult result, CityCostEntry cityEntryA, CityCostEntry cityEntryB, double offerSalary) {
+            ComparisonResult result, CityCostEntry cityEntryA, CityCostEntry cityEntryB, double offerSalary,
+            JobInfo job) {
+
+        List<Map<String, Object>> graph = new ArrayList<>();
+
+        // 1. WebPage
         Map<String, Object> webpage = new HashMap<>();
         webpage.put("@context", "https://schema.org");
         webpage.put("@type", "WebPage");
         webpage.put("name", title);
         webpage.put("description", description);
         webpage.put("url", canonicalUrl);
+        webpage.put("datePublished", "2025-01-01"); // Static start
+        webpage.put("dateModified", java.time.LocalDate.now().toString()); // Dynamic freshness
+        graph.add(webpage);
 
+        // 2. BreadcrumbList (Hierarchy Power)
+        Map<String, Object> breadcrumb = new HashMap<>();
+        breadcrumb.put("@context", "https://schema.org");
+        breadcrumb.put("@type", "BreadcrumbList");
+
+        List<Map<String, Object>> itemListElement = new ArrayList<>();
+
+        // Home
+        itemListElement.add(Map.of(
+                "@type", "ListItem",
+                "position", 1,
+                "name", "Home",
+                "item", appProperties.getPublicBaseUrl()));
+
+        // Tools/Salary Check
+        itemListElement.add(Map.of(
+                "@type", "ListItem",
+                "position", 2,
+                "name", "Salary Check",
+                "item", appProperties.getPublicBaseUrl() + "/cities"));
+
+        // Current Page
+        itemListElement.add(Map.of(
+                "@type", "ListItem",
+                "position", 3,
+                "name", String.format("%s in %s vs %s", job.getTitle(), cityEntryA.getCity(), cityEntryB.getCity()),
+                "item", canonicalUrl));
+
+        breadcrumb.put("itemListElement", itemListElement);
+        graph.add(breadcrumb);
+
+        // 3. Dataset (Authority Signal)
+        Map<String, Object> dataset = new HashMap<>();
+        dataset.put("@context", "https://schema.org");
+        dataset.put("@type", "Dataset");
+        dataset.put("name", String.format("%s Salary & Cost of Living Data: %s vs %s", job.getTitle(),
+                cityEntryA.getCity(), cityEntryB.getCity()));
+        dataset.put("description", String.format(
+                "Comprehensive 2026 comparative data for %s stats, including 2025 IRS tax brackets, %s rent prices, and purchasing power parity analysis.",
+                job.getTitle(), cityEntryB.getCity()));
+        dataset.put("license", "https://creativecommons.org/licenses/by-sa/4.0/");
+        dataset.put("creator", Map.of("@type", "Organization", "name", "OfferVerdict"));
+        dataset.put("dateModified", java.time.LocalDate.now().toString());
+        graph.add(dataset);
+
+        // 4. FAQPage (Dynamic & Specific)
         Map<String, Object> faq = new HashMap<>();
         faq.put("@context", "https://schema.org");
         faq.put("@type", "FAQPage");
@@ -517,19 +617,22 @@ public class ComparisonController {
                         "@type", "Answer",
                         "text", result.getVerdictCopy() + " " + result.getValueDiffMsg())));
 
-        // Q2: Cost of Living Context
+        // Q2: Cost of Living Context (Dynamic Numbers)
         String housingDiff = result.getOffer().getRent() > result.getCurrent().getRent() ? "higher" : "lower";
+        double rentDiffVal = Math.abs(result.getOffer().getRent() - result.getCurrent().getRent());
+
         questions.add(Map.of(
                 "@type", "Question",
                 "name",
-                String.format("Is housing more expensive in %s than %s?", cityEntryB.getCity(), cityEntryA.getCity()),
+                String.format("How much is rent in %s compared to %s?", cityEntryB.getCity(), cityEntryA.getCity()),
                 "acceptedAnswer", Map.of(
                         "@type", "Answer",
                         "text",
                         String.format(
-                                "Based on %s data, housing in %s is %s. You would pay roughly $%s/month for a 1-bedroom apartment in %s.",
-                                "2026", cityEntryB.getCity(), housingDiff,
-                                String.format("%,.0f", result.getOffer().getRent()), cityEntryB.getCity()))));
+                                "Housing in %s is %s. You would pay roughly $%s/month (~$%s difference) for a similar quality of life.",
+                                cityEntryB.getCity(), housingDiff,
+                                String.format("%,.0f", result.getOffer().getRent()),
+                                String.format("%,.0f", rentDiffVal)))));
 
         // Q3: Tax Context
         double totalTax = (result.getOffer().getTaxResult() != null)
@@ -539,21 +642,22 @@ public class ComparisonController {
         questions.add(Map.of(
                 "@type", "Question",
                 "name",
-                String.format("How much tax will I pay on $%s in %s?", String.format("%,.0f", offerSalary),
+                String.format("What is the take-home pay for $%s in %s?", String.format("%,.0f", offerSalary),
                         cityEntryB.getCity()),
                 "acceptedAnswer", Map.of(
                         "@type", "Answer",
                         "text",
                         String.format(
-                                "For a single filer earning $%s in %s, estimated total tax (Federal + State + Local) is roughly $%s/year. This leaves a monthly take-home of approximately $%s before other expenses.",
+                                "For a single filer earning $%s in %s, estimated total tax (Federal + State + Local) is roughly $%s/year (Effective Rate: %.1f%%).",
                                 String.format("%,.0f", offerSalary), cityEntryB.getCity(),
                                 String.format("%,.0f", totalTax),
-                                String.format("%,.0f", (offerSalary - totalTax) / 12)))));
+                                result.getOffer().getTaxResult().getEffectiveTaxRate()))));
 
         faq.put("mainEntity", questions);
+        graph.add(faq);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("@graph", List.of(webpage, faq));
+        data.put("@graph", graph);
         return data;
     }
 

@@ -53,7 +53,12 @@ public class SingleCityController {
     @GetMapping("/salary-check/{citySlug}/{salaryInt}")
     public Object singleCityAnalysis(@PathVariable("citySlug") String citySlug,
             @PathVariable("salaryInt") int salaryInt,
+            jakarta.servlet.http.HttpServletResponse response,
             Model model) {
+
+        // SEO SIGNAL: Last-Modified Header
+        response.setHeader(org.springframework.http.HttpHeaders.LAST_MODIFIED,
+                java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME.format(java.time.ZonedDateTime.now()));
 
         // 1. SEO Rounding Check (301 Redirect)
         int interval = appProperties.getSeoSalaryBucketInterval();
