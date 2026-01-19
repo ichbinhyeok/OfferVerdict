@@ -13,6 +13,7 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" href="/favicon.ico">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +26,9 @@
     <meta name="description" th:content="${metaDescription}">
     <link rel="canonical" th:href="${canonicalUrl}">
     <!-- SEO Enhancement: Conditional noindex for low-value combinations -->
+    <!-- SEO Enhancement: Conditional noindex for low-value combinations -->
     <meta th:if="${!shouldIndex}" name="robots" content="noindex, follow">
+    <meta th:if="${shouldIndex}" name="robots" content="index, follow">
 
     <!-- Open Graph / Viral Meta -->
     <meta property="og:title" th:content="${ogTitle}" />
@@ -307,6 +310,7 @@
                         <input type="hidden" name="cityBSlug" th:value="${cityB.slug}">
                         <input type="hidden" name="currentSalary" th:value="${currentSalary}">
                         <input type="hidden" name="offerSalary" th:value="${offerSalary}">
+                        <input type="hidden" name="hasDependents" th:value="${householdType.name() == 'FAMILY'}">
 
                         <!-- Boost/Leak Hidden Toggles -->
                         <input type="hidden" name="isPremiumBenefits" id="boost-benefits" value="false">

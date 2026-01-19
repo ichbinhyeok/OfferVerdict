@@ -58,6 +58,11 @@ public class ComparisonController {
         this.contentEnrichmentService = contentEnrichmentService;
     }
 
+    @GetMapping("/favicon.ico")
+    public String favicon() {
+        return "forward:/favicon.svg";
+    }
+
     @GetMapping({ "/", "/start" })
     public Object home(@RequestParam(name = "job", required = false) String job,
             @RequestParam(name = "cityA", required = false) String cityA,
@@ -100,8 +105,8 @@ public class ComparisonController {
                         if (targetPath != null) {
                             RedirectView redirectView = new RedirectView(targetPath, true);
                             redirectView.setStatusCode(HttpStatus.FOUND);
-                            addRedirectParams(redirectAttributes, currentSalary, offerSalary, salaryType, null, null,
-                                    null, null);
+                            addRedirectParams(redirectAttributes, currentSalary, offerSalary, salaryType,
+                                    null, null, null, null, null, null, null, null, null, null, null, null, null, null);
                             return redirectView;
                         }
                     }
@@ -140,8 +145,18 @@ public class ComparisonController {
             @RequestParam(name = "salaryType", required = false, defaultValue = "annual") String salaryType,
             @RequestParam(name = "fourOhOneKRate", required = false) Double fourOhOneKRate,
             @RequestParam(name = "monthlyInsurance", required = false) Double monthlyInsurance,
-            @RequestParam(name = "rsuAmount", required = false) Double rsuAmount,
+            @RequestParam(name = "equityAnnual", required = false) Double equityAnnual,
             @RequestParam(name = "isMarried", required = false) Boolean isMarried,
+            @RequestParam(name = "signingBonus", required = false, defaultValue = "0") double signingBonus,
+            @RequestParam(name = "equityMultiplier", required = false, defaultValue = "1.0") double equityMultiplier,
+            @RequestParam(name = "commuteTime", required = false, defaultValue = "0") double commuteTime,
+            @RequestParam(name = "sideHustle", required = false, defaultValue = "0") double sideHustle,
+            @RequestParam(name = "otherLeaks", required = false, defaultValue = "0") double otherLeaks,
+            @RequestParam(name = "isRemote", required = false, defaultValue = "false") boolean isRemote,
+            @RequestParam(name = "isHomeOwner", required = false, defaultValue = "false") boolean isHomeOwner,
+            @RequestParam(name = "hasStudentLoan", required = false, defaultValue = "false") boolean hasStudentLoan,
+            @RequestParam(name = "isTaxOptimized", required = false, defaultValue = "false") boolean isTaxOptimized,
+            @RequestParam(name = "isCarOwner", required = false, defaultValue = "true") boolean isCarOwner,
             RedirectAttributes redirectAttributes,
             jakarta.servlet.http.HttpServletResponse response,
             Model model) {
@@ -150,16 +165,13 @@ public class ComparisonController {
         response.setHeader(org.springframework.http.HttpHeaders.LAST_MODIFIED,
                 java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME.format(java.time.ZonedDateTime.now()));
 
-        System.out.println("DEBUG: Entering compare method with job=" + job);
         String normalizedJob = SlugNormalizer.normalize(job);
-        System.out.println("DEBUG: Normalized job=" + normalizedJob);
         String normalizedCityA = SlugNormalizer.normalize(cityA);
         String normalizedCityB = SlugNormalizer.normalize(cityB);
 
         JobInfo jobInfo = repository.findJobLoosely(normalizedJob)
                 .orElseGet(() -> {
                     // Start of Custom Job Logic
-                    System.out.println("DEBUG: Creating CUSTOM JOB for " + job);
                     JobInfo custom = new JobInfo();
                     custom.setTitle(job); // Use raw input as title
                     custom.setSlug(normalizedJob);
@@ -173,24 +185,6 @@ public class ComparisonController {
         CityCostEntry cityEntryB = repository.findCityLoosely(normalizedCityB)
                 .orElseThrow(() -> new ResourceNotFoundException("Unknown city slug: " + cityB));
 
-        // SEO Enhancement: Enforce alphabetical city order to prevent duplicate content
-        // Example: austin-vs-dallas (canonical) vs dallas-vs-austin (redirect)
-        boolean shouldSwapCities = cityEntryA.getSlug().compareTo(cityEntryB.getSlug()) > 0;
-        if (shouldSwapCities) {
-            // Swap cities and redirect to canonical URL
-            String canonicalSwappedPath = "/" + jobInfo.getSlug() + "-salary-" + cityEntryB.getSlug() + "-vs-"
-                    + cityEntryA.getSlug();
-            RedirectView redirectView = new RedirectView(canonicalSwappedPath, true);
-            // Swap salary params too
-            if (currentSalary != null && offerSalary != null) {
-                addRedirectParams(redirectAttributes, offerSalary, currentSalary, salaryType, fourOhOneKRate,
-                        monthlyInsurance,
-                        rsuAmount, isMarried);
-            }
-            redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
-            return redirectView;
-        }
-
         String canonicalPath = "/" + jobInfo.getSlug() + "-salary-" + cityEntryA.getSlug() + "-vs-"
                 + cityEntryB.getSlug();
 
@@ -202,8 +196,9 @@ public class ComparisonController {
             // Pass params if they exist
             if (currentSalary != null && offerSalary != null) {
                 addRedirectParams(redirectAttributes, currentSalary, offerSalary, salaryType, fourOhOneKRate,
-                        monthlyInsurance,
-                        rsuAmount, isMarried);
+                        monthlyInsurance, equityAnnual, isMarried, signingBonus, equityMultiplier,
+                        commuteTime, sideHustle, otherLeaks, isRemote, isHomeOwner, hasStudentLoan,
+                        isTaxOptimized, isCarOwner);
             }
             redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
             return redirectView;
@@ -259,10 +254,19 @@ public class ComparisonController {
         // We only redirect if salaries were NULL and we used medians.
 
         // Ensure non-null for calculation
-        HouseholdType parsedHouseholdType = HouseholdType.SINGLE;
-        HousingType parsedHousingType = HousingType.RENT;
+        HouseholdType parsedHouseholdType = (isMarried != null && isMarried) ? HouseholdType.FAMILY
+                : HouseholdType.SINGLE;
+        HousingType parsedHousingType = isHomeOwner ? HousingType.OWN : HousingType.RENT;
 
         Boolean effectiveIsMarried = isMarried != null ? isMarried : (parsedHouseholdType == HouseholdType.FAMILY);
+
+        // Final tax data adjustment
+        Double taxFourOhOneK = fourOhOneKRate;
+        if (taxFourOhOneK == null) {
+            taxFourOhOneK = (isTaxOptimized) ? 0.08 : 0.04;
+        }
+
+        double extraDebt = hasStudentLoan ? 800.0 : 0.0;
 
         String validationMessage = validateSalary(effectiveCurrentSalary).orElse(null);
         validationMessage = validationMessage == null ? validateSalary(effectiveOfferSalary).orElse(null)
@@ -279,12 +283,17 @@ public class ComparisonController {
                 parsedHouseholdType,
                 parsedHousingType,
                 effectiveIsMarried,
-                fourOhOneKRate,
+                taxFourOhOneK,
                 monthlyInsurance,
-                0.0,
-                0.0, // sideHustle
-                false, // isRemote
-                true); // isCarOwner default
+                extraDebt,
+                otherLeaks,
+                sideHustle,
+                isRemote,
+                isCarOwner,
+                signingBonus,
+                equityAnnual != null ? equityAnnual : 0.0,
+                equityMultiplier,
+                commuteTime);
 
         if (result == null)
             throw new IllegalStateException("ComparisonResult cannot be null");
@@ -338,7 +347,7 @@ public class ComparisonController {
         // If we use effective, it might clarify future clicks. Let's use effective for
         // links.)
         String queryString = buildQueryString(effectiveCurrentSalary, effectiveOfferSalary, fourOhOneKRate,
-                monthlyInsurance, rsuAmount,
+                monthlyInsurance, equityAnnual,
                 isMarried);
         model.addAttribute("otherJobLinks",
                 comparisonService.relatedJobComparisons(cityEntryA.getSlug(), cityEntryB.getSlug(), queryString));
@@ -675,8 +684,18 @@ public class ComparisonController {
             String salaryType,
             Double fourOhOneKRate,
             Double monthlyInsurance,
-            Double rsuAmount,
-            Boolean isMarried) {
+            Double equityAnnual,
+            Boolean isMarried,
+            Double signingBonus,
+            Double equityMultiplier,
+            Double commuteTime,
+            Double sideHustle,
+            Double otherLeaks,
+            Boolean isRemote,
+            Boolean isHomeOwner,
+            Boolean hasStudentLoan,
+            Boolean isTaxOptimized,
+            Boolean isCarOwner) {
         redirectAttributes.addAttribute("currentSalary", currentSalary);
         redirectAttributes.addAttribute("offerSalary", offerSalary);
         if (salaryType != null && !salaryType.equals("annual"))
@@ -685,15 +704,35 @@ public class ComparisonController {
             redirectAttributes.addAttribute("fourOhOneKRate", fourOhOneKRate);
         if (monthlyInsurance != null)
             redirectAttributes.addAttribute("monthlyInsurance", monthlyInsurance);
-        if (rsuAmount != null)
-            redirectAttributes.addAttribute("rsuAmount", rsuAmount);
+        if (equityAnnual != null)
+            redirectAttributes.addAttribute("equityAnnual", equityAnnual);
         if (isMarried != null)
             redirectAttributes.addAttribute("isMarried", isMarried);
+        if (signingBonus != null)
+            redirectAttributes.addAttribute("signingBonus", signingBonus);
+        if (equityMultiplier != null)
+            redirectAttributes.addAttribute("equityMultiplier", equityMultiplier);
+        if (commuteTime != null)
+            redirectAttributes.addAttribute("commuteTime", commuteTime);
+        if (sideHustle != null)
+            redirectAttributes.addAttribute("sideHustle", sideHustle);
+        if (otherLeaks != null)
+            redirectAttributes.addAttribute("otherLeaks", otherLeaks);
+        if (isRemote != null)
+            redirectAttributes.addAttribute("isRemote", isRemote);
+        if (isHomeOwner != null)
+            redirectAttributes.addAttribute("isHomeOwner", isHomeOwner);
+        if (hasStudentLoan != null)
+            redirectAttributes.addAttribute("hasStudentLoan", hasStudentLoan);
+        if (isTaxOptimized != null)
+            redirectAttributes.addAttribute("isTaxOptimized", isTaxOptimized);
+        if (isCarOwner != null)
+            redirectAttributes.addAttribute("isCarOwner", isCarOwner);
     }
 
     private String buildQueryString(double currentSalary, double offerSalary,
             Double fourOhOneKRate, Double monthlyInsurance,
-            Double rsuAmount, Boolean isMarried) {
+            Double equityAnnual, Boolean isMarried) {
         StringBuilder sb = new StringBuilder();
         sb.append("?currentSalary=").append(currentSalary);
         sb.append("&offerSalary=").append(offerSalary);
@@ -701,8 +740,8 @@ public class ComparisonController {
             sb.append("&fourOhOneKRate=").append(fourOhOneKRate);
         if (monthlyInsurance != null)
             sb.append("&monthlyInsurance=").append(monthlyInsurance);
-        if (rsuAmount != null)
-            sb.append("&rsuAmount=").append(rsuAmount);
+        if (equityAnnual != null)
+            sb.append("&equityAnnual=").append(equityAnnual);
         if (isMarried != null)
             sb.append("&isMarried=").append(isMarried);
         return sb.toString();

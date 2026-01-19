@@ -13,9 +13,18 @@ public class FinancialEngine {
         if (metrics == null || metrics.getLocalIncomeTaxes() == null)
             return 0;
 
-        // Match city slug or abbreviation
+        String lowerSlug = citySlug.toLowerCase();
+
+        // 1. Explicit Special Cases (Common mismatches)
+        if (lowerSlug.contains("new-york") && metrics.getLocalIncomeTaxes().containsKey("NYC")) {
+            return grossSalary * metrics.getLocalIncomeTaxes().get("NYC");
+        }
+
+        // 2. Generic Containment Match
         for (Map.Entry<String, Double> entry : metrics.getLocalIncomeTaxes().entrySet()) {
-            if (citySlug.toLowerCase().contains(entry.getKey().toLowerCase())) {
+            String key = entry.getKey().toLowerCase();
+            // Match "Philadelphia" in "philadelphia-pa"
+            if (lowerSlug.contains(key)) {
                 return grossSalary * entry.getValue();
             }
         }

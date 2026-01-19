@@ -160,8 +160,37 @@ public class SingleCityController {
         model.addAttribute("title", "Is $" + salaryInt + " a good salary in " + city.getCity() + "? - OfferVerdict");
         model.addAttribute("metaDescription", "See the real take-home pay and lifestyle breakdown for a $" + salaryInt
                 + " salary in " + city.getCity() + ", " + city.getState() + ".");
-        model.addAttribute("canonicalUrl",
-                comparisonService.buildCanonicalUrl("/salary-check/" + citySlug + "/" + salaryInt));
+        // SEO Structured Data (Breadcrumb)
+        String canonicalUrl = comparisonService.buildCanonicalUrl("/salary-check/" + citySlug + "/" + salaryInt);
+
+        // Build minimal Breadcrumb JSON-LD
+        String structuredData = String.format("""
+                {
+                  "@context": "https://schema.org",
+                  "@type": "BreadcrumbList",
+                  "itemListElement": [{
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "%s"
+                  },{
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Salary Check",
+                    "item": "%s/cities"
+                  },{
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": "$%s in %s",
+                    "item": "%s"
+                  }]
+                }
+                """, appProperties.getPublicBaseUrl(), appProperties.getPublicBaseUrl(), salaryInt, city.getCity(),
+                canonicalUrl);
+
+        model.addAttribute("structuredDataJson", structuredData); // Reuse fragment variable
+
+        model.addAttribute("canonicalUrl", canonicalUrl);
 
         return "single-verdict";
     }

@@ -35,11 +35,8 @@ public class ContentEnrichmentService {
         try {
             loadCityContexts();
             loadJobContexts();
-            System.out.println("✅ ContentEnrichmentService initialized: " +
-                    cityContexts.size() + " cities, " +
-                    jobContexts.size() + " jobs");
         } catch (IOException e) {
-            System.err.println("⚠️  Warning: Could not load content enrichment data: " + e.getMessage());
+            // Warning: Could not load content enrichment data
             // Non-fatal: site will work without enrichment, just less SEO value
         }
     }

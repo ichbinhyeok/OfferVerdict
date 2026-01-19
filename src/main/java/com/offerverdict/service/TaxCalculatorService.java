@@ -326,12 +326,9 @@ public class TaxCalculatorService {
             return taxableIncome * 0.123;
         }
 
-        // New York (State + NYC if applicable)
+        // New York (State only - Local tax handled by FinancialEngine)
         if (state.equals("NY")) {
-            double nyStateTax = calculateNYStateTax(taxableIncome);
-            // Assume NYC for simplicity (add NYC tax)
-            double nycTax = taxableIncome * 0.038; // ~3.8% NYC local tax
-            return nyStateTax + nycTax;
+            return calculateNYStateTax(taxableIncome);
         }
 
         // New Jersey

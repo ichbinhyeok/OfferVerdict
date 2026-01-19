@@ -124,7 +124,11 @@ public class ComparisonService {
         result.setMonthlyGainStr(sign + currency.format(monthlyGain));
 
         // 2. Freedom Index (Residual / Net Income)
-        double freedomIdx = (offer.getResidual() / offer.getNetMonthly()) * 100;
+        double netMonthly = offer.getNetMonthly();
+        double freedomIdx = 0.0;
+        if (netMonthly > 0) {
+            freedomIdx = (offer.getResidual() / netMonthly) * 100;
+        }
         result.setFreedomIndex(String.format("%.0f%%", Math.max(0, freedomIdx)));
 
         // 3. Messages (Why?)
