@@ -1,6 +1,8 @@
 spring:
   application:
     name: offer-verdict
+server:
+  port: 8080
   thymeleaf:
     cache: false
 
