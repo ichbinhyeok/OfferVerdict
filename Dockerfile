@@ -14,8 +14,9 @@ COPY src src
 RUN ./gradlew clean build -x check -x test --no-daemon
 
 # 2단계: 실행 스테이지 (가벼운 JRE 환경)
-# eclipse-temurin:17-jre-alpine 이미지는 용량이 매우 작아 OCI 프리티어의 저장 공간과 네트워크 대역폭을 절약합니다.
-FROM eclipse-temurin:17-jre-alpine
+# eclipse-temurin의 alpine 버전은 ARM64용 매니페스트를 제공하지 않아, 
+# ARM64를 완벽하게 지원하면서도 용량이 매우 작은 bellsoft/liberica-openjdk-alpine:17-jre를 사용합니다.
+FROM bellsoft/liberica-openjdk-alpine:17-jre
 WORKDIR /app
 
 # 빌드 스테이지에서 생성된 jar 파일만 가져옵니다.
