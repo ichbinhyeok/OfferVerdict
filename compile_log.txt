@@ -1,0 +1,159 @@
+
+> Task :compileJava FAILED
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\data\DataRepository.java:9: error: cannot find symbol
+import com.offerverdict.model.StateTax;
+                             ^
+  symbol:   class StateTax
+  location: package com.offerverdict.model
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\service\TaxCalculatorService.java:5: error: cannot find symbol
+import com.offerverdict.model.FederalTax;
+                             ^
+  symbol:   class FederalTax
+  location: package com.offerverdict.model
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\service\TaxCalculatorService.java:6: error: cannot find symbol
+import com.offerverdict.model.Fica;
+                             ^
+  symbol:   class Fica
+  location: package com.offerverdict.model
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\service\TaxCalculatorService.java:7: error: cannot find symbol
+import com.offerverdict.model.StateTax;
+                             ^
+  symbol:   class StateTax
+  location: package com.offerverdict.model
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\data\DataRepository.java:181: error: cannot find symbol
+    public Map<String, StateTax> stateTaxMap() {
+                       ^
+  symbol:   class StateTax
+  location: class DataRepository
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\TaxData.java:6: error: cannot find symbol
+    private FederalTax federal;
+            ^
+  symbol:   class FederalTax
+  location: class TaxData
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\TaxData.java:7: error: cannot find symbol
+    private List<StateTax> states;
+                 ^
+  symbol:   class StateTax
+  location: class TaxData
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\TaxData.java:8: error: cannot find symbol
+    private Fica fica;
+            ^
+  symbol:   class Fica
+  location: class TaxData
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\TaxData.java:10: error: cannot find symbol
+    public FederalTax getFederal() {
+           ^
+  symbol:   class FederalTax
+  location: class TaxData
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\TaxData.java:14: error: cannot find symbol
+    public void setFederal(FederalTax federal) {
+                           ^
+  symbol:   class FederalTax
+  location: class TaxData
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\TaxData.java:18: error: cannot find symbol
+    public List<StateTax> getStates() {
+                ^
+  symbol:   class StateTax
+  location: class TaxData
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\TaxData.java:22: error: cannot find symbol
+    public void setStates(List<StateTax> states) {
+                               ^
+  symbol:   class StateTax
+  location: class TaxData
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\TaxData.java:26: error: cannot find symbol
+    public Fica getFica() {
+           ^
+  symbol:   class Fica
+  location: class TaxData
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\TaxData.java:30: error: cannot find symbol
+    public void setFica(Fica fica) {
+                        ^
+  symbol:   class Fica
+  location: class TaxData
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\FederalTax.java:7: error: cannot find symbol
+    private List<TaxBracket> bracketsSingle;
+                 ^
+  symbol:   class TaxBracket
+  location: class FederalTax
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\FederalTax.java:10: error: cannot find symbol
+    private List<TaxBracket> bracketsMarried;
+                 ^
+  symbol:   class TaxBracket
+  location: class FederalTax
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\FederalTax.java:21: error: cannot find symbol
+    private List<TaxBracket> legacyBrackets;
+                 ^
+  symbol:   class TaxBracket
+  location: class FederalTax
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\FederalTax.java:23: error: cannot find symbol
+    public List<TaxBracket> getBracketsSingle() {
+                ^
+  symbol:   class TaxBracket
+  location: class FederalTax
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\FederalTax.java:27: error: cannot find symbol
+    public void setBracketsSingle(List<TaxBracket> bracketsSingle) {
+                                       ^
+  symbol:   class TaxBracket
+  location: class FederalTax
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\FederalTax.java:31: error: cannot find symbol
+    public List<TaxBracket> getBracketsMarried() {
+                ^
+  symbol:   class TaxBracket
+  location: class FederalTax
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\FederalTax.java:35: error: cannot find symbol
+    public void setBracketsMarried(List<TaxBracket> bracketsMarried) {
+                                        ^
+  symbol:   class TaxBracket
+  location: class FederalTax
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\StateTax.java:9: error: cannot find symbol
+    private List<TaxBracket> brackets;
+                 ^
+  symbol:   class TaxBracket
+  location: class StateTax
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\StateTax.java:12: error: cannot find symbol
+    private List<TaxBracket> bracketsMarried;
+                 ^
+  symbol:   class TaxBracket
+  location: class StateTax
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\StateTax.java:22: error: cannot find symbol
+    public List<TaxBracket> getBrackets() {
+                ^
+  symbol:   class TaxBracket
+  location: class StateTax
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\StateTax.java:26: error: cannot find symbol
+    public void setBrackets(List<TaxBracket> brackets) {
+                                 ^
+  symbol:   class TaxBracket
+  location: class StateTax
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\StateTax.java:30: error: cannot find symbol
+    public List<TaxBracket> getBracketsMarried() {
+                ^
+  symbol:   class TaxBracket
+  location: class StateTax
+C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\model\StateTax.java:34: error: cannot find symbol
+    public void setBracketsMarried(List<TaxBracket> bracketsMarried) {
+                                        ^
+  symbol:   class TaxBracket
+  location: class StateTax
+27 errors
+
+[Incubating] Problems report is available at: file:///C:/Development/Owner/OfferVerdict/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler output below.
+  C:\Development\Owner\OfferVerdict\src\main\java\com\offerverdict\data\DataRepository.java:9: error: cannot find symbol
+  import com.offerverdict.model.StateTax;
+                               ^
+    symbol:   class StateTax
+    location: package com.offerverdict.model
+  27 errors
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to generate a Build Scan (powered by Develocity).
+
+BUILD FAILED in 2s
+1 actionable task: 1 executed

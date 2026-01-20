@@ -1,5 +1,6 @@
 package com.offerverdict.service;
 
+import com.offerverdict.data.DataRepository;
 import com.offerverdict.model.AuthoritativeMetrics;
 import com.offerverdict.model.ComparisonBreakdown;
 import org.springframework.stereotype.Service;
@@ -9,18 +10,34 @@ import java.util.Map;
 @Service
 public class FinancialEngine {
 
+    private final DataRepository repository;
+
+    public FinancialEngine(DataRepository repository) {
+        this.repository = repository;
+    }
+
     public double calculateLocalTax(double grossSalary, String citySlug, AuthoritativeMetrics metrics) {
+        String lowerSlug = citySlug.toLowerCase();
+
+        // 1. Central Configuration (Primary Source)
+        Map<String, Double> localTaxes = repository.getTaxData().getLocalTaxes();
+        if (localTaxes != null) {
+            // New York City specific check
+            if (lowerSlug.contains("new-york") && localTaxes.containsKey("nyc")) {
+                return grossSalary * localTaxes.get("nyc");
+            }
+        }
+
+        // 2. Legacy/Metrics Source (Fallback)
         if (metrics == null || metrics.getLocalIncomeTaxes() == null)
             return 0;
 
-        String lowerSlug = citySlug.toLowerCase();
-
-        // 1. Explicit Special Cases (Common mismatches)
+        // Explicit Special Cases (Common mismatches) from metrics
         if (lowerSlug.contains("new-york") && metrics.getLocalIncomeTaxes().containsKey("NYC")) {
             return grossSalary * metrics.getLocalIncomeTaxes().get("NYC");
         }
 
-        // 2. Generic Containment Match
+        // Generic Containment Match
         for (Map.Entry<String, Double> entry : metrics.getLocalIncomeTaxes().entrySet()) {
             String key = entry.getKey().toLowerCase();
             // Match "Philadelphia" in "philadelphia-pa"
@@ -32,12 +49,19 @@ public class FinancialEngine {
     }
 
     public double calculateCarInsurance(String state, AuthoritativeMetrics metrics) {
+        double defaultMonthly = 175.0;
+
+        // Load default from Central Config
+        if (repository.getTaxData().getDefaults() != null) {
+            defaultMonthly = repository.getTaxData().getDefaults().getDefaultCarInsuranceMonthly();
+        }
+
         if (metrics == null || metrics.getStateCarInsuranceMonthly() == null)
-            return 175.0 * 12; // Default
+            return defaultMonthly * 12;
 
         Double monthly = metrics.getStateCarInsuranceMonthly().get(state.toUpperCase());
         if (monthly == null) {
-            monthly = metrics.getStateCarInsuranceMonthly().getOrDefault("default", 175.0);
+            monthly = metrics.getStateCarInsuranceMonthly().getOrDefault("default", defaultMonthly);
         }
         return monthly * 12;
     }

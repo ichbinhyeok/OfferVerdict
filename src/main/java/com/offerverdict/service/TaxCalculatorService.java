@@ -1,10 +1,16 @@
+
 package com.offerverdict.service;
 
 import com.offerverdict.data.DataRepository;
+import com.offerverdict.model.FederalTax;
+import com.offerverdict.model.Fica;
 import com.offerverdict.model.StateTax;
 import com.offerverdict.model.TaxBracket;
+import com.offerverdict.model.TaxData;
+import com.offerverdict.model.TaxDefaults;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -15,67 +21,8 @@ import java.util.Map;
  */
 @Service
 public class TaxCalculatorService {
-    // ============================================
-    // 2025 IRS OFFICIAL TAX DATA
-    // ============================================
 
-    // Standard Deductions (2025)
-    private static final double STANDARD_DEDUCTION_SINGLE_2025 = 14_600.0;
-    private static final double STANDARD_DEDUCTION_MARRIED_2025 = 29_200.0;
-
-    // 401k Contribution Limits (2024-2025)
-    private static final double MAX_401K_CONTRIBUTION_2024 = 23_000.0;
-
-    // RSU Supplemental Tax Rate (Federal)
-    private static final double RSU_SUPPLEMENTAL_FEDERAL_RATE = 0.22; // 22% flat rate
-
-    // Smart Defaults (Industry Standard)
-    private static final double DEFAULT_401K_RATE = 0.05; // 5%
-    private static final double DEFAULT_MONTHLY_INSURANCE = 150.0; // $150/month
-    private static final double DEFAULT_ANNUAL_INSURANCE = DEFAULT_MONTHLY_INSURANCE * 12; // $1,800/year
-
-    // Federal Tax Brackets (2025 Single Filer)
-    private static final double[][] FEDERAL_BRACKETS_2025_SINGLE = {
-            { 11_925, 0.10 }, // 10%: $0 – $11,925
-            { 48_475, 0.12 }, // 12%: $11,926 – $48,475
-            { 103_350, 0.22 }, // 22%: $48,476 – $103,350
-            { 197_300, 0.24 }, // 24%: $103,351 – $197,300
-            { 250_525, 0.32 }, // 32%: $197,301 – $250,525
-            { 626_350, 0.35 }, // 35%: $250,526 – $626,350
-            { Double.MAX_VALUE, 0.37 } // 37%: Over $626,350
-    };
-
-    // Federal Tax Brackets (2025 Married Filing Jointly)
-    private static final double[][] FEDERAL_BRACKETS_2025_MARRIED = {
-            { 23_850, 0.10 }, // 10%: $0 – $23,850
-            { 96_950, 0.12 }, // 12%: $23,851 – $96,950
-            { 206_700, 0.22 }, // 22%: $96,951 – $206,700
-            { 394_600, 0.24 }, // 24%: $206,701 – $394,600
-            { 501_050, 0.32 }, // 32%: $394,601 – $501,050
-            { 751_600, 0.35 }, // 35%: $501,051 – $751,600
-            { Double.MAX_VALUE, 0.37 } // 37%: Over $751,600
-    };
-
-    // FICA (2025)
-    private static final double SOCIAL_SECURITY_RATE = 0.062; // 6.2%
-    private static final double SOCIAL_SECURITY_CAP = 176_100.0; // 2025 limit
-    private static final double MEDICARE_RATE = 0.0145; // 1.45%
-    private static final double ADDITIONAL_MEDICARE_THRESHOLD_SINGLE = 200_000.0;
-    private static final double ADDITIONAL_MEDICARE_THRESHOLD_MARRIED = 250_000.0;
-    private static final double ADDITIONAL_MEDICARE_RATE = 0.009; // 0.9%
-
-    // State Tax Strategy
-    private static final String[] NO_TAX_STATES = { "TX", "FL", "NV", "TN", "WA", "WY", "SD", "AK", "NH" };
-    private static final Map<String, Double> FLAT_TAX_STATES = Map.of(
-            "PA", 0.0307, // Pennsylvania 3.07%
-            "IL", 0.0495, // Illinois 4.95%
-            "MA", 0.05, // Massachusetts 5%
-            "MI", 0.0425, // Michigan 4.25%
-            "IN", 0.0305, // Indiana 3.05%
-            "CO", 0.044, // Colorado 4.4%
-            "NC", 0.0475, // North Carolina 4.75%
-            "UT", 0.0465 // Utah 4.65%
-    );
+    // Hardcoded constants removed in favor of TaxData defaults
 
     private final DataRepository repository;
 
@@ -91,14 +38,16 @@ public class TaxCalculatorService {
      */
     @Deprecated
     public double calculateNetAnnual(double salary, String stateCode) {
-        // Step 1: Apply Standard Deduction
-        double taxableIncome = Math.max(0, salary - STANDARD_DEDUCTION_SINGLE_2025);
+        // Step 1: Apply Standard Deduction (assuming Single for legacy)
+        TaxData taxData = repository.getTaxData();
+        double standardDeduction = taxData.getFederal().getStandardDeductionSingle();
+        double taxableIncome = Math.max(0, salary - standardDeduction);
 
         // Step 2: Calculate Federal Tax using 2025 brackets
         double federalTax = calculateFederalTax(taxableIncome, false);
 
         // Step 3: Calculate State Tax
-        double stateTax = calculateStateTax(salary, stateCode); // Legacy: uses gross income
+        double stateTax = calculateStateTax(salary, stateCode, false); // Legacy: uses gross income
 
         // Step 4: Calculate FICA (on gross, not taxable income)
         double ficaTax = calculateFICA(salary);
@@ -129,20 +78,36 @@ public class TaxCalculatorService {
     public TaxResult calculateTax(double grossIncome, String stateCode, Boolean isMarried,
             Double preTax401kRate, Double monthlyInsurance, Double studentLoanOrChildcare,
             Double rsuAmount) {
+
+        TaxData taxData = repository.getTaxData();
+        TaxDefaults defaults = taxData.getDefaults();
+
+        // Default values from Configuration (with safe fallbacks if config is missing)
+        double default401kRate = 0.05;
+        double max401kContribution = 23500.0; // 2025 fallback
+        double defaultAnnualInsurance = 1800.0;
+        double defaultRsuRate = 0.22;
+
+        if (defaults != null) {
+            max401kContribution = defaults.getMax401kContribution();
+            defaultAnnualInsurance = defaults.getStandardMonthlyInsurance() * 12;
+            defaultRsuRate = defaults.getRsuSupplementalRate();
+        }
+
         // ============================================
         // Step 0: Apply Smart Defaults
         // ============================================
         boolean married = isMarried != null && isMarried;
-        double effective401kRate = (preTax401kRate != null && preTax401kRate > 0)
+        double effective401kRate = (preTax401kRate != null)
                 ? preTax401kRate
-                : DEFAULT_401K_RATE;
-        double annualInsurance = (monthlyInsurance != null && monthlyInsurance > 0)
+                : default401kRate;
+        double annualInsurance = (monthlyInsurance != null)
                 ? monthlyInsurance * 12
-                : DEFAULT_ANNUAL_INSURANCE;
-        double otherPreTaxDeductions = (studentLoanOrChildcare != null && studentLoanOrChildcare > 0)
+                : defaultAnnualInsurance;
+        double otherPreTaxDeductions = (studentLoanOrChildcare != null)
                 ? studentLoanOrChildcare
                 : 0.0;
-        double rsuValue = (rsuAmount != null && rsuAmount > 0) ? rsuAmount : 0.0;
+        double rsuValue = (rsuAmount != null) ? rsuAmount : 0.0;
 
         // ============================================
         // Step A: Gross to Taxable Income
@@ -155,7 +120,7 @@ public class TaxCalculatorService {
         // NOTE: 401k is calculated ONLY on base salary, NOT on RSU
         double preTax401k = Math.min(
                 grossIncome * effective401kRate,
-                MAX_401K_CONTRIBUTION_2024);
+                max401kContribution);
 
         // FICA Taxable Base - 401k Contribution = Federal/State Taxable Income (base
         // salary only)
@@ -172,12 +137,14 @@ public class TaxCalculatorService {
         // Step C: Federal Income Tax
         // ============================================
         // Base salary: Progressive brackets
-        double standardDeduction = married ? STANDARD_DEDUCTION_MARRIED_2025 : STANDARD_DEDUCTION_SINGLE_2025;
+        double standardDeduction = married
+                ? taxData.getFederal().getStandardDeductionMarried()
+                : taxData.getFederal().getStandardDeductionSingle();
         double federalTaxableIncome = Math.max(0, taxableIncome - standardDeduction);
         double federalTaxOnSalary = calculateFederalTax(federalTaxableIncome, married);
 
-        // RSU: Flat 22% supplemental rate (NOT subject to progressive brackets)
-        double rsuFederalTax = rsuValue * RSU_SUPPLEMENTAL_FEDERAL_RATE;
+        // RSU: Flat supplemental rate (NOT subject to progressive brackets)
+        double rsuFederalTax = rsuValue * defaultRsuRate;
         double totalFederalTax = federalTaxOnSalary + rsuFederalTax;
 
         // ============================================
@@ -186,7 +153,7 @@ public class TaxCalculatorService {
         // State tax is calculated on taxable income (base salary) + RSU
         // RSU is usually taxed at the same rate as ordinary income in most states
         double stateTaxableIncome = taxableIncome + rsuValue;
-        double stateTax = calculateStateTax(stateTaxableIncome, stateCode);
+        double stateTax = calculateStateTax(stateTaxableIncome, stateCode, married);
 
         // ============================================
         // Step E: Calculate Net Income
@@ -220,23 +187,33 @@ public class TaxCalculatorService {
      */
     @Deprecated
     public TaxBreakdown calculateTaxBreakdown(double salary, String stateCode) {
-        double taxableIncome = Math.max(0, salary - STANDARD_DEDUCTION_SINGLE_2025);
+        TaxData taxData = repository.getTaxData();
+        double standardDeduction = taxData.getFederal().getStandardDeductionSingle();
+        double taxableIncome = Math.max(0, salary - standardDeduction);
 
         double federalTax = calculateFederalTax(taxableIncome, false); // Default to single for legacy
-        double stateTax = calculateStateTax(salary, stateCode); // Legacy: uses gross income
+        double stateTax = calculateStateTax(salary, stateCode, false); // Legacy: uses gross income
         double ficaTax = calculateFICA(salary);
+
+        // Recalculate components specifically for breakdown display if needed,
+        // but leveraging helper methods ensures consistency.
+        // FICA Breakdown for legacy
+        Fica fica = taxData.getFica();
+        double socialSecurity = Math.min(salary, fica.getSocialSecurityCap()) * fica.getSocialSecurityRate();
+        double medicare = salary * fica.getMedicareRate();
+        double additionalMedicare = salary > fica.getAdditionalMedicareThresholdSingle()
+                ? (salary - fica.getAdditionalMedicareThresholdSingle()) * fica.getAdditionalMedicareRate()
+                : 0;
 
         TaxBreakdown breakdown = new TaxBreakdown();
         breakdown.grossIncome = salary;
-        breakdown.standardDeduction = STANDARD_DEDUCTION_SINGLE_2025;
+        breakdown.standardDeduction = standardDeduction;
         breakdown.taxableIncome = taxableIncome;
         breakdown.federalTax = federalTax;
         breakdown.stateTax = stateTax;
-        breakdown.socialSecurityTax = Math.min(salary, SOCIAL_SECURITY_CAP) * SOCIAL_SECURITY_RATE;
-        breakdown.medicareTax = salary * MEDICARE_RATE;
-        breakdown.additionalMedicareTax = salary > ADDITIONAL_MEDICARE_THRESHOLD_SINGLE
-                ? (salary - ADDITIONAL_MEDICARE_THRESHOLD_SINGLE) * ADDITIONAL_MEDICARE_RATE
-                : 0;
+        breakdown.socialSecurityTax = socialSecurity;
+        breakdown.medicareTax = medicare;
+        breakdown.additionalMedicareTax = additionalMedicare;
         breakdown.totalTax = federalTax + stateTax + ficaTax;
         breakdown.netIncome = Math.max(0, salary - breakdown.totalTax);
 
@@ -246,170 +223,70 @@ public class TaxCalculatorService {
     /**
      * Calculate Federal Tax using 2025 IRS brackets
      */
-    /**
-     * Calculate Federal Tax using 2025 IRS brackets
-     */
     private double calculateFederalTax(double taxableIncome, boolean isMarried) {
-        double tax = 0;
-        double previousBracket = 0;
-        double[][] brackets = isMarried ? FEDERAL_BRACKETS_2025_MARRIED : FEDERAL_BRACKETS_2025_SINGLE;
+        TaxData taxData = repository.getTaxData();
+        FederalTax federal = taxData.getFederal();
+        List<TaxBracket> brackets = isMarried ? federal.getBracketsMarried() : federal.getBracketsSingle();
 
-        for (double[] bracket : brackets) {
-            double cap = bracket[0];
-            double rate = bracket[1];
-
-            if (taxableIncome <= previousBracket) {
-                break;
-            }
-
-            double taxableInThisBracket = Math.min(taxableIncome, cap) - previousBracket;
-            tax += taxableInThisBracket * rate;
-
-            previousBracket = cap;
+        // Fallback for migration safety if married brackets are missing but single
+        // exists
+        if (brackets == null || brackets.isEmpty()) {
+            brackets = federal.getBracketsSingle();
         }
 
-        return tax;
+        return computeTaxFromBrackets(taxableIncome, brackets);
     }
 
     /**
-     * Calculate State Tax with strategy pattern
-     * 
-     * @param taxableIncome Taxable income (after pre-tax deductions)
-     * @param stateCode     State code
-     * @return State tax amount
+     * Calculate State Tax
      */
-    private double calculateStateTax(double taxableIncome, String stateCode) {
+    private double calculateStateTax(double taxableIncome, String stateCode, boolean isMarried) {
         String state = stateCode.toUpperCase(Locale.US);
-
-        // No Tax States
-        for (String noTaxState : NO_TAX_STATES) {
-            if (state.equals(noTaxState)) {
-                return 0;
-            }
-        }
-
-        // Flat Tax States
-        if (FLAT_TAX_STATES.containsKey(state)) {
-            return taxableIncome * FLAT_TAX_STATES.get(state);
-        }
-
-        // Progressive Tax States
-        return calculateProgressiveStateTax(taxableIncome, state);
-    }
-
-    /**
-     * Calculate Progressive State Tax (CA, NY, etc.)
-     * 
-     * @param taxableIncome Taxable income (after pre-tax deductions)
-     * @param state         State code
-     * @return State tax amount
-     */
-    private double calculateProgressiveStateTax(double taxableIncome, String state) {
-        // California - Simplified progressive (effective rate approximation)
-        if (state.equals("CA")) {
-            if (taxableIncome <= 10_412)
-                return taxableIncome * 0.01;
-            if (taxableIncome <= 24_684)
-                return taxableIncome * 0.02;
-            if (taxableIncome <= 38_959)
-                return taxableIncome * 0.04;
-            if (taxableIncome <= 54_081)
-                return taxableIncome * 0.06;
-            if (taxableIncome <= 68_350)
-                return taxableIncome * 0.08;
-            if (taxableIncome <= 349_137)
-                return taxableIncome * 0.093;
-            if (taxableIncome <= 418_961)
-                return taxableIncome * 0.103;
-            if (taxableIncome <= 698_271)
-                return taxableIncome * 0.113;
-            return taxableIncome * 0.123;
-        }
-
-        // New York (State only - Local tax handled by FinancialEngine)
-        if (state.equals("NY")) {
-            return calculateNYStateTax(taxableIncome);
-        }
-
-        // New Jersey
-        if (state.equals("NJ")) {
-            if (taxableIncome <= 20_000)
-                return taxableIncome * 0.014;
-            if (taxableIncome <= 35_000)
-                return taxableIncome * 0.0175;
-            if (taxableIncome <= 40_000)
-                return taxableIncome * 0.035;
-            if (taxableIncome <= 75_000)
-                return taxableIncome * 0.05525;
-            if (taxableIncome <= 500_000)
-                return taxableIncome * 0.0637;
-            if (taxableIncome <= 1_000_000)
-                return taxableIncome * 0.0897;
-            return taxableIncome * 0.1075;
-        }
-
-        // Fallback: Use repository data if available
         Map<String, StateTax> stateTaxMap = repository.stateTaxMap();
         StateTax stateTax = stateTaxMap.get(state);
+
         if (stateTax != null) {
-            return computeTaxFromBrackets(taxableIncome, stateTax.getBrackets());
+            List<TaxBracket> brackets = null;
+            if (isMarried) {
+                brackets = stateTax.getBracketsMarried();
+            }
+            // Fallback to single/default brackets if married not specified
+            if (brackets == null || brackets.isEmpty()) {
+                brackets = stateTax.getBrackets();
+            }
+
+            if (brackets != null && !brackets.isEmpty()) {
+                return computeTaxFromBrackets(taxableIncome, brackets);
+            }
         }
 
-        // Default: Assume moderate state tax (~5%)
-        return taxableIncome * 0.05;
-    }
-
-    /**
-     * Calculate NY State Tax
-     * 
-     * @param taxableIncome Taxable income (after pre-tax deductions)
-     * @return NY State tax amount
-     */
-    private double calculateNYStateTax(double taxableIncome) {
-        if (taxableIncome <= 8_500)
-            return taxableIncome * 0.04;
-        if (taxableIncome <= 11_700)
-            return taxableIncome * 0.045;
-        if (taxableIncome <= 13_900)
-            return taxableIncome * 0.0525;
-        if (taxableIncome <= 80_650)
-            return taxableIncome * 0.055;
-        if (taxableIncome <= 215_400)
-            return taxableIncome * 0.06;
-        if (taxableIncome <= 1_077_550)
-            return taxableIncome * 0.0685;
-        if (taxableIncome <= 5_000_000)
-            return taxableIncome * 0.0965;
-        if (taxableIncome <= 25_000_000)
-            return taxableIncome * 0.103;
-        return taxableIncome * 0.109;
+        // Default or Fallback if state not found or no brackets (should assume 0 or
+        // handle logic)
+        // With partial JSON, some states might be missing.
+        // BUT we migrated ALL hardcoded states to JSON, so this should only hit for
+        // unknown states.
+        return 0.0;
     }
 
     /**
      * Calculate FICA (2025)
-     * - Social Security: 6.2% up to $176,100
-     * - Medicare: 1.45% on all earnings
-     * - Additional Medicare: +0.9% over $200,000 (Single) / $250,000 (Married)
-     * 
-     * @param ficaTaxableBase Income base for FICA calculation (gross - pre-tax
-     *                        insurance)
-     * @param isMarried       true for Married filing jointly, false for Single
-     * @return Total FICA tax
      */
     private double calculateFICAWithMaritalStatus(double ficaTaxableBase, boolean isMarried) {
+        Fica fica = repository.getTaxData().getFica();
+
         // Social Security: 6.2% up to cap
-        double socialSecurity = Math.min(ficaTaxableBase, SOCIAL_SECURITY_CAP) * SOCIAL_SECURITY_RATE;
+        double socialSecurity = Math.min(ficaTaxableBase, fica.getSocialSecurityCap()) * fica.getSocialSecurityRate();
 
         // Medicare: 1.45% on all earnings (no cap)
-        double medicare = ficaTaxableBase * MEDICARE_RATE;
+        double medicare = ficaTaxableBase * fica.getMedicareRate();
 
         // Additional Medicare Tax (0.9% over threshold)
         double additionalMedicareThreshold = isMarried
-                ? ADDITIONAL_MEDICARE_THRESHOLD_MARRIED
-                : ADDITIONAL_MEDICARE_THRESHOLD_SINGLE;
+                ? fica.getAdditionalMedicareThresholdMarried()
+                : fica.getAdditionalMedicareThresholdSingle();
         double additionalMedicare = 0;
         if (ficaTaxableBase > additionalMedicareThreshold) {
-            additionalMedicare = (ficaTaxableBase - additionalMedicareThreshold) * ADDITIONAL_MEDICARE_RATE;
+            additionalMedicare = (ficaTaxableBase - additionalMedicareThreshold) * fica.getAdditionalMedicareRate();
         }
 
         return socialSecurity + medicare + additionalMedicare;
@@ -417,33 +294,39 @@ public class TaxCalculatorService {
 
     /**
      * Calculate FICA (2025) - Legacy method for backward compatibility
-     * - Social Security: 6.2% up to $176,100
-     * - Medicare: 1.45% on all earnings
-     * - Additional Medicare: +0.9% over $200,000
      */
     private double calculateFICA(double salary) {
         return calculateFICAWithMaritalStatus(salary, false); // Default to Single
     }
 
     /**
-     * Legacy method for repository-based tax calculation
+     * General method for bracket-based tax calculation
      */
-    private double computeTaxFromBrackets(double salary, List<TaxBracket> brackets) {
+    private double computeTaxFromBrackets(double taxableIncome, List<TaxBracket> brackets) {
+        if (brackets == null || brackets.isEmpty())
+            return 0.0;
+
         double tax = 0;
-        double previous = 0;
+        double previousBracketLimit = 0;
+
         for (TaxBracket bracket : brackets) {
             Double cap = bracket.getUpTo();
-            double taxable;
-            if (cap == null) {
-                taxable = Math.max(0, salary - previous);
-            } else {
-                taxable = Math.max(0, Math.min(salary, cap) - previous);
+            double rate = bracket.getRate();
+
+            // Calculate taxable amount in this bracket
+            // If cap is null, it means "infinity" (last bracket)
+            double currentBracketLimit = (cap == null) ? Double.MAX_VALUE : cap;
+
+            if (taxableIncome > previousBracketLimit) {
+                double taxableInThisBracket = Math.min(taxableIncome, currentBracketLimit) - previousBracketLimit;
+                tax += taxableInThisBracket * rate;
             }
-            tax += taxable * bracket.getRate();
-            if (cap == null || salary <= cap) {
+
+            if (cap == null || taxableIncome <= cap) {
                 break;
             }
-            previous = cap;
+
+            previousBracketLimit = currentBracketLimit;
         }
         return tax;
     }
@@ -474,8 +357,6 @@ public class TaxCalculatorService {
 
     /**
      * TaxResult - Detailed US tax calculation result
-     * Supports Waterfall method: Gross -> Pre-tax Deductions -> FICA -> Taxable
-     * Income -> Net
      */
     public static class TaxResult {
         private double grossIncome;

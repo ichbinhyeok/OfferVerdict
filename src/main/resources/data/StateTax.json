@@ -1,110 +1,386 @@
 {
+  "meta": {
+    "taxYear": 2026
+  },
+  "defaults": {
+    "max_401k_contribution": 23000.0,
+    "standard_monthly_insurance": 200.0,
+    "rsu_supplemental_rate": 0.22,
+    "default_car_insurance_monthly": 175.0
+  },
+  "local_taxes": {
+    "nyc": 0.03876
+  },
   "federal": {
-    "brackets": [
-      { "upTo": 11000, "rate": 0.1 },
-      { "upTo": 44725, "rate": 0.12 },
-      { "upTo": 95375, "rate": 0.22 },
-      { "upTo": 182100, "rate": 0.24 },
-      { "upTo": 231250, "rate": 0.32 },
-      { "upTo": 578125, "rate": 0.35 },
-      { "upTo": null, "rate": 0.37 }
+    "standard_deduction_single": 14600.0,
+    "standard_deduction_married": 29200.0,
+    "brackets_single": [
+      {
+        "upTo": 11925,
+        "rate": 0.10
+      },
+      {
+        "upTo": 48475,
+        "rate": 0.12
+      },
+      {
+        "upTo": 103350,
+        "rate": 0.22
+      },
+      {
+        "upTo": 197300,
+        "rate": 0.24
+      },
+      {
+        "upTo": 250525,
+        "rate": 0.32
+      },
+      {
+        "upTo": 626350,
+        "rate": 0.35
+      },
+      {
+        "upTo": null,
+        "rate": 0.37
+      }
+    ],
+    "brackets_married": [
+      {
+        "upTo": 23850,
+        "rate": 0.10
+      },
+      {
+        "upTo": 96950,
+        "rate": 0.12
+      },
+      {
+        "upTo": 206700,
+        "rate": 0.22
+      },
+      {
+        "upTo": 394600,
+        "rate": 0.24
+      },
+      {
+        "upTo": 501050,
+        "rate": 0.32
+      },
+      {
+        "upTo": 751600,
+        "rate": 0.35
+      },
+      {
+        "upTo": null,
+        "rate": 0.37
+      }
     ]
+  },
+  "fica": {
+    "socialSecurityRate": 0.062,
+    "socialSecurityCap": 176100.0,
+    "medicareRate": 0.0145,
+    "additionalMedicareRate": 0.009,
+    "additionalMedicareThresholdSingle": 200000.0,
+    "additionalMedicareThresholdMarried": 250000.0
   },
   "states": [
     {
       "state": "NY",
       "brackets": [
-        { "upTo": 8500, "rate": 0.04 },
-        { "upTo": 11700, "rate": 0.045 },
-        { "upTo": 13900, "rate": 0.0525 },
-        { "upTo": 21400, "rate": 0.059 },
-        { "upTo": 80650, "rate": 0.0621 },
-        { "upTo": 215400, "rate": 0.0649 },
-        { "upTo": 1077550, "rate": 0.0685 },
-        { "upTo": null, "rate": 0.109 }
+        {
+          "upTo": 8500,
+          "rate": 0.04
+        },
+        {
+          "upTo": 11700,
+          "rate": 0.045
+        },
+        {
+          "upTo": 13900,
+          "rate": 0.0525
+        },
+        {
+          "upTo": 80650,
+          "rate": 0.055
+        },
+        {
+          "upTo": 215400,
+          "rate": 0.06
+        },
+        {
+          "upTo": 1077550,
+          "rate": 0.0685
+        },
+        {
+          "upTo": 5000000,
+          "rate": 0.0965
+        },
+        {
+          "upTo": 25000000,
+          "rate": 0.103
+        },
+        {
+          "upTo": null,
+          "rate": 0.109
+        }
       ]
     },
     {
       "state": "CA",
       "brackets": [
-        { "upTo": 10099, "rate": 0.01 },
-        { "upTo": 23942, "rate": 0.02 },
-        { "upTo": 37788, "rate": 0.04 },
-        { "upTo": 52455, "rate": 0.06 },
-        { "upTo": 66295, "rate": 0.08 },
-        { "upTo": 338639, "rate": 0.093 },
-        { "upTo": 406364, "rate": 0.103 },
-        { "upTo": 677275, "rate": 0.113 },
-        { "upTo": null, "rate": 0.123 }
+        {
+          "upTo": 10412,
+          "rate": 0.01
+        },
+        {
+          "upTo": 24684,
+          "rate": 0.02
+        },
+        {
+          "upTo": 38959,
+          "rate": 0.04
+        },
+        {
+          "upTo": 54081,
+          "rate": 0.06
+        },
+        {
+          "upTo": 68350,
+          "rate": 0.08
+        },
+        {
+          "upTo": 349137,
+          "rate": 0.093
+        },
+        {
+          "upTo": 418961,
+          "rate": 0.103
+        },
+        {
+          "upTo": 698271,
+          "rate": 0.113
+        },
+        {
+          "upTo": null,
+          "rate": 0.123
+        }
       ]
     },
     {
-      "state": "TX",
+      "state": "NJ",
       "brackets": [
-        { "upTo": null, "rate": 0.0 }
-      ]
-    },
-    {
-      "state": "WA",
-      "brackets": [
-        { "upTo": null, "rate": 0.0 }
-      ]
-    },
-    {
-      "state": "IL",
-      "brackets": [
-        { "upTo": null, "rate": 0.0495 }
-      ]
-    },
-    {
-      "state": "FL",
-      "brackets": [
-        { "upTo": null, "rate": 0.0 }
-      ]
-    },
-    {
-      "state": "MA",
-      "brackets": [
-        { "upTo": null, "rate": 0.05 }
-      ]
-    },
-    {
-      "state": "CO",
-      "brackets": [
-        { "upTo": null, "rate": 0.044 }
-      ]
-    },
-    {
-      "state": "NV",
-      "brackets": [
-        { "upTo": null, "rate": 0.0 }
-      ]
-    },
-    {
-      "state": "GA",
-      "brackets": [
-        { "upTo": null, "rate": 0.0575 }
+        {
+          "upTo": 20000,
+          "rate": 0.014
+        },
+        {
+          "upTo": 35000,
+          "rate": 0.0175
+        },
+        {
+          "upTo": 40000,
+          "rate": 0.035
+        },
+        {
+          "upTo": 75000,
+          "rate": 0.05525
+        },
+        {
+          "upTo": 500000,
+          "rate": 0.0637
+        },
+        {
+          "upTo": 1000000,
+          "rate": 0.0897
+        },
+        {
+          "upTo": null,
+          "rate": 0.1075
+        }
       ]
     },
     {
       "state": "AZ",
       "brackets": [
-        { "upTo": 28808, "rate": 0.025 },
-        { "upTo": 57615, "rate": 0.033 },
-        { "upTo": 86423, "rate": 0.041 },
-        { "upTo": null, "rate": 0.045 }
+        {
+          "upTo": 28808,
+          "rate": 0.025
+        },
+        {
+          "upTo": 57615,
+          "rate": 0.033
+        },
+        {
+          "upTo": 86423,
+          "rate": 0.041
+        },
+        {
+          "upTo": null,
+          "rate": 0.045
+        }
+      ]
+    },
+    {
+      "state": "TX",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0
+        }
+      ]
+    },
+    {
+      "state": "FL",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0
+        }
+      ]
+    },
+    {
+      "state": "NV",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0
+        }
+      ]
+    },
+    {
+      "state": "TN",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0
+        }
+      ]
+    },
+    {
+      "state": "WA",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0
+        }
+      ]
+    },
+    {
+      "state": "WY",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0
+        }
+      ]
+    },
+    {
+      "state": "SD",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0
+        }
+      ]
+    },
+    {
+      "state": "AK",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0
+        }
+      ]
+    },
+    {
+      "state": "NH",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0
+        }
+      ]
+    },
+    {
+      "state": "PA",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0307
+        }
+      ]
+    },
+    {
+      "state": "IL",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0495
+        }
+      ]
+    },
+    {
+      "state": "MA",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.05
+        }
+      ]
+    },
+    {
+      "state": "MI",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0425
+        }
+      ]
+    },
+    {
+      "state": "IN",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0305
+        }
+      ]
+    },
+    {
+      "state": "CO",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.044
+        }
       ]
     },
     {
       "state": "NC",
       "brackets": [
-        { "upTo": null, "rate": 0.0475 }
+        {
+          "upTo": null,
+          "rate": 0.0475
+        }
+      ]
+    },
+    {
+      "state": "UT",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0465
+        }
+      ]
+    },
+    {
+      "state": "GA",
+      "brackets": [
+        {
+          "upTo": null,
+          "rate": 0.0575
+        }
       ]
     }
-  ],
-  "fica": {
-    "socialSecurityRate": 0.062,
-    "socialSecurityCap": 168600,
-    "medicareRate": 0.0145
-  }
+  ]
 }
