@@ -298,14 +298,10 @@ public class ComparisonController {
         if (result == null)
             throw new IllegalStateException("ComparisonResult cannot be null");
 
-        // Dynamic Title for SEO
-        String title = String.format("%s Salary: %s vs %s | Real Value Calculator",
-                jobInfo.getTitle(), cityEntryA.getCity(), cityEntryB.getCity());
-
-        String metaDescription = String.format(
-                "Is moving from %s to %s for a %s job worth it? Compare taxes, rent, and %s vs %s cost of living with real 2026 data.",
-                cityEntryA.getCity(), cityEntryB.getCity(), jobInfo.getTitle(), cityEntryA.getCity(),
-                cityEntryB.getCity());
+        // SEO Meta - DECISION GAP FRAMEWORK (Phase 2: Comparison Pages)
+        // Principle: "Should You Actually Accept?" - defer judgment to site
+        String title = generateComparisonTitle(jobInfo, cityEntryA, cityEntryB);
+        String metaDescription = generateComparisonDescription(result, jobInfo, cityEntryA, cityEntryB);
 
         String canonicalUrl = comparisonService.buildCanonicalUrl(canonicalPath);
         String ogImageUrl = comparisonService.buildCanonicalUrl("/share/" + jobInfo.getSlug() + "-salary-"
@@ -845,5 +841,60 @@ public class ComparisonController {
     private Map<String, List<JobInfo>> groupJobsByCategory() {
         return repository.getJobs().stream()
                 .collect(Collectors.groupingBy(JobInfo::getCategory, TreeMap::new, Collectors.toList()));
+    }
+
+    /**
+     * Decision Gap Framework: Generate comparison title that defers judgment
+     * Enhanced with Option 1: "Before You Leave..." framing for urgency + loss
+     * aversion
+     * Format: "Before You Leave [CityA] for [CityB]: Is the [Job] Offer Actually
+     * Worth It?"
+     * NO salary numbers, NO definitive conclusions
+     */
+    private String generateComparisonTitle(JobInfo job, CityCostEntry cityA, CityCostEntry cityB) {
+        String currentYear = java.time.Year.now().toString();
+
+        // "Before You Leave" - urgency + loss framing (what you're giving up)
+        // "Actually Worth It" - value judgment deferral
+        return String.format(
+                "Before You Leave %s for %s: Is the %s Offer Actually Worth It? (%s)",
+                cityA.getCity(), cityB.getCity(), job.getTitle(), currentYear);
+    }
+
+    /**
+     * Decision Gap Framework: Generate descrip description focusing on tradeoffs
+     * Principle: Show risks/tradeoffs without revealing final verdict
+     * Format: "What do you trade off?" not "What is the answer?"
+     */
+    private String generateComparisonDescription(ComparisonResult result, JobInfo job,
+            CityCostEntry cityA, CityCostEntry cityB) {
+        // Calculate key tradeoff indicators
+        double taxA = result.getCurrent().getTaxResult() != null ? result.getCurrent().getTaxResult().getTotalTax()
+                : 0.0;
+        double taxB = result.getOffer().getTaxResult() != null ? result.getOffer().getTaxResult().getTotalTax() : 0.0;
+        double taxDiff = taxB > 0 ? (taxB - taxA) / taxB : 0.0;
+
+        double costOfLivingDiff = cityB.getColIndex() - cityA.getColIndex();
+
+        // Generate tradeoff-focused descriptions based on risk profile
+        // No specific numbers, focus on comparison dynamics
+
+        if (taxDiff > 0.15 && costOfLivingDiff > 15) { // High tax + high COL
+            return String.format(
+                    "Moving from %s to %s for that %s offer? Don't ignore the double tax: higher state income tax + %.0f%% costlier living. We calculated if the raise is real.",
+                    cityA.getCity(), cityB.getCity(), job.getTitle(), costOfLivingDiff);
+        } else if (taxDiff < -0.03 && costOfLivingDiff > 20) { // Lower tax but expensive
+            return String.format(
+                    "Is %s's tax advantage worth %s's %.0f%% cost premium? We break down the hidden housing trap and what your wallet actually feels.",
+                    cityB.getState(), cityB.getCity(), Math.abs(costOfLivingDiff));
+        } else if (costOfLivingDiff < -10) { // Cheaper destination
+            return String.format(
+                    "Is %s's lower cost worth leaving %s? Calculate the real tradeoffs: career trajectory, lifestyle, network. Cheap doesn't always mean better.",
+                    cityB.getCity(), cityA.getCity());
+        } else { // Moderate difference
+            return String.format(
+                    "%s vs %s for %s: Which offer is ACTUALLY better? We deduct taxes, rent inflation, and lifestyle costs to show real purchasing power.",
+                    cityA.getCity(), cityB.getCity(), job.getTitle());
+        }
     }
 }

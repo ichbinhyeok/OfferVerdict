@@ -22,35 +22,39 @@
     <link rel="canonical" th:href="${canonicalUrl}">
     <meta name="description" th:content="${metaDescription}">
 
-    <!-- JSON-LD Structured Data for SEO -->
+    <!-- JSON-LD Structured Data - DECISION GAP FRAMEWORK (Phase 3) -->
+    <!-- Principle: FAQPage with conditional answers - NO exact salary numbers -->
+    <!-- Prevents Zero-Click while maintaining rich results eligibility -->
     <script type="application/ld+json" th:inline="javascript">
     {
         "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": /*[[${title}]]*/ "Is $100k good in Austin?",
-        "description": /*[[${metaDescription}]]*/ "Salary analysis",
-        "author": {
-            "@type": "Organization",
-            "name": "OfferVerdict"
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "OfferVerdict"
-        },
-        "mainEntity": {
-            "@type": "MonetaryAmount",
-            "currency": "USD",
-            "value": /*[[${salary}]]*/ 100000
-        },
-        "about": {
-            "@type": "Place",
-            "name": /*[[${city.city}]]*/ "Austin",
-            "address": {
-                "@type": "PostalAddress",
-                "addressRegion": /*[[${city.state}]]*/ "TX",
-                "addressCountry": "US"
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": /*[['Is $' + ${salary} + ' a good salary in ' + ${city.city} + '?']]*/ "Is this salary good in this city?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": /*[['It depends on your lifestyle and family situation. In ' + ${city.city} + ', you need to consider ' + ${city.state} + ' state taxes, housing costs (avg. rent ~$' + ${city.avgRent} + '/mo), and your personal spending. Use our verdict calculator to see your real residual income.']]*/ "It depends on your lifestyle..."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": /*[['What is the cost of living in ' + ${city.city} + '?']]*/ "What is the cost of living?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": /*[['The primary cost factors in ' + ${city.city} + ' are housing and taxes. ' + ${city.state} + ' has specific tax rates. Your actual cost depends on neighborhood choice, lifestyle, and whether you own or rent. Our calculator breaks down all major expense categories.']]*/ "The primary factors are housing and taxes..."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How accurate is this salary analysis?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "We use IRS 2025 tax tables, BLS wage data, and Numbeo cost-of-living indices. Results are high-fidelity estimates based on statistical averages. Your personal outcome depends on lifestyle choices, debt obligations, and housing preferences. This is a strategic baseline for decision-making, not financial advice. Consult a CFP for personalized guidance."
+                }
             }
-        }
+        ]
     }
     </script>
     <!-- Analytics -->

@@ -156,10 +156,11 @@ public class SingleCityController {
         model.addAttribute("contextualDisclaimer",
                 "*Figures are estimates based on public data. Actual costs vary by neighborhood and lifestyle.");
 
-        // SEO Meta
-        model.addAttribute("title", "Is $" + salaryInt + " a good salary in " + city.getCity() + "? - OfferVerdict");
-        model.addAttribute("metaDescription", "See the real take-home pay and lifestyle breakdown for a $" + salaryInt
-                + " salary in " + city.getCity() + ", " + city.getState() + ".");
+        // SEO Meta - DECISION GAP FRAMEWORK
+        // Principle: Move judgment from SERP to site using "Can You Actually" framing
+        model.addAttribute("title", generateRiskBasedTitle(city, salaryInt));
+        model.addAttribute("metaDescription", generateRiskBasedDescription(city, result, salaryInt));
+
         // SEO Structured Data (Breadcrumb)
         String canonicalUrl = comparisonService.buildCanonicalUrl("/salary-check/" + citySlug + "/" + salaryInt);
 
@@ -193,5 +194,61 @@ public class SingleCityController {
         model.addAttribute("canonicalUrl", canonicalUrl);
 
         return "single-verdict";
+    }
+
+    /**
+     * Decision Gap Framework: Generate title that defers judgment to site
+     * Enhanced with Option 1: "Before You..." framing for urgency + fear/loss
+     * Principle: SERP = Question, Site = Calculation + Verdict
+     * Format: "Before You Accept That [City] Offer: Can You Actually Afford Life
+     * Here?"
+     */
+    private String generateRiskBasedTitle(CityCostEntry city, int salaryInt) {
+        String currentYear = java.time.Year.now().toString();
+
+        // "Before You Accept" - urgency (pre-decision timing)
+        // "Actually Afford" - fear/loss (financial capability question)
+        // NO specific salary number - forces click to calculate
+        return String.format(
+                "Before You Accept That %s Offer: Can You Actually Afford Life Here? (%s)",
+                city.getCity(), currentYear);
+    }
+
+    /**
+     * Decision Gap Framework: Generate description focusing on risks/tradeoffs
+     * Principle: Show judgment criteria, not final answers
+     * Three triggers to avoid: exact numbers, definitive conclusions, SERP-complete
+     * info
+     */
+    private String generateRiskBasedDescription(CityCostEntry city, ComparisonBreakdown result, int salaryInt) {
+        // Calculate key risk indicators
+        double rentBurden = result.getRent() / (salaryInt / 12.0);
+
+        // State tax rate analysis (approximate from breakdown)
+        double stateTaxRate = 0.0;
+        if (result.getTaxResult() != null && result.getTaxResult().getStateTax() > 0) {
+            stateTaxRate = result.getTaxResult().getStateTax() / salaryInt;
+        }
+
+        // Decision Gap Strategy: Present risks/tradeoffs without final verdict
+        // Format: "Should you / Can you actually / What do you trade off"
+
+        if (stateTaxRate > 0.05) { // High tax burden
+            return String.format(
+                    "Don't accept that %s offer without seeing this. We calculated the REAL residual after %s's state tax bite and housing costs. Is there anything left?",
+                    city.getCity(), city.getState());
+        } else if (rentBurden > 0.30) { // Housing burden
+            return String.format(
+                    "Can you actually afford life in %s on this salary? We break down the hidden housing burden and what's left for savings. The numbers might shock you.",
+                    city.getCity());
+        } else if (rentBurden < 0.20) { // Low cost city - tradeoff warning
+            return String.format(
+                    "Is %s's low cost of living worth the tradeoff? Calculate your true purchasing power—taxes, lifestyle, career growth. Don't just chase cheap rent.",
+                    city.getCity());
+        } else { // Moderate cost
+            return String.format(
+                    "Should you move to %s for this salary? We expose the real trade-offs: tax burden vs. housing costs vs. lifestyle. Make the call with data.",
+                    city.getCity());
+        }
     }
 }
