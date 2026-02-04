@@ -40,6 +40,12 @@
     "category": "Healthcare"
   },
   {
+    "title": "Medical Resident",
+    "slug": "medical-resident",
+    "category": "Healthcare",
+    "major": true
+  },
+  {
     "title": "Pharmacist",
     "slug": "pharmacist",
     "category": "Healthcare",
@@ -110,6 +116,18 @@
     "category": "Finance"
   },
   {
+    "title": "Investment Banker",
+    "slug": "investment-banker",
+    "category": "Finance",
+    "major": true
+  },
+  {
+    "title": "Management Consultant",
+    "slug": "management-consultant",
+    "category": "Business",
+    "major": true
+  },
+  {
     "title": "Project Manager",
     "slug": "project-manager",
     "category": "Business",
@@ -167,6 +185,12 @@
   {
     "title": "Plumber",
     "slug": "plumber",
+    "category": "Trades",
+    "major": true
+  },
+  {
+    "title": "Electrical Lineman",
+    "slug": "lineman",
     "category": "Trades",
     "major": true
   },
@@ -256,5 +280,23 @@
     "title": "General Professional",
     "slug": "general-professional",
     "category": "General"
+  },
+  {
+    "title": "Travel Nurse",
+    "slug": "travel-nurse",
+    "category": "Healthcare",
+    "major": true
+  },
+  {
+    "title": "Petroleum Engineer",
+    "slug": "petroleum-engineer",
+    "category": "Engineering",
+    "major": true
+  },
+  {
+    "title": "Cybersecurity Analyst",
+    "slug": "cybersecurity-analyst",
+    "category": "Technology",
+    "major": true
   }
 ]

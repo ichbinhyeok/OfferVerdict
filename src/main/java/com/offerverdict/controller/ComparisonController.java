@@ -157,6 +157,7 @@ public class ComparisonController {
             @RequestParam(name = "hasStudentLoan", required = false, defaultValue = "false") boolean hasStudentLoan,
             @RequestParam(name = "isTaxOptimized", required = false, defaultValue = "false") boolean isTaxOptimized,
             @RequestParam(name = "isCarOwner", required = false, defaultValue = "true") boolean isCarOwner,
+            @RequestParam(name = "full", required = false, defaultValue = "false") boolean full,
             RedirectAttributes redirectAttributes,
             jakarta.servlet.http.HttpServletResponse response,
             Model model) {
@@ -370,8 +371,8 @@ public class ComparisonController {
         model.addAttribute("shouldIndex", shouldIndex);
 
         // SEO Enhancement: Add contextual content
-        model.addAttribute("cityAContext", contentEnrichmentService.getCityContext(cityEntryA.getSlug()).orElse(null));
-        model.addAttribute("cityBContext", contentEnrichmentService.getCityContext(cityEntryB.getSlug()).orElse(null));
+        model.addAttribute("cityContextA", contentEnrichmentService.getCityContext(cityEntryA.getSlug()).orElse(null));
+        model.addAttribute("cityContextB", contentEnrichmentService.getCityContext(cityEntryB.getSlug()).orElse(null));
         model.addAttribute("jobContext", contentEnrichmentService.getJobContext(jobInfo.getSlug()).orElse(null));
 
         return "result";
@@ -414,25 +415,37 @@ public class ComparisonController {
 
         // High Income (> $110k)
         if (jobSlug.contains("doctor") || jobSlug.contains("physician"))
-            return 220000;
+            return 240000;
+        if (jobSlug.contains("medical-resident"))
+            return 68000; // Distinct from doctor
+        if (jobSlug.contains("investment-banker"))
+            return 175000;
         if (jobSlug.contains("pilot"))
-            return 130000;
-        if (jobSlug.contains("lawyer") || jobSlug.contains("attorney"))
-            return 140000;
-        if (jobSlug.contains("manager") && (jobSlug.contains("product") || jobSlug.contains("engineering")))
             return 145000;
+        if (jobSlug.contains("petroleum") || jobSlug.contains("drilling"))
+            return 165000;
+        if (jobSlug.contains("lawyer") || jobSlug.contains("attorney"))
+            return 155000;
+        if (jobSlug.contains("manager") && (jobSlug.contains("product") || jobSlug.contains("engineering")))
+            return 155000;
         if (jobSlug.contains("software") || jobSlug.contains("data-scientist"))
-            return 135000;
+            return 140000;
         if (jobSlug.contains("pharmacist"))
-            return 125000;
+            return 138000;
 
-        // Upper Middle (> $80k)
+        // Upper Middle (> $90k)
         if (jobSlug.contains("manager"))
-            return 95000; // General managers
+            return 105000; // General managers
         if (jobSlug.contains("project-manager"))
-            return 105000;
+            return 110000;
+        if (jobSlug.contains("consultant") || jobSlug.contains("management-consultant"))
+            return 125000;
+        if (jobSlug.contains("travel-nurse"))
+            return 135000; // Travel nurses earn significantly more than staff RNs
+        if (jobSlug.contains("lineman"))
+            return 110000; // High overtime potential
         if (jobSlug.contains("physical-therapist"))
-            return 95000;
+            return 105000;
         if (jobSlug.contains("ux-designer"))
             return 95000;
         if (jobSlug.contains("cybersecurity") || jobSlug.contains("devops"))
@@ -441,21 +454,21 @@ public class ComparisonController {
             return 100000; // Generic
                            // engineer
 
-        // Middle Income (> $60k)
+        // Middle Income (> $70k)
         if (jobSlug.contains("nurse") || jobSlug.contains("rn"))
-            return 82000;
+            return 95000;
         if (jobSlug.contains("dental-hygienist"))
-            return 85000;
+            return 88000;
         if (jobSlug.contains("accountant") || jobSlug.contains("analyst"))
-            return 75000;
+            return 82000;
         if (jobSlug.contains("police") || jobSlug.contains("firefighter"))
-            return 70000;
+            return 78000;
         if (jobSlug.contains("teacher") || jobSlug.contains("professor"))
-            return 65000;
+            return 72000;
         if (jobSlug.contains("electrician") || jobSlug.contains("plumber") || jobSlug.contains("leads"))
-            return 65000;
-        if (jobSlug.contains("hr-") || jobSlug.contains("marketing"))
-            return 70000;
+            return 68000;
+        if (jobSlug.contains("hr-") || jobSlug.contains("marketing") || jobSlug.contains("web-developer"))
+            return 85000;
 
         // Skilled Trade / Admin (> $45k)
         if (jobSlug.contains("mechanic") || jobSlug.contains("hvac") || jobSlug.contains("welder"))
@@ -512,25 +525,23 @@ public class ComparisonController {
             return false;
         }
 
-        // Don't index if both cities are low-priority (Tier 3+)
-        if (cityA.getTier() >= 3 && cityB.getTier() >= 3) {
+        // Logic: Instead of blocking "minor" pages, we allow them but mark their
+        // importance in the Sitemap.
+        // However, we still have a "Quality Floor" to avoid truly thin combinations.
+
+        // Pruning Case 1: Extreme salary outliers (Stay within $25k - $750k range for
+        // SEO safety)
+        if (currentSalary < 25000 || currentSalary > 750000) {
+            return false;
+        }
+        if (offerSalary < 25000 || offerSalary > 750000) {
             return false;
         }
 
-        // Don't index if job is not "major" and both cities are not Tier 1
-        if (!job.isMajor() && cityA.getTier() > 1 && cityB.getTier() > 1) {
-            return false;
-        }
-
-        // Don't index extreme salary outliers (< $20k or > $500k)
-        if (currentSalary < 20000 || currentSalary > 500000) {
-            return false;
-        }
-        if (offerSalary < 20000 || offerSalary > 500000) {
-            return false;
-        }
-
-        return true; // Index this page
+        // Pruning Case 2: If BOTH cities are very low priority (Tier 4+ if we had it),
+        // we'd block.
+        // For now, we allow almost all real city/job combinations.
+        return true;
     }
 
     private double clampSalary(double salary) {

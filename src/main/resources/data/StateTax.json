@@ -203,20 +203,8 @@
       "state": "AZ",
       "brackets": [
         {
-          "upTo": 28808,
-          "rate": 0.025
-        },
-        {
-          "upTo": 57615,
-          "rate": 0.033
-        },
-        {
-          "upTo": 86423,
-          "rate": 0.041
-        },
-        {
           "upTo": null,
-          "rate": 0.045
+          "rate": 0.025
         }
       ]
     },
@@ -378,7 +366,7 @@
       "brackets": [
         {
           "upTo": null,
-          "rate": 0.0575
+          "rate": 0.0539
         }
       ]
     }

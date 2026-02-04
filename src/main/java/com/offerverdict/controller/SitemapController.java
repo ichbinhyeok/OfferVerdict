@@ -141,48 +141,54 @@ public class SitemapController {
         urls.add(new SitemapUrl(comparisonService.buildCanonicalUrl("/contact"), monthAgo, "0.5", "monthly"));
 
         // 2. Single City Analysis (Salary Check) - [SEO OPTIMIZED STRATEGY]
-        // Filter: Priority Cities Only & Tiered Salary Buckets
-        List<CityCostEntry> topCities = cities.stream()
-                .filter(c -> c.getPriority() <= 2) // Priority 1 & 2
-                .toList();
-
-        // SEO-Optimized Tiered Salary Buckets
-        // Focus on high search volume ranges with appropriate granularity
+        // Focus on all cities but with tiered priorities
         List<Integer> salaryBuckets = buildSalaryBuckets();
 
-        for (CityCostEntry city : topCities) {
+        for (CityCostEntry city : cities) {
+            String priority = "0.6"; // Baseline
+            if (city.getTier() == 1)
+                priority = "0.8";
+            if (city.getTier() >= 3)
+                priority = "0.3";
+
             for (int salary : salaryBuckets) {
                 String path = "/salary-check/" + city.getSlug() + "/" + salary;
-                // Salary check pages: High priority, updated weekly with cost data
                 urls.add(new SitemapUrl(
                         comparisonService.buildCanonicalUrl(path),
                         weekAgo,
-                        "0.8",
+                        priority,
                         "weekly"));
             }
         }
 
-        // 3. Job x CityA x CityB Comparisons - [OPTIMIZED]
-        // Instead of ALL combinations, focus on High Priority Pairs or Major Jobs
-        for (JobInfo job : jobs) { // Iterate all jobs, filter inside
-            for (CityCostEntry cityA : topCities) {
-                for (CityCostEntry cityB : topCities) {
+        // 3. Job x CityA x CityB Comparisons - [TIERED PRIORITY STRATEGY]
+        for (JobInfo job : jobs) {
+            for (CityCostEntry cityA : cities) {
+                for (CityCostEntry cityB : cities) {
                     if (!cityA.getSlug().equals(cityB.getSlug())) {
 
-                        // LOGIC MUST MATCH ComparisonController.shouldIndexThisPage()
-                        // 1. If Job is NOT major, at least one city must be Tier 1
-                        boolean isMajorJob = job.isMajor();
-                        boolean isAtLeastOneTier1 = (cityA.getTier() == 1 || cityB.getTier() == 1);
+                        // Calculate Tiered Priority
+                        // 1.0 = Home, 0.9 = Hot Pairs, 0.7 = Major, 0.3 = Minor
+                        double priorityValue = 0.5; // Default
 
-                        if (isMajorJob || isAtLeastOneTier1) {
-                            String path = "/" + job.getSlug() + "-salary-" + cityA.getSlug() + "-vs-" + cityB.getSlug();
-                            // Comparison pages: Medium-high priority, updated weekly
-                            urls.add(new SitemapUrl(
-                                    comparisonService.buildCanonicalUrl(path),
-                                    weekAgo,
-                                    "0.7",
-                                    "weekly"));
-                        }
+                        boolean isMajorJob = job.isMajor();
+                        int combinedTier = cityA.getTier() + cityB.getTier();
+
+                        if (isMajorJob && combinedTier <= 2)
+                            priorityValue = 0.9;
+                        else if (isMajorJob && combinedTier <= 4)
+                            priorityValue = 0.7;
+                        else if (!isMajorJob && combinedTier <= 2)
+                            priorityValue = 0.6;
+                        else if (combinedTier >= 6)
+                            priorityValue = 0.1; // Very minor
+
+                        String path = "/" + job.getSlug() + "-salary-" + cityA.getSlug() + "-vs-" + cityB.getSlug();
+                        urls.add(new SitemapUrl(
+                                comparisonService.buildCanonicalUrl(path),
+                                weekAgo,
+                                String.valueOf(priorityValue),
+                                (priorityValue >= 0.7 ? "weekly" : "monthly")));
                     }
                 }
             }
@@ -208,20 +214,21 @@ public class SitemapController {
             buckets.add(s);
         }
 
-        // Tier 2: $60K-$120K, $10K intervals (6 buckets)
-        // Covers: Mid-level to senior positions (highest search volume)
-        for (int s = 70000; s <= 120000; s += 10000) {
+        // Tier 2: $60K-$130K, $5K intervals (Crucial Range)
+        // Covers: Teachers ($65k), Residents ($68k est using 70k), Nurses ($95k),
+        // Managers ($110k), Consultants ($125k)
+        // We moved to $5k intervals here because this is the "Golden Zone" of traffic.
+        for (int s = 65000; s <= 130000; s += 5000) {
             buckets.add(s);
         }
 
-        // Tier 3: $120K-$200K, $20K intervals (5 buckets)
-        // Covers: Senior to executive positions
-        for (int s = 140000; s <= 200000; s += 20000) {
+        // Tier 3: $140K-$250K, $10K intervals
+        // Covers: Travel Nurses ($135k+), Tech ($150k), IB ($175k), Doctors ($240k)
+        for (int s = 140000; s <= 250000; s += 10000) {
             buckets.add(s);
         }
 
-        // Total: 21 salary buckets (vs. previous 47)
-        // Coverage: 95% of actual searches, -55% page count
+        // Total: More buckets, but precise targeting for our new "Whale" professions.
         return buckets;
     }
 

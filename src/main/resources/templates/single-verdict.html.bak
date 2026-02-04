@@ -23,6 +23,8 @@
     <meta name="description" th:content="${metaDescription}">
 
     <!-- JSON-LD Structured Data - DECISION GAP FRAMEWORK (Phase 3) -->
+    <!-- Principle: FAQPage with conditional answers - NO exact salary numbers -->
+    <!-- Prevents Zero-Click while maintaining rich results eligibility -->
     <script type="application/ld+json" th:inline="javascript">
     {
         "@context": "https://schema.org",
@@ -30,10 +32,26 @@
         "mainEntity": [
             {
                 "@type": "Question",
-                "name": "Is this a good salary?",
+                "name": /*[['Is $' + ${salary} + ' a good salary in ' + ${city.city} + '?']]*/ "Is this salary good in this city?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "It depends on your lifestyle. Our calculator breaks down taxes and living costs."
+                    "text": /*[['It depends on your lifestyle and family situation. In ' + ${city.city} + ', you need to consider ' + ${city.state} + ' state taxes, housing costs (avg. rent ~$' + ${city.avgRent} + '/mo), and your personal spending. Use our verdict calculator to see your real residual income.']]*/ "It depends on your lifestyle..."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": /*[['What is the cost of living in ' + ${city.city} + '?']]*/ "What is the cost of living?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": /*[['The primary cost factors in ' + ${city.city} + ' are housing and taxes. ' + ${city.state} + ' has specific tax rates. Your actual cost depends on neighborhood choice, lifestyle, and whether you own or rent. Our calculator breaks down all major expense categories.']]*/ "The primary factors are housing and taxes..."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How accurate is this salary analysis?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "We use IRS 2025 tax tables, BLS wage data, and Numbeo cost-of-living indices. Results are high-fidelity estimates based on statistical averages. Your personal outcome depends on lifestyle choices, debt obligations, and housing preferences. This is a strategic baseline for decision-making, not financial advice. Consult a CFP for personalized guidance."
                 }
             }
         ]
@@ -53,8 +71,8 @@
 
     <main class="main-content">
         <!-- LAYER 1: VERDICT -->
-        <!-- Safe check for verdict being null -->
-        <section class="verdict-section" th:if="${verdict != null}" th:classappend="${verdictCssClass}">
+        <section class="verdict-section"
+            th:classappend="${verdict == T(com.offerverdict.model.Verdict).GO ? 'premium-gold' : (verdict == T(com.offerverdict.model.Verdict).NO_GO ? 'harsh-red' : 'neutral-blue')}">
             <div class="container">
                 <!-- BREADCRUMBS -->
                 <nav aria-label="Breadcrumb" class="breadcrumb-nav"
@@ -114,12 +132,9 @@
                         Where your money goes.</p>
                 </div>
 
-                <!-- 
-                     CRITICAL FIX: Simplified Logic. No complex th:with.
-                     Using pre-calculated controller variables: grossMonthly, taxMonthly, etc.
-                -->
                 <div class="receipt-grid single-analysis-grid">
-                    <div class="receipt-card">
+                    <div class="receipt-card"
+                        th:with="grossMo=${salary/12}, taxMo=${(result.taxResult.totalTax + (result.localTax*12))/12}, gap=${(salary/12) - ((result.taxResult.totalTax + (result.localTax*12))/12) - result.rent - result.livingCost - result.residual}">
                         <div class="card-header">
                             <h3 th:text="${city.city}">Austin</h3>
                             <span class="badge">Stats</span>
@@ -127,27 +142,27 @@
                         <div class="line-item">
                             <span class="label">Gross Monthly</span>
                             <span class="value mono"
-                                th:text="${'$' + #numbers.formatInteger(grossMonthly, 0, 'COMMA')}">$8,333</span>
+                                th:text="${'$' + #numbers.formatInteger(grossMo, 0, 'COMMA')}">$8,333</span>
                         </div>
                         <div class="line-item danger-text">
                             <span class="label">Taxes (Est.)</span>
                             <span class="value mono"
-                                th:text="${'-$' + #numbers.formatInteger(taxMonthly, 0, 'COMMA')}">-$2,000</span>
+                                th:text="${'-$' + #numbers.formatInteger(taxMo, 0, 'COMMA')}">-$2,000</span>
                         </div>
                         <div class="line-item warning-text">
                             <span class="label">Housing (Avg. Rent)</span>
                             <span class="value mono"
-                                th:text="${'-$' + #numbers.formatInteger(rentMonthly, 0, 'COMMA')}">-$1,900</span>
+                                th:text="${'-$' + #numbers.formatInteger(result.rent, 0, 'COMMA')}">-$1,900</span>
                         </div>
                         <div class="line-item">
                             <span class="label">Living Costs</span>
                             <span class="value mono"
-                                th:text="${'-$' + #numbers.formatInteger(livingCostMonthly, 0, 'COMMA')}">-$1,200</span>
+                                th:text="${'-$' + #numbers.formatInteger(result.livingCost, 0, 'COMMA')}">-$1,200</span>
                         </div>
                         <div class="line-item danger-text">
                             <span class="label">Benefits & 401k</span>
                             <span class="value mono"
-                                th:text="${'-$' + #numbers.formatInteger(gapMonthly, 0, 'COMMA')}">-$610</span>
+                                th:text="${'-$' + #numbers.formatInteger(gap, 0, 'COMMA')}">-$610</span>
                         </div>
                         <div class="line-item success-text highlight-row">
                             <span class="label">True Residual</span>
@@ -167,6 +182,8 @@
             </div>
         </section>
 
+        <!-- SALARY NEIGHBORS (Internal Linking) -->
+
         <!-- SEO Enhancement: City Context Section -->
         <section class="city-context-section" th:if="${cityContext != null}">
             <div class="container">
@@ -180,7 +197,7 @@
                         <div class="icon">🏢</div>
                         <div class="reality-content">
                             <h4>Job Market</h4>
-                            <p th:text="${cityContext?.jobMarketSummary}">Job market information...</p>
+                            <p th:text="${cityContext.jobMarketSummary}">Job market information...</p>
                         </div>
                     </div>
 
@@ -188,7 +205,7 @@
                         <div class="icon">🏘️</div>
                         <div class="reality-content">
                             <h4>Housing Market</h4>
-                            <p th:text="${cityContext?.housingTrends}">Housing trends...</p>
+                            <p th:text="${cityContext.housingTrends}">Housing trends...</p>
                         </div>
                     </div>
 
@@ -196,7 +213,7 @@
                         <div class="icon">🏭</div>
                         <div class="reality-content">
                             <h4>Industry Focus</h4>
-                            <p th:text="${cityContext?.industryFocus}">Industry information...</p>
+                            <p th:text="${cityContext.industryFocus}">Industry information...</p>
                         </div>
                     </div>
 
@@ -204,13 +221,14 @@
                         <div class="icon">🌟</div>
                         <div class="reality-content">
                             <h4>Quality of Life</h4>
-                            <p th:text="${cityContext?.qualityOfLife}">Quality of life...</p>
+                            <p th:text="${cityContext.qualityOfLife}">Quality of life...</p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- SALARY NEIGHBORS (Internal Linking) -->
         <!-- SALARY NEIGHBORS (Internal Linking) -->
         <section class="neighbors-section" style="padding: 3rem 0; background: #fafafa; border-top: 1px solid #eee;">
             <div class="container">
