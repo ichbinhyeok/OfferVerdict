@@ -13,6 +13,12 @@ public class GlobalExceptionHandler {
 
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(org.springframework.web.servlet.NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ModelAndView handleNoHandler(org.springframework.web.servlet.NoHandlerFoundException ex) {
+        return new ModelAndView("error/404");
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ModelAndView handleNotFound(ResourceNotFoundException ex) {
