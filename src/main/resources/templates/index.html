@@ -178,7 +178,23 @@
         <!-- Right Split: Action & Form -->
         <div class="split-right">
             <main class="journey-card animate-in delay-2">
-                <form action="/start" method="get">
+                <form action="/start" method="get" id="searchForm">
+                    <!-- SEARCH MODE TOGGLE -->
+                    <div class="mode-toggle-container"
+                        style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+                        <div class="toggle-group"
+                            style="background: #f1f5f9; padding: 4px; border-radius: 8px; display: inline-flex;">
+                            <button type="button" id="tabSingle" onclick="toggleSearchMode('single')"
+                                style="padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; border:none; background: #4f46e5; color: white; transition: all 0.2s;">
+                                Check Sufficiency
+                            </button>
+                            <button type="button" id="tabCompare" onclick="toggleSearchMode('compare')"
+                                style="padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; border:none; background: transparent; color: #64748b; transition: all 0.2s;">
+                                Compare Offers
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Shared Occupation Context -->
                     <div class="occupation-header">
                         <div class="form-group" style="text-align: center;">
@@ -301,8 +317,61 @@
                                 document.querySelector('label[for="typeMonthly"]').style.color = '#64748b';
                             }
                         }
+
+                        function toggleSearchMode(mode) {
+                            const singleBtn = document.getElementById('tabSingle');
+                            const compareBtn = document.getElementById('tabCompare');
+                            const newOfferCol = document.querySelector('.new-offer');
+                            const arrow = document.querySelector('.comparison-arrow');
+                            const submitBtn = document.querySelector('button[type="submit"]');
+
+                            const cityBInput = document.getElementById('cityInputB');
+                            const offerSalaryInput = document.querySelector('input[name="offerSalary"]');
+
+                            if (mode === 'single') {
+                                // Style
+                                singleBtn.style.background = '#4f46e5';
+                                singleBtn.style.color = 'white';
+                                compareBtn.style.background = 'transparent';
+                                compareBtn.style.color = '#64748b';
+
+                                // Visibility
+                                newOfferCol.style.opacity = '0.3';
+                                newOfferCol.style.pointerEvents = 'none';
+                                arrow.style.opacity = '0.3';
+
+                                // Logic: Disable inputs to prevent validation
+                                cityBInput.disabled = true;
+                                offerSalaryInput.disabled = true;
+
+                                submitBtn.textContent = 'Check My Salary';
+                            } else {
+                                // Style
+                                compareBtn.style.background = '#4f46e5';
+                                compareBtn.style.color = 'white';
+                                singleBtn.style.background = 'transparent';
+                                singleBtn.style.color = '#64748b';
+
+                                // Visibility
+                                newOfferCol.style.opacity = '1';
+                                newOfferCol.style.pointerEvents = 'all';
+                                arrow.style.opacity = '1';
+
+                                // Logic
+                                cityBInput.disabled = false;
+                                offerSalaryInput.disabled = false;
+
+                                submitBtn.textContent = 'Compare Reality';
+                            }
+                        }
+
+                        // Init Default Mode
+                        window.addEventListener('DOMContentLoaded', () => {
+                            toggleSearchMode('single');
+                            updateSalaryLabels();
+                        });
                         // Init
-                        updateSalaryLabels();
+                        // Init handled in event listener
                     </script>
 
                     <!-- Submit -->

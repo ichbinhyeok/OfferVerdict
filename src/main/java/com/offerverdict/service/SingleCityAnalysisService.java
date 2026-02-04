@@ -97,9 +97,6 @@ public class SingleCityAnalysisService {
         double netMonthly = totalAnnualNet / 12.0;
 
         // Commute Time-Value Cost
-        double hourlyRate = salary / 2080.0;
-        double netHourlyRate = (netAnnual / 2080.0) * 0.8; // conservative net hourly
-        double monthlyCommuteCost = (commuteTime * 2 * 22 / 60.0) * netHourlyRate;
 
         double householdMultiplier = householdType == HouseholdType.FAMILY ? 1.4 : 1.0;
 

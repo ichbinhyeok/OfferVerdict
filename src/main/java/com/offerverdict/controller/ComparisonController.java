@@ -12,7 +12,6 @@ import com.offerverdict.model.JobInfo;
 import com.offerverdict.service.ComparisonService;
 
 import com.offerverdict.util.SlugNormalizer;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,50 +72,74 @@ public class ComparisonController {
             RedirectAttributes redirectAttributes,
             Model model) {
 
-        if (job != null && cityA != null && cityB != null && currentSalary != null && offerSalary != null) {
+        // Check for sufficient inputs (Either Comparison OR Single City)
+        boolean isComparison = (cityB != null && !cityB.isBlank() && offerSalary != null);
+        boolean isSingleCity = (job != null && cityA != null && currentSalary != null);
+
+        if (isSingleCity && currentSalary != null) {
+            double curSalary = currentSalary;
             try {
                 String normalizedJob = SlugNormalizer.normalize(job);
                 String normalizedCityA = SlugNormalizer.normalize(cityA);
-                String normalizedCityB = SlugNormalizer.normalize(cityB);
 
                 Optional<JobInfo> jobInfo = resolveJobInput(job, normalizedJob);
                 Optional<CityCostEntry> cityMatchA = resolveCityInput(cityA, normalizedCityA);
-                Optional<CityCostEntry> cityMatchB = resolveCityInput(cityB, normalizedCityB);
 
-                if (jobInfo.isPresent() && cityMatchA.isPresent() && cityMatchB.isPresent()) {
+                if (jobInfo.isPresent() && cityMatchA.isPresent()) {
                     // Smart Validation: Account for monthly inputs
-                    double currentMultiplier = ("monthly".equalsIgnoreCase(salaryType) || currentSalary < 12000) ? 12.0
-                            : 1.0;
-                    double offerMultiplier = ("monthly".equalsIgnoreCase(salaryType) || offerSalary < 12000) ? 12.0
+                    double currentMultiplier = ("monthly".equalsIgnoreCase(salaryType) || curSalary < 12000) ? 12.0
                             : 1.0;
 
-                    if (currentSalary * currentMultiplier < MIN_SALARY || currentSalary * currentMultiplier > MAX_SALARY
-                            ||
-                            offerSalary * offerMultiplier < MIN_SALARY || offerSalary * offerMultiplier > MAX_SALARY) {
+                    if (curSalary * currentMultiplier < MIN_SALARY
+                            || curSalary * currentMultiplier > MAX_SALARY) {
                         model.addAttribute("validationMessage",
-                                String.format("Salaries must be between $%,.0f and $%,.0f (Annualized)", MIN_SALARY,
+                                String.format("Salary must be between $%,.0f and $%,.0f (Annualized)", MIN_SALARY,
                                         MAX_SALARY));
-                    } else {
-                        String targetPath = String.format("/%s-salary-%s-vs-%s",
-                                jobInfo.get().getSlug(),
-                                cityMatchA.get().getSlug(),
-                                cityMatchB.get().getSlug());
+                    } else if (isComparison && offerSalary != null) {
+                        double offSalary = offerSalary;
+                        // --- COMPARISON LOGIC (Existing) ---
+                        String normalizedCityB = SlugNormalizer.normalize(cityB);
+                        Optional<CityCostEntry> cityMatchB = resolveCityInput(cityB, normalizedCityB);
 
-                        if (targetPath != null) {
+                        // Check offer salary
+                        double offerMultiplier = ("monthly".equalsIgnoreCase(salaryType) || offSalary < 12000) ? 12.0
+                                : 1.0;
+                        if (offSalary * offerMultiplier < MIN_SALARY || offSalary * offerMultiplier > MAX_SALARY) {
+                            model.addAttribute("validationMessage", "Offer salary out of range.");
+                        } else if (cityMatchB.isPresent()) {
+                            String targetPath = String.format("/%s-salary-%s-vs-%s",
+                                    jobInfo.get().getSlug(),
+                                    cityMatchA.get().getSlug(),
+                                    cityMatchB.get().getSlug());
+
                             RedirectView redirectView = new RedirectView(targetPath, true);
                             redirectView.setStatusCode(HttpStatus.FOUND);
-                            addRedirectParams(redirectAttributes, currentSalary, offerSalary, salaryType,
+                            addRedirectParams(redirectAttributes, curSalary, offSalary,
+                                    salaryType != null ? salaryType : "annual",
                                     null, null, null, null, null, null, null, null, null, null, null, null, null, null);
                             return redirectView;
+                        } else {
+                            model.addAttribute("validationMessage", "Could not find the second city.");
                         }
+                    } else {
+                        // --- SINGLE CITY LOGIC (New) ---
+                        int salaryInt = (int) (curSalary * currentMultiplier);
+                        String targetPath = String.format("/salary-check/%s/%s/%d",
+                                jobInfo.get().getSlug(),
+                                cityMatchA.get().getSlug(),
+                                salaryInt);
+
+                        RedirectView redirectView = new RedirectView(targetPath, true);
+                        redirectView.setStatusCode(HttpStatus.FOUND);
+                        return redirectView;
                     }
                 } else {
                     model.addAttribute("validationMessage",
-                            "Could not find matching job or cities. Please check your inputs.");
+                            "Could not find matching job or city. Please check your inputs.");
                 }
             } catch (Exception e) {
-                model.addAttribute("validationMessage",
-                        "An error occurred. Please check your inputs and try again.");
+                model.addAttribute("validationMessage", "An error occurred. Please check your inputs.");
+                e.printStackTrace();
             }
         }
 

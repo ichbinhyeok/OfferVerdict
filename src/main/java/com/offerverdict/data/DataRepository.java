@@ -31,6 +31,7 @@ public class DataRepository {
     private Map<String, CityCostEntry> cityBySlug = Collections.emptyMap();
     private Map<String, JobInfo> jobBySlug = Collections.emptyMap();
     private AuthoritativeMetrics authoritativeMetrics;
+    private Map<String, Map<String, Map<String, Double>>> jobMarketData = Collections.emptyMap();
 
     public DataRepository(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -61,6 +62,13 @@ public class DataRepository {
                     new ClassPathResource("data/Jobs.json").getInputStream(),
                     new TypeReference<>() {
                     });
+
+            // Load Job Market Benchmarks
+            MarketDataContainer marketContainer = objectMapper.readValue(
+                    new ClassPathResource("data/JobMarketData.json").getInputStream(),
+                    MarketDataContainer.class);
+            this.jobMarketData = marketContainer.markets;
+
             this.cityBySlug = cities.stream()
                     .collect(Collectors.toMap(c -> SlugNormalizer.normalize(c.getSlug()), c -> c));
             this.jobBySlug = jobs.stream()
@@ -70,9 +78,31 @@ public class DataRepository {
         }
     }
 
-    // Inner class for JSON wrapper
+    /**
+     * Finds market benchmark (p10, p50, p90) for a job and city with fallbacks.
+     */
+    public Map<String, Double> getMarketBenchmark(String jobSlug, String citySlug) {
+        String jSlug = SlugNormalizer.normalize(jobSlug);
+        String cSlug = SlugNormalizer.normalize(citySlug);
+
+        Map<String, Map<String, Double>> jobEntry = jobMarketData.getOrDefault(jSlug, jobMarketData.get("default"));
+        if (jobEntry == null)
+            return Collections.emptyMap();
+
+        Map<String, Double> cityEntry = jobEntry.getOrDefault(cSlug, jobEntry.get("default"));
+        if (cityEntry == null)
+            return Collections.emptyMap();
+
+        return cityEntry;
+    }
+
+    // Inner classes for JSON wrappers
     private static class CityDataContainer {
         public List<CityCostEntry> cities;
+    }
+
+    private static class MarketDataContainer {
+        public Map<String, Map<String, Map<String, Double>>> markets;
     }
 
     public TaxData getTaxData() {

@@ -64,12 +64,16 @@
                     <span style="margin: 0 0.5rem;">&rsaquo;</span>
                     <span th:text="${city.state} + ' Cities'">State Cities</span>
                     <span style="margin: 0 0.5rem;">&rsaquo;</span>
-                    <span th:text="${city.city} + ' Salary Analysis'" style="font-weight: 600; color: #333;">City
+                    <span
+                        th:text="${jobInfo != null ? jobInfo.title + ' in ' + city.city : city.city + ' Salary Analysis'}"
+                        style="font-weight: 600; color: #333;">City
                         Analysis</span>
                 </nav>
 
                 <div class="verdict-header">
-                    <span class="badge-source">SINGLE CITY ANALYSIS</span>
+                    <span class="badge-source"
+                        th:text="${jobInfo != null ? #strings.toUpperCase(jobInfo.title) + ' ANALYSIS' : 'SINGLE CITY ANALYSIS'}">SINGLE
+                        CITY ANALYSIS</span>
                 </div>
 
                 <div class="verdict-display">
@@ -164,7 +168,127 @@
                             solid financial move.</span></p>
                 </div>
 
+                <!-- NEW: MARKET INTELLIGENCE -->
+                <div class="market-intelligence-container" th:if="${marketRating != null}"
+                    style="margin-top: 3rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 style="margin: 0; font-size: 1.25rem;">Market Position</h3>
+                        <span class="badge" th:classappend="${verdictCssClass}"
+                            style="padding: 6px 16px; border-radius: 99px; font-weight: 700;"
+                            th:text="${marketRating}">COMPETITIVE</span>
+                    </div>
+
+                    <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6;">
+                        In <span th:text="${city.city}">Austin</span>, the median salary for a
+                        <span th:text="${jobTitle}">Professional role</span> is approximately
+                        <strong th:text="${'$' + #numbers.formatInteger(marketMedian, 0, 'COMMA')}">$135,000</strong>.
+                        Your offer is <strong
+                            th:text="${#numbers.formatDecimal(marketPositionAbs, 1, 1) + '%'}">0%</strong>
+                        <span th:text="${marketPosition >= 0 ? 'above' : 'below'}">above</span> the local market median.
+                    </p>
+
+                    <div class="market-bar-wrapper" style="margin-top: 2rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94a3b8; font-weight: 600; margin-bottom: 0.5rem;">
+                            <span>MARKET MIN</span>
+                            <span>MEDIAN</span>
+                            <span>TOP 10%</span>
+                        </div>
+                        <div style="height: 10px; background: #f1f5f9; border-radius: 5px; position: relative;">
+                            <!-- Marker for user salary -->
+                            <div
+                                th:style="'position: absolute; left: ' + ${marketBarLeft} + '%; top: -5px; width: 20px; height: 20px; background: #4f46e5; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW: RELOCATION ROI -->
+                <div class="relocation-roi-container" th:if="${relocationGainSF != null}" style="margin-top: 3rem;">
+                    <div class="section-title" style="text-align: left; margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1.25rem;">Relocation Intelligence</h3>
+                        <p style="font-size: 0.9rem; color: #64748b;">The true purchasing power shift from major tech
+                            hubs.</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+                        <!-- SF Baseline -->
+                        <div
+                            style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 12px;">
+                            <span
+                                style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Moving
+                                from SF ($180k)</span>
+                            <div style="font-size: 1.5rem; font-weight: 800; margin-top: 0.5rem;"
+                                th:classappend="${isGainSF ? 'success-text' : 'danger-text'}"
+                                th:text="${(relocationGainSF >= 0 ? '+' : '-') + '$' + #numbers.formatInteger(relocationGainSFAbs, 0, 'COMMA') + '/mo'}">
+                                +$1,200/mo
+                            </div>
+                            <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">
+                                Equivalent to a net <span
+                                    th:text="${isGainSF ? 'increase' : 'decrease'}">increase</span> in
+                                monthly discretionary income compared to a tech hub baseline.
+                            </p>
+                        </div>
+
+                        <!-- NYC Baseline -->
+                        <div
+                            style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 12px;">
+                            <span
+                                style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Moving
+                                from NYC ($170k)</span>
+                            <div style="font-size: 1.5rem; font-weight: 800; margin-top: 0.5rem;"
+                                th:classappend="${isGainNYC ? 'success-text' : 'danger-text'}"
+                                th:text="${(relocationGainNYC >= 0 ? '+' : '-') + '$' + #numbers.formatInteger(relocationGainNYCAbs, 0, 'COMMA') + '/mo'}">
+                                +$950/mo
+                            </div>
+                            <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">
+                                Based on local tax and housing cost parity.
+                            </p>
+                        </div>
+                        <!-- Big Mac Tangibility -->
+                        <div th:if="${bigMacTarget != null}"
+                            style="background: #fff; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 12px; grid-column: span 1;">
+                            <span
+                                style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Purchasing
+                                Power</span>
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem;">
+                                <div style="font-size: 1.5rem;">🍔</div>
+                                <div>
+                                    <div style="font-size: 1.1rem; font-weight: 700;"
+                                        th:text="${bigMacIsCheaper ? 'Lower Daily Costs' : 'Higher Daily Costs'}">Lower
+                                        Daily Costs</div>
+                                    <p style="font-size: 0.8rem; color: #64748b; margin: 0;">
+                                        A Big Mac here is <strong th:text="${'$' + bigMacTarget}">$4.36</strong>
+                                        vs <span th:text="${'$' + bigMacSF}">$6.50</span> in SF.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ADVICE: NEGOTIATION LEVERAGE -->
+                    <div
+                        style="margin-top: 1.5rem; background: #eef2ff; border: 1px border-subtle; border-radius: 12px; padding: 1.25rem; display: flex; align-items: flex-start; gap: 1rem;">
+                        <span style="font-size: 1.25rem;">💡</span>
+                        <p style="font-size: 0.9rem; color: #4338ca; margin: 0; font-weight: 500;">
+                            <strong>Strategic Insight:</strong>
+                            <span th:if="${isGainSF}">Since you are saving <span
+                                    th:text="${'$' + #numbers.formatInteger(relocationGainSFAbs, 0, 'COMMA')}">money</span>
+                                compared to SF, your "Lifestyle Stability" is high.</span>
+                            <span th:if="${!isGainSF}">While this is a <span
+                                    th:text="${'$' + #numbers.formatInteger(relocationGainSFAbs, 0, 'COMMA')}">money</span>
+                                reduction from a top-tier SF baseline,</span>
+                            if your Market Position is below median, use the high local rent trends to negotiate a
+                            housing stipend.
+                        </p>
+                    </div>
+                </div>
+
             </div>
+        </section>
+
+        </div>
         </section>
 
         <!-- SEO Enhancement: City Context Section -->
@@ -229,7 +353,7 @@
                                 style="display: block; font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Lower
                                 Range</span>
                             <span style="display: block; font-size: 1.25rem; font-weight: 700; color: #333;"
-                                th:text="${'$' + #numbers.formatInteger(salary - 10000, 0, 'COMMA')}">$90,000</span>
+                                th:text="${'$' + #numbers.formatInteger(salary - salaryInterval, 0, 'COMMA')}">$90,000</span>
                         </div>
                         <span style="font-size: 1.5rem; color: #ccc;">&larr;</span>
                     </a>
@@ -255,7 +379,7 @@
                                 style="display: block; font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Higher
                                 Range</span>
                             <span style="display: block; font-size: 1.25rem; font-weight: 700; color: #333;"
-                                th:text="${'$' + #numbers.formatInteger(salary + 10000, 0, 'COMMA')}">$110,000</span>
+                                th:text="${'$' + #numbers.formatInteger(salary + salaryInterval, 0, 'COMMA')}">$110,000</span>
                         </div>
                         <span style="font-size: 1.5rem; color: #ccc;">&rarr;</span>
                     </a>

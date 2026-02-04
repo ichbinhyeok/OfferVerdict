@@ -20,9 +20,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class SingleCityController {
@@ -241,6 +240,7 @@ public class SingleCityController {
         model.addAttribute("prevSalaryUrl", prevSalaryUrl);
         model.addAttribute("nextSalaryUrl", nextSalaryUrl);
         model.addAttribute("relatedCities", relatedCities);
+        model.addAttribute("salaryInterval", interval);
 
         // 7c. Verdict CSS Class
         String verdictCssClass = "neutral-blue";
@@ -250,6 +250,77 @@ public class SingleCityController {
             verdictCssClass = "harsh-red";
         }
         model.addAttribute("verdictCssClass", verdictCssClass);
+
+        // 7e. Market Benchmarking Analysis
+        String jSlugForMarket = (jobInfo != null) ? jobInfo.getSlug() : "default";
+        Map<String, Double> benchmark = repository.getMarketBenchmark(jSlugForMarket, citySlug);
+
+        if (!benchmark.isEmpty()) {
+            double p10 = benchmark.getOrDefault("p10", 0.0);
+            double p50 = benchmark.getOrDefault("p50", 0.0);
+            double p90 = benchmark.getOrDefault("p90", 0.0);
+
+            String marketRating = "Fair";
+            double salary = (double) salaryInt;
+
+            if (salary < p10)
+                marketRating = "Low-ball";
+            else if (salary >= p90)
+                marketRating = "Elite";
+            else if (salary >= p50)
+                marketRating = "Competitive";
+
+            model.addAttribute("marketMedian", p50);
+            model.addAttribute("marketRating", marketRating);
+
+            double position = (salary / p50) * 100 - 100;
+            model.addAttribute("marketPosition", position);
+            model.addAttribute("marketPositionAbs", Math.abs(position));
+
+            // Calculate progress bar left position (0-100 range)
+            double barLeft = Math.min(100.0, Math.max(0.0, 50.0 + (position / 2.0)));
+            model.addAttribute("marketBarLeft", barLeft);
+            model.addAttribute("jobTitle", (jobInfo != null) ? jobInfo.getTitle() : "Professional role");
+        } else {
+            model.addAttribute("jobTitle", "Professional role");
+        }
+
+        // 7f. Relocation ROI (Relational Baseline)
+        try {
+            // SF Baseline: $180k
+            ComparisonResult sfBaseline = comparisonService.compare("san-francisco-ca", citySlug, 180000.0,
+                    (double) salaryInt,
+                    HouseholdType.SINGLE, HousingType.RENT, false, 0.0, 0.0, 0.0, 0.0, false, true);
+            double sfResidual = sfBaseline.getCurrent().getResidual();
+            double targetResidual = sfBaseline.getOffer().getResidual();
+            double monthlyGainVsSF = targetResidual - sfResidual;
+
+            // NYC Baseline: $170k
+            ComparisonResult nycBaseline = comparisonService.compare("new-york-ny", citySlug, 170000.0,
+                    (double) salaryInt,
+                    HouseholdType.SINGLE, HousingType.RENT, false, 0.0, 0.0, 0.0, 0.0, false, true);
+            double nycResidual = nycBaseline.getCurrent().getResidual();
+            double monthlyGainVsNYC = targetResidual - nycResidual;
+
+            model.addAttribute("relocationGainSF", monthlyGainVsSF);
+            model.addAttribute("relocationGainNYC", monthlyGainVsNYC);
+            model.addAttribute("relocationGainSFAbs", Math.abs(monthlyGainVsSF));
+            model.addAttribute("relocationGainNYCAbs", Math.abs(monthlyGainVsNYC));
+            model.addAttribute("isGainSF", monthlyGainVsSF > 0);
+            model.addAttribute("isGainNYC", monthlyGainVsNYC > 0);
+
+            // Added: Big Mac Index Comparison
+            if (metrics != null && metrics.getBigMacIndex() != null) {
+                double sfMac = metrics.getBigMacIndex().getOrDefault("San Francisco", 6.50);
+                double targetMac = metrics.getBigMacIndex().getOrDefault(city.getCity(),
+                        metrics.getBigMacIndex().getOrDefault("nationalAverage", 5.69));
+                model.addAttribute("bigMacSF", sfMac);
+                model.addAttribute("bigMacTarget", targetMac);
+                model.addAttribute("bigMacIsCheaper", targetMac < sfMac);
+            }
+        } catch (Exception e) {
+            // Fallback silently if baseline hubs are missing in data
+        }
 
         // 7b. City Context Enrichment
         enrichmentService.getCityContext(citySlug).ifPresent(ctx -> model.addAttribute("cityContext", ctx));

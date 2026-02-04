@@ -40,8 +40,7 @@
             <div class="container">
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
                     <a th:each="city : ${cities}"
-                        th:href="@{'/' + ${job.slug} + '-salary-' + ${city.slug} + '-vs-new-york-ny?currentSalary=100000&offerSalary=100000'}"
-                        class="card"
+                        th:href="@{'/salary-check/' + ${job.slug} + '/' + ${city.slug} + '/100000'}" class="card"
                         style="padding: 1.5rem; border: 1px solid var(--border-subtle); border-radius: 8px; text-decoration: none; color: inherit; transition: transform 0.2s;">
                         <span
                             style="font-size: 0.9rem; color: var(--text-3); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 0.5rem;"
@@ -49,7 +48,7 @@
                         <h3 style="font-size: 1.1rem; color: var(--brand-primary); margin: 0;" th:text="${city.city}">
                             City</h3>
                         <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-2);">
-                            vs New York (Base)
+                            $100,000 Analysis &rarr;
                         </div>
                     </a>
                 </div>
