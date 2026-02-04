@@ -35,8 +35,21 @@ public class GlobalExceptionHandler {
         return mav;
     }
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ModelAndView handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        return new ModelAndView("error/404");
+    }
+
     @ExceptionHandler(Exception.class)
     public ModelAndView handleGeneric(Exception ex, jakarta.servlet.http.HttpServletResponse response) {
+        // Safety check: If it's a 404-type exception, return 404 immediately
+        if (ex instanceof org.springframework.web.servlet.NoHandlerFoundException ||
+                ex instanceof org.springframework.web.servlet.resource.NoResourceFoundException) {
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return new ModelAndView("error/404");
+        }
+
         // Log the full stack trace for debugging
         logger.error("Internal Server Error (Potential Resource Issue): ", ex);
 

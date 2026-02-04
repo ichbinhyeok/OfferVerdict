@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title}">About Us</title>
+    <title th:text="${title}">About Us - OfferVerdict</title>
     <meta name="description" th:content="${metaDescription}">
 
     <link rel="stylesheet" href="/css/tokens.css">
@@ -21,6 +21,33 @@
         rel="stylesheet">
     <!-- Analytics -->
     <div th:replace="~{fragments/analytics :: analytics}"></div>
+
+    <!-- Author Schema for EEAT -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "AboutPage",
+        "mainEntity": {
+            "@type": "Organization",
+            "name": "OfferVerdict",
+            "url": "https://livingcostcheck.com",
+            "description": "Data-driven salary and cost of living comparison tool helping job seekers make informed relocation decisions.",
+            "foundingDate": "2026",
+            "founder": {
+                "@type": "Person",
+                "name": "Hyeok Shin",
+                "jobTitle": "Founder & Lead Developer",
+                "description": "Financial technology professional with expertise in data analysis and software development. Built OfferVerdict to solve the real-world problem of understanding true salary value across different cities."
+            },
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "email": "pshinhyeok@gmail.com",
+                "contactType": "customer support"
+            },
+            "sameAs": []
+        }
+    }
+    </script>
 </head>
 
 <body class="theme-lucid">
@@ -37,9 +64,10 @@
             <div class="container" style="max-width: 800px;">
                 <span class="badge"
                     style="background: var(--brand-primary); color: white; padding: 4px 12px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">About
-                    the Creator</span>
-                <h1 style="font-size: 2.5rem; margin-top: 1.5rem; letter-spacing: -0.03em;">Why I Built This</h1>
-                <p style="font-size: 1.25rem; color: var(--text-2); margin-top: 1rem;">A personal note from Gabi.</p>
+                    OfferVerdict</span>
+                <h1 style="font-size: 2.5rem; margin-top: 1.5rem; letter-spacing: -0.03em;">Why We Built This</h1>
+                <p style="font-size: 1.25rem; color: var(--text-2); margin-top: 1rem;">A tool born from real
+                    experience.</p>
             </div>
         </section>
 
@@ -47,31 +75,73 @@
         <section class="section-story" style="padding: 3rem 0; background: var(--bg-page);">
             <div class="container" style="max-width: 720px;">
                 <div class="content-block" style="font-size: 1.125rem; line-height: 1.8; color: var(--gray-800);">
-                    <p>Hi, I'm <strong>Gabi</strong>.</p>
 
-                    <p>A few years ago, I received what looked like a dream job offer. The salary was 30% higher than
-                        what I was making. I packed my bags, moved across the country, and expected my life to upgrade
-                        significantly.</p>
+                    <h3>The Problem We Solve</h3>
+                    <p>Every year, millions of professionals face a critical decision: <strong>Should I take this job
+                            offer in a new city?</strong></p>
 
-                    <p><strong>I was wrong.</strong></p>
+                    <p>The salary looks higher on paper. But after state taxes, housing costs, and local expenses—is it
+                        really a raise? Or are you just working harder to maintain the same lifestyle?</p>
 
-                    <p>Between state taxes I hadn't calculated, a ridiculous increase in car insurance, and housing
-                        costs that were double what Zillow estimated, my "raise" effectively vanished. I was making more
-                        money on paper, but I felt poorer.</p>
+                    <p><strong>Most people guess. We calculate.</strong></p>
 
                     <hr style="margin: 2.5rem 0; border: 0; border-top: 1px solid var(--border-subtle);">
 
-                    <h3>OfferVerdict is the Tool I Wish I Had</h3>
-                    <p>I built OfferVerdict to solve this specific pain point. Most "cost of living calculators" just
-                        give you a generic percentage match. They don't tell you about the local tax nuances, the
-                        specific housing market reality, or the wealth-building potential over 10 years.</p>
+                    <h3>Our Approach</h3>
+                    <p>OfferVerdict uses a "Reverse-Disposable Income" methodology. Instead of just comparing nominal
+                        salaries, we:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 1rem;">
+                        <li>Calculate <strong>actual tax burdens</strong> using 2025 IRS and state tax tables</li>
+                        <li>Factor in <strong>real housing costs</strong> from Numbeo and local market data</li>
+                        <li>Estimate <strong>living expenses</strong> based on city-specific cost indices</li>
+                        <li>Show your <strong>true residual income</strong>—what you actually keep</li>
+                    </ul>
 
-                    <p>My goal is simple: <strong>To help you make the best financial decision of your career, with eyes
-                            wide open.</strong></p>
+                    <hr style="margin: 2.5rem 0; border: 0; border-top: 1px solid var(--border-subtle);">
+
+                    <!-- Author Section for EEAT -->
+                    <h3>About the Creator</h3>
+                    <div style="display: flex; gap: 1.5rem; align-items: flex-start; margin-top: 1rem;">
+                        <div
+                            style="width: 80px; height: 80px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: 700; flex-shrink: 0;">
+                            H</div>
+                        <div>
+                            <p style="margin: 0; font-weight: 600; font-size: 1.2rem;">Hyeok Shin</p>
+                            <p style="margin: 0.25rem 0 0.75rem 0; color: var(--text-2); font-size: 0.95rem;">Founder &
+                                Lead Developer</p>
+                            <p style="margin: 0;">A professional with background in financial technology and data
+                                analysis. After personally experiencing the hidden costs of job relocation, I built
+                                OfferVerdict to help others make data-driven career decisions.</p>
+                        </div>
+                    </div>
+
+                    <hr style="margin: 2.5rem 0; border: 0; border-top: 1px solid var(--border-subtle);">
+
+                    <h3>Our Data Sources</h3>
+                    <p>We rely exclusively on authoritative, publicly available data:</p>
+                    <ul style="margin-left: 1.5rem; margin-top: 1rem;">
+                        <li><strong>IRS</strong> — Federal tax brackets and deductions (2025)</li>
+                        <li><strong>State Revenue Departments</strong> — State and local tax rates</li>
+                        <li><strong>Bureau of Labor Statistics (BLS)</strong> — Wage data and occupational statistics
+                        </li>
+                        <li><strong>Numbeo</strong> — Cost of living indices and housing data</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">For full transparency, see our <a href="/methodology"
+                            style="color: var(--brand-primary);">Methodology</a> page.</p>
+
+                    <hr style="margin: 2.5rem 0; border: 0; border-top: 1px solid var(--border-subtle);">
+
+                    <h3>Contact Us</h3>
+                    <p>Have questions, feedback, or partnership inquiries?</p>
+                    <p style="margin-top: 0.5rem;">
+                        <strong>Email:</strong>
+                        <a href="mailto:pshinhyeok@gmail.com"
+                            style="color: var(--brand-primary);">pshinhyeok@gmail.com</a>
+                    </p>
                 </div>
 
-                <div style="margin-top: 4rem; text-align: center;">
-                    <a href="/contact" class="btn btn-primary">Get in Touch</a>
+                <div style="margin-top: 3rem; text-align: center;">
+                    <a href="/" class="btn btn-primary">Try the Calculator</a>
                 </div>
             </div>
         </section>

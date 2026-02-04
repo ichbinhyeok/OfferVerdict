@@ -9,7 +9,7 @@ server:
 app:
   publicBaseUrl: http://localhost:8080
   baselineLivingCost: 1800
-  sitemapChunkSize: 25
+  sitemapChunkSize: 5000
   devReloadEnabled: true
 
 seo:
