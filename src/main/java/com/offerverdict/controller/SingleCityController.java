@@ -342,9 +342,69 @@ public class SingleCityController {
         model.addAttribute("contextualDisclaimer",
                 "*Figures are estimates based on public data. Actual costs vary by neighborhood and lifestyle.");
 
+        // --- SMART CROSS-LINKING (SEO Siloing) ---
+        // 1. Salary Neighbors (+/- 10k, 20k)
+        Map<String, String> salaryLinks = new java.util.LinkedHashMap<>();
+        int[] steps = { -20000, -10000, 10000, 20000 };
+        String jobSegment = (jobInfo != null) ? jobInfo.getSlug() + "/" : "";
+
+        for (int step : steps) {
+            int newSalary = salaryInt + step;
+            if (newSalary > 30000) { // Min salary check
+                salaryLinks.put(String.format("$%,d", newSalary),
+                        "/salary-check/" + jobSegment + citySlug + "/" + newSalary);
+            }
+        }
+        model.addAttribute("salaryLinks", salaryLinks);
+
+        // 2. City Neighbors (Same State or Popular)
+        Map<String, String> cityLinks = new java.util.LinkedHashMap<>();
+        // Simple logic: if in TX, show Dallas/Houston. If CA, show SF/LA. Else show top
+        // hubs.
+        String state = city.getState();
+        List<String> neighborCities = List.of("austin-tx", "dallas-tx", "houston-tx", "san-francisco-ca", "new-york-ny",
+                "seattle-wa");
+
+        for (String slug : neighborCities) {
+            if (!slug.equals(citySlug)) {
+                // Get city name roughly from slug
+                String name = slug.replace("-", " ").toUpperCase();
+                // Pretty Print
+                if (name.contains("TX"))
+                    name = name.replace("TX", ", TX");
+                else if (name.contains("CA"))
+                    name = name.replace("CA", ", CA");
+                else if (name.contains("NY"))
+                    name = name.replace("NY", ", NY");
+                else if (name.contains("WA"))
+                    name = name.replace("WA", ", WA");
+
+                cityLinks.put(name, "/salary-check/" + jobSegment + slug + "/" + salaryInt);
+            }
+            if (cityLinks.size() >= 4)
+                break;
+        }
+        model.addAttribute("cityLinks", cityLinks);
+
+        // 3. Job Neighbors (Link to other roles in same city)
+        Map<String, String> jobLinks = new java.util.LinkedHashMap<>();
+        if (jobInfo != null) {
+            List<String> otherJobs = List.of("product-manager", "data-scientist", "software-engineer",
+                    "marketing-manager", "finance");
+
+            for (String jSlug : otherJobs) {
+                if (!jSlug.equals(jobInfo.getSlug())) {
+                    String name = jSlug.replace("-", " ").toUpperCase();
+                    jobLinks.put(name, "/salary-check/" + jSlug + "/" + citySlug + "/" + salaryInt);
+                }
+                if (jobLinks.size() >= 4)
+                    break;
+            }
+            model.addAttribute("jobLinks", jobLinks);
+        }
+
         // SEO Meta
         model.addAttribute("title",
-
                 generateRiskBasedTitle(city, salaryInt, jobInfo));
         model.addAttribute("metaDescription", generateRiskBasedDescription(city, result, salaryInt, jobInfo));
 

@@ -555,20 +555,66 @@
             </div>
         </section>
 
-        <!-- STATE-BASED CITY LINKS (Internal Linking Grid) -->
-        <section class="related-cities-section" th:if="${relatedCities != null and !relatedCities.isEmpty()}">
+        <!-- PSEO: SMART CROSS-LINKING GRID -->
+        <section class="related-analysis-section"
+            style="background: #f8f9fa; padding: 3rem 0; border-top: 1px solid #eee;">
             <div class="container">
-                <h3>Compare with other cities in <span th:text="${city.state}">Texas</span></h3>
-                <p>See how this salary compares in nearby cities:</p>
-                <div class="city-links-grid">
-                    <a th:each="relatedCity : ${relatedCities}"
-                        th:href="@{/salary-check/{slug}/{amount}(slug=${relatedCity.slug}, amount=${salary})}"
-                        rel="follow" class="city-link-card">
-                        <span class="city-name" style="font-weight: 500;"
-                            th:text="'Is ' + ${'$' + #numbers.formatInteger(salary, 0, 'COMMA')} + ' a good salary in ' + ${relatedCity.city} + '?'">
-                            Is $100,000 a good salary in Dallas?
-                        </span>
-                    </a>
+                <h3 style="margin-bottom: 2rem; color: #1e293b; font-size: 1.5rem;">Explore Related Scenarios</h3>
+
+                <div class="analysis-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+
+                    <!-- 1. Salary Variations -->
+                    <div class="link-group" th:if="${salaryLinks != null and !salaryLinks.isEmpty()}">
+                        <h4
+                            style="font-size: 1.1rem; color: #64748b; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">
+                            Different Salary Points
+                        </h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li th:each="link : ${salaryLinks}" style="margin-bottom: 0.8rem;">
+                                <a th:href="${link.value}"
+                                    style="color: #2563eb; text-decoration: none; font-weight: 500; display: block; padding: 0.5rem; background: #fff; border-radius: 6px; border: 1px solid #e2e8f0; transition: all 0.2s;">
+                                    <span style="color: #64748b; margin-right: 0.5rem;">&rarr;</span>
+                                    Check <span th:text="${link.key}">$110,000</span> Analysis
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 2. City Neighbors -->
+                    <div class="link-group" th:if="${cityLinks != null and !cityLinks.isEmpty()}">
+                        <h4
+                            style="font-size: 1.1rem; color: #64748b; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">
+                            Similar Cities
+                        </h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li th:each="link : ${cityLinks}" style="margin-bottom: 0.8rem;">
+                                <a th:href="${link.value}"
+                                    style="color: #2563eb; text-decoration: none; font-weight: 500; display: block; padding: 0.5rem; background: #fff; border-radius: 6px; border: 1px solid #e2e8f0; transition: all 0.2s;">
+                                    <span style="color: #64748b; margin-right: 0.5rem;">&rarr;</span>
+                                    <span th:text="${link.key}">Dallas, TX</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 3. Job Variations -->
+                    <div class="link-group" th:if="${jobLinks != null and !jobLinks.isEmpty()}">
+                        <h4
+                            style="font-size: 1.1rem; color: #64748b; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">
+                            Other Roles in <span th:text="${city.city}">Austin</span>
+                        </h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li th:each="link : ${jobLinks}" style="margin-bottom: 0.8rem;">
+                                <a th:href="${link.value}"
+                                    style="color: #2563eb; text-decoration: none; font-weight: 500; display: block; padding: 0.5rem; background: #fff; border-radius: 6px; border: 1px solid #e2e8f0; transition: all 0.2s;">
+                                    <span style="color: #64748b; margin-right: 0.5rem;">&rarr;</span>
+                                    <span th:text="${link.key}">Product Manager</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </section>
