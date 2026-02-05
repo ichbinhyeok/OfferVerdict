@@ -14,7 +14,7 @@ import java.util.List;
 public class SitemapController {
 
     private final DataRepository repository;
-    private final String BASE_URL = "https://offerverdict.com"; // Change to actual domain
+    private final String BASE_URL = "https://livingcostcheck.com";
 
     public SitemapController(DataRepository repository) {
         this.repository = repository;
@@ -31,39 +31,40 @@ public class SitemapController {
         addUrl(xml, "/", "1.0");
         addUrl(xml, "/about", "0.8");
         addUrl(xml, "/methodology", "0.8");
-        addUrl(xml, "/cities", "0.9"); // Directory root
+        addUrl(xml, "/cities", "0.9");
 
-        // Dynamic Pages: Top 50 Cities x Top Jobs
-        // Strategy: We don't want 10M pages yet. Pick Top Cities and Top Jobs.
+        // Dynamic Seed Strategy: Focus on Tech Hubs & Rising Cities
+        // Instead of generating 5000+ thin pages, we focus on high-intent seeds.
+
         List<CityCostEntry> allCities = repository.getCities();
         List<JobInfo> allJobs = repository.getJobs();
 
-        // Filter for "Popular" logic (simplified: first 20 cities/jobs for now)
-        // In real app, we would have a 'population' field or 'isPopular' flag.
-        int cityLimit = Math.min(allCities.size(), 30);
-        int jobLimit = Math.min(allJobs.size(), 10);
+        // 1. Tech Hubs (San Francisco, New York, Seattle, Austin, Boston)
+        List<String> targetCitySlugs = List.of("san-francisco-ca", "new-york-ny", "seattle-wa", "austin-tx",
+                "boston-ma", "los-angeles-ca", "denver-co", "chicago-il");
+        // 2. High Volume Roles
+        List<String> targetJobSlugs = List.of("software-engineer", "product-manager", "data-scientist",
+                "marketing-manager", "finance", "registered-nurse");
 
-        for (int i = 0; i < cityLimit; i++) {
-            CityCostEntry city = allCities.get(i);
+        for (CityCostEntry city : allCities) {
+            if (targetCitySlugs.contains(city.getSlug())) {
+                for (JobInfo job : allJobs) {
+                    if (targetJobSlugs.contains(job.getSlug())) {
+                        // Key Salaries Only: Start, Mid, Senior
+                        // This reduces bloat and focuses on "Is $100k good?" type intent.
+                        int[] salaryPoints = { 80000, 100000, 120000, 150000, 200000 };
 
-            for (int j = 0; j < jobLimit; j++) {
-                JobInfo job = allJobs.get(j);
-
-                // Tiered Salary Logic: $20k to $250k
-                // Tier 1: 20-60 ($10k steps)
-                for (int s = 20000; s <= 60000; s += 10000) {
-                    addUrl(xml, "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + s, "0.6");
-                }
-                // Tier 2: 80-150 ($10k steps)
-                for (int s = 80000; s <= 150000; s += 10000) {
-                    addUrl(xml, "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + s, "0.7");
-                }
-                // Tier 3: 175-250 ($25k steps)
-                for (int s = 175000; s <= 250000; s += 25000) {
-                    addUrl(xml, "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + s, "0.5");
+                        for (int s : salaryPoints) {
+                            addUrl(xml, "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + s, "0.9");
+                        }
+                    }
                 }
             }
         }
+
+        // Add Comparisons Seed
+        addUrl(xml, "/software-engineer-salary-san-francisco-ca-vs-austin-tx", "0.8");
+        addUrl(xml, "/financial-analyst-salary-new-york-ny-vs-chicago-il", "0.8");
 
         xml.append("</urlset>");
         return xml.toString();
