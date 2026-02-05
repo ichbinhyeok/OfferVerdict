@@ -54,7 +54,7 @@ public class SingleCityAnalysisService {
                 salary,
                 city.getState(),
                 isMarried != null ? isMarried : (householdType == HouseholdType.FAMILY),
-                fourOhOneKRate,
+                fourOhOneKRate != null ? fourOhOneKRate / 100.0 : null,
                 monthlyInsurance,
                 studentLoanOrChildcare > 0 ? studentLoanOrChildcare * 12 : null,
                 0.0);
@@ -128,6 +128,18 @@ public class SingleCityAnalysisService {
         if (city.getDetails() != null && !city.getDetails().isEmpty()) {
             groceries = city.getDetails().getOrDefault("groceries", 0.0) * householdMultiplier;
             transport = city.getDetails().getOrDefault("transport", 0.0) * householdMultiplier;
+
+            // Add Commute Cost: Assume $0.50 per minute of commute (gas/wear) monthly
+            // e.g. 30min * 2 ways * 22 days = 1320 mins -> but this logic is per minute of
+            // one-way
+            // Simple model: $15 extra monthly cost per 1 minute of one-way commute
+            // (includes gas, tolls, depreciation)
+            // 30 min commute -> $450/mo total transport cost impact? Maybe too high.
+            // Conservative: $5 per minute. 30 min -> $150 extra/mo.
+            if (commuteTime > 0) {
+                transport += (commuteTime * 5.0);
+            }
+
             utilities = city.getDetails().getOrDefault("utilities", 0.0) * householdMultiplier;
             misc = city.getDetails().getOrDefault("misc", 0.0) * householdMultiplier;
 

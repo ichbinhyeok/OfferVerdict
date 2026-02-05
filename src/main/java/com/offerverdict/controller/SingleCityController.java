@@ -329,11 +329,13 @@ public class SingleCityController {
         if (jobInfo != null) {
             model.addAttribute("jobInfo", jobInfo);
             enrichmentService.getJobContext(jobInfo.getSlug()).ifPresent(ctx -> model.addAttribute("jobContext", ctx));
-            // Update CTA to use actual job
-            model.addAttribute("compareUrl", "/" + jobInfo.getSlug() + "-salary-" + citySlug + "-vs-austin-tx");
+            // CTA Update: Link to Index with Prefill (Component 2)
+            model.addAttribute("compareUrl",
+                    "/?mode=compare&city1=" + citySlug + "&job=" + jobInfo.getSlug() + "&salary=" + salaryInt);
         } else {
             // Default CTA fallback
-            model.addAttribute("compareUrl", "/software-engineer-salary-" + citySlug + "-vs-austin-tx");
+            model.addAttribute("compareUrl",
+                    "/?mode=compare&city1=" + citySlug + "&job=general-professional&salary=" + salaryInt);
         }
 
         // Legal Shield
@@ -341,7 +343,9 @@ public class SingleCityController {
                 "*Figures are estimates based on public data. Actual costs vary by neighborhood and lifestyle.");
 
         // SEO Meta
-        model.addAttribute("title", generateRiskBasedTitle(city, salaryInt, jobInfo));
+        model.addAttribute("title",
+
+                generateRiskBasedTitle(city, salaryInt, jobInfo));
         model.addAttribute("metaDescription", generateRiskBasedDescription(city, result, salaryInt, jobInfo));
 
         // SEO Structured Data (Breadcrumb)
@@ -386,40 +390,25 @@ public class SingleCityController {
 
     private String generateRiskBasedTitle(CityCostEntry city, int salaryInt, JobInfo jobInfo) {
         String currentYear = java.time.Year.now().toString();
-        String jobPrefix = (jobInfo != null) ? jobInfo.getTitle() + " " : "";
+        String jobTitle = (jobInfo != null) ? jobInfo.getTitle() : "Salary";
+        String formattedSalary = String.format("%,d", salaryInt);
 
+        // SEO CTR Optimized Title: "Is $100K Good in Austin? Software Engineer
+        // Take-Home [2026]"
         return String.format(
-                "Before You Accept That %s %s Offer: Can You Actually Afford Life Here? (%s)",
-                city.getCity(), jobPrefix, currentYear);
+                "Is $%s Good in %s? %s Take-Home Pay [%s]",
+                formattedSalary, city.getCity(), jobTitle, currentYear);
     }
 
     private String generateRiskBasedDescription(CityCostEntry city, ComparisonBreakdown result, int salaryInt,
             JobInfo jobInfo) {
-        double rentBurden = result.getRent() / (salaryInt / 12.0);
-        String jobPrefix = (jobInfo != null) ? " as a " + jobInfo.getTitle() : "";
+        String formattedSalary = String.format("%,d", salaryInt);
+        String formattedResidual = String.format("%,d", Math.round(result.getResidual()));
 
-        // State tax rate analysis
-        double stateTaxRate = 0.0;
-        if (result.getTaxResult() != null && result.getTaxResult().getStateTax() > 0) {
-            stateTaxRate = result.getTaxResult().getStateTax() / salaryInt;
-        }
-
-        if (stateTaxRate > 0.05) {
-            return String.format(
-                    "Don't accept that %s offer%s without seeing this. We calculated the REAL residual after %s's state tax bite. Is there anything left?",
-                    city.getCity(), jobPrefix, city.getState());
-        } else if (rentBurden > 0.30) {
-            return String.format(
-                    "Can you actually afford life in %s%s on this salary? We break down the housing burden and savings. The numbers might shock you.",
-                    city.getCity(), jobPrefix);
-        } else if (rentBurden < 0.20) {
-            return String.format(
-                    "Is %s's low cost worth the tradeoff%s? Calculate your true purchasing power—taxes, lifestyle, career. Don't just chase cheap rent.",
-                    city.getCity(), jobPrefix);
-        } else {
-            return String.format(
-                    "Should you move to %s%s for this salary? We expose the real trade-offs: tax burden vs. lifestyle. Make the call with data.",
-                    city.getCity(), jobPrefix);
-        }
+        // SEO CTR Optimized Meta: "$100,000 in Austin = $2,500/mo savings. After taxes
+        // ($14k), rent ($2k). See breakdown →"
+        return String.format(
+                "$%s in %s = $%s/mo savings. After taxes, rent, and living costs. See the full breakdown \u2192",
+                formattedSalary, city.getCity(), formattedResidual);
     }
 }

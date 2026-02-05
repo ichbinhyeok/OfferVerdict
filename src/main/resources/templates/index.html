@@ -366,12 +366,46 @@
                         }
 
                         // Init Default Mode
+                        // Init Default Mode & Prefill
                         window.addEventListener('DOMContentLoaded', () => {
-                            toggleSearchMode('single');
+                            const params = new URLSearchParams(window.location.search);
+                            const mode = params.get('mode');
+
+                            toggleSearchMode(mode === 'compare' ? 'compare' : 'single');
                             updateSalaryLabels();
+
+                            // Prefill Logic
+                            if (mode === 'compare') {
+                                // Job
+                                if (params.get('job')) {
+                                    const jobSlug = params.get('job');
+                                    // Simple slug-to-title
+                                    const jobTitle = jobSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                                    document.getElementById('jobInput').value = jobTitle;
+                                }
+
+                                // Salary (Set as Offer Salary)
+                                if (params.get('salary')) {
+                                    document.querySelector('input[name="offerSalary"]').value = params.get('salary');
+                                }
+
+                                // City (Set as New Offer - City B)
+                                if (params.get('city1')) {
+                                    const citySlug = params.get('city1');
+                                    // Slug to Title (e.g. austin-tx -> Austin, TX)
+                                    const parts = citySlug.split('-');
+                                    let cityTitle = "";
+                                    if (parts.length > 1) {
+                                        const state = parts.pop().toUpperCase();
+                                        const city = parts.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                                        cityTitle = city + ", " + state;
+                                    } else {
+                                        cityTitle = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+                                    }
+                                    document.getElementById('cityInputB').value = cityTitle;
+                                }
+                            }
                         });
-                        // Init
-                        // Init handled in event listener
                     </script>
 
                     <!-- Submit -->

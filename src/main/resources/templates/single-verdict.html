@@ -22,7 +22,7 @@
     <link rel="canonical" th:href="${canonicalUrl}">
     <meta name="description" th:content="${metaDescription}">
 
-    <!-- JSON-LD Structured Data - DECISION GAP FRAMEWORK (Phase 3) -->
+    <!-- JSON-LD Structured Data - DECISION GAP FRAMEWORK (Phase 6 Extended) -->
     <script type="application/ld+json" th:inline="javascript">
     {
         "@context": "https://schema.org",
@@ -30,10 +30,26 @@
         "mainEntity": [
             {
                 "@type": "Question",
-                "name": "Is this a good salary?",
+                "name": "Is " + [[${'$' + #numbers.formatInteger(salary, 0, 'COMMA')}]] + " a good salary in " + [[${city.city}]] + "?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "It depends on your lifestyle. Our calculator breaks down taxes and living costs."
+                    "text": "Based on our analysis, a " + [[${'$' + #numbers.formatInteger(salary, 0, 'COMMA')}]] + " salary in " + [[${city.city}]] + " leaves you with an estimated " + [[${'$' + #numbers.formatInteger(result.residual, 0, 'COMMA')}]] + " monthly residual income after taxes and living expenses."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What is the take-home pay for " + [[${'$' + #numbers.formatInteger(salary, 0, 'COMMA')}]] + " in " + [[${city.city}]] + "?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "After estimated taxes, your monthly take-home pay is approximately " + [[${'$' + #numbers.formatInteger(result.netMonthly, 0, 'COMMA')}]] + "."
+                }
+            },
+             {
+                "@type": "Question",
+                "name": "Is " + [[${city.city}]] + " expensive to live in?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Housing costs in " + [[${city.city}]] + " are " + [[${result.rent} > 2000 ? 'relatively high' : 'moderate']] + ", with an average rent of " + [[${'$' + #numbers.formatInteger(result.rent, 0, 'COMMA')}]] + "/mo."
                 }
             }
         ]
@@ -62,7 +78,9 @@
                     <a href="/"
                         style="color: inherit; text-decoration: none; border-bottom: 1px solid transparent;">Home</a>
                     <span style="margin: 0 0.5rem;">&rsaquo;</span>
-                    <span th:text="${city.state} + ' Cities'">State Cities</span>
+                    <a th:href="@{/cities#} + ${city.state}" th:text="${city.state} + ' Cities'"
+                        style="color: inherit; text-decoration: none; border-bottom: 1px solid transparent;">State
+                        Cities</a>
                     <span style="margin: 0 0.5rem;">&rsaquo;</span>
                     <span
                         th:text="${jobInfo != null ? jobInfo.title + ' in ' + city.city : city.city + ' Salary Analysis'}"
@@ -90,7 +108,7 @@
 
                 <div class="financial-impact">
                     <div class="impact-label">Estimated Monthly Residual (Savings)</div>
-                    <div class="impact-value"
+                    <div class="impact-value" id="disp-residual-top"
                         th:text="${'$' + #numbers.formatInteger(result.residual, 0, 'COMMA') + '/mo'}">$2,500/mo</div>
                     <div class="contextual-disclaimer"
                         style="margin-top: 12px; font-size: 0.85rem; color: #666; font-style: italic;">
@@ -103,6 +121,156 @@
                     <div class="ad-label">ADVERTISEMENT</div>
                     <div class="ad-placeholder">
                         <span class="ad-hint">Premium Financial Partner Slot</span>
+                    </div>
+                </div>
+            </div>
+            <!-- SIMULATION UI (PHASE 6) -->
+            <div class="simulation-section container" style="margin-top: 2rem; margin-bottom: 3rem;">
+                <!-- Pulse Animation Style -->
+                <style>
+                    @keyframes pulse-glow {
+                        0% {
+                            box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+                        }
+
+                        70% {
+                            box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+                        }
+
+                        100% {
+                            box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+                        }
+                    }
+
+                    .sticky-result-bar {
+                        position: fixed;
+                        bottom: 0;
+                        left: 0;
+                        width: 100%;
+                        background: white;
+                        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+                        padding: 1rem;
+                        z-index: 1000;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        transform: translateY(100%);
+                        transition: transform 0.3s ease-out;
+                    }
+
+                    .sticky-result-bar.visible {
+                        transform: translateY(0);
+                    }
+
+                    .sticky-label {
+                        font-size: 0.85rem;
+                        color: #64748b;
+                        font-weight: 500;
+                    }
+
+                    .sticky-value {
+                        font-size: 1.5rem;
+                        font-weight: 800;
+                        color: var(--brand-primary);
+                    }
+                </style>
+
+                <button id="btn-toggle-sim" class="btn-secondary"
+                    style="width: 100%; text-align: center; border: 2px solid var(--brand-primary); color: var(--brand-primary); font-weight: 700; padding: 1rem; border-radius: 12px; background: #eef2ff; transition: all 0.2s; animation: pulse-glow 2s infinite;">
+                    ⚡ Customize Your Financial Reality ▼
+                </button>
+                <div id="simulation-panel"
+                    style="display: none; background: white; padding: 1.5rem; border-radius: 12px; margin-top: 1rem; border: 1px solid var(--border-subtle); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+                    <h3
+                        style="margin-bottom: 0.5rem; font-size: 1.2rem; color: var(--text-1); display: flex; align-items: center;">
+                        <span style="margin-right:8px;">🎛️</span> Fine-tune your scenario
+                    </h3>
+                    <p style="margin-bottom: 1.5rem; color: var(--text-2); font-size: 0.9rem;">Adjust sliders to see
+                        instant updates to your residual income.</p>
+
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                        <!-- Sliders with oninput for realtime -->
+                        <div class="slider-group">
+                            <label
+                                style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.9rem; font-weight:500;">
+                                401k Contribution
+                                <span id="val-401k" style="color:var(--brand-primary); font-weight:700;">0%</span>
+                            </label>
+                            <input type="range" id="input-401k" min="0" max="25" step="1" value="0"
+                                style="width:100%; accent-color: var(--brand-primary);">
+                        </div>
+
+                        <div class="slider-group">
+                            <label
+                                style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.9rem; font-weight:500;">
+                                Monthly Insurance
+                                <span id="val-insurance" style="color:var(--brand-primary); font-weight:700;">$0</span>
+                            </label>
+                            <input type="range" id="input-insurance" min="0" max="2000" step="50" value="0"
+                                style="width:100%; accent-color: var(--brand-primary);">
+                        </div>
+
+                        <div class="slider-group">
+                            <label
+                                style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.9rem; font-weight:500;">
+                                Annual RSU/Equity
+                                <span id="val-equity" style="color:var(--brand-primary); font-weight:700;">$0</span>
+                            </label>
+                            <input type="range" id="input-equity" min="0" max="200000" step="5000" value="0"
+                                style="width:100%; accent-color: var(--brand-primary);">
+                        </div>
+
+                        <div class="slider-group">
+                            <label
+                                style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.9rem; font-weight:500;">
+                                Commute (mins, 1-way)
+                                <span id="val-commute" style="color:var(--brand-primary); font-weight:700;">0m</span>
+                            </label>
+                            <input type="range" id="input-commute" min="0" max="120" step="5" value="0"
+                                style="width:100%; accent-color: var(--brand-primary);">
+                        </div>
+
+                        <div class="slider-group">
+                            <label
+                                style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.9rem; font-weight:500;">
+                                Side Hustle (/mo)
+                                <span id="val-sidehustle" style="color:var(--brand-primary); font-weight:700;">$0</span>
+                            </label>
+                            <input type="range" id="input-sidehustle" min="0" max="5000" step="100" value="0"
+                                style="width:100%; accent-color: var(--brand-primary);">
+                        </div>
+
+                        <div class="slider-group">
+                            <label
+                                style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.9rem; font-weight:500;">
+                                Other Debt/Leaks (/mo)
+                                <span id="val-leaks" style="color:var(--brand-primary); font-weight:700;">$0</span>
+                            </label>
+                            <input type="range" id="input-leaks" min="0" max="3000" step="100" value="0"
+                                style="width:100%; accent-color: var(--brand-primary);">
+                        </div>
+                    </div>
+                    <!-- Validated Logic Hint -->
+                    <div
+                        style="margin-top: 1rem; padding: 0.8rem; background: #f8fafc; border-radius: 8px; font-size: 0.8rem; color: #64748b;">
+                        * Checks: 401k reduces tax base. Commute is time-cost (not cash). Side hustle adds to residual.
+                    </div>
+                </div>
+
+                <!-- Sticky Result Bar -->
+                <div id="sticky-result" class="sticky-result-bar">
+                    <div class="container"
+                        style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                        <div>
+                            <span class="sticky-label">New Monthly Residual</span>
+                            <div class="sticky-value" id="sticky-residual-val">$2,500</div>
+                        </div>
+                        <button
+                            onclick="document.getElementById('simulation-panel').scrollIntoView({behavior: 'smooth'})"
+                            style="background:none; border:none; color:var(--brand-primary); font-weight:600; cursor:pointer;">
+                            Edit ▲
+                        </button>
                     </div>
                 </div>
             </div>
@@ -135,27 +303,27 @@
                         </div>
                         <div class="line-item danger-text">
                             <span class="label">Taxes (Est.)</span>
-                            <span class="value mono"
+                            <span class="value mono" id="disp-tax"
                                 th:text="${'-$' + #numbers.formatInteger(taxMonthly, 0, 'COMMA')}">-$2,000</span>
                         </div>
                         <div class="line-item warning-text">
                             <span class="label">Housing (Avg. Rent)</span>
-                            <span class="value mono"
+                            <span class="value mono" id="disp-rent"
                                 th:text="${'-$' + #numbers.formatInteger(rentMonthly, 0, 'COMMA')}">-$1,900</span>
                         </div>
                         <div class="line-item">
                             <span class="label">Living Costs</span>
-                            <span class="value mono"
+                            <span class="value mono" id="disp-living"
                                 th:text="${'-$' + #numbers.formatInteger(livingCostMonthly, 0, 'COMMA')}">-$1,200</span>
                         </div>
                         <div class="line-item danger-text">
                             <span class="label">Benefits & 401k</span>
-                            <span class="value mono"
+                            <span class="value mono" id="disp-benefits"
                                 th:text="${'-$' + #numbers.formatInteger(gapMonthly, 0, 'COMMA')}">-$610</span>
                         </div>
                         <div class="line-item success-text highlight-row">
                             <span class="label">True Residual</span>
-                            <span class="value mono"
+                            <span class="value mono" id="disp-residual"
                                 th:text="${'$' + #numbers.formatInteger(result.residual, 0, 'COMMA')}">$3,233</span>
                         </div>
                     </div>
@@ -427,6 +595,173 @@
     </main>
 
     <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // Data from Thymeleaf
+            const citySlug = [[${ city.slug }]];
+            const baseSalary = [[${ salary }]];
+
+            // Elements
+            const btnToggle = document.getElementById('btn-toggle-sim');
+            const panel = document.getElementById('simulation-panel');
+            const stickyBar = document.getElementById('sticky-result');
+            const stickyValue = document.getElementById('sticky-residual-val');
+
+            // Format Helper
+            const fmtMoney = (num) => '$' + Math.floor(num).toLocaleString();
+
+            // Toggle Logic
+            if (btnToggle) {
+                btnToggle.addEventListener('click', function () {
+                    const isHidden = panel.style.display === 'none';
+                    if (isHidden) {
+                        panel.style.display = 'block';
+                        btnToggle.innerHTML = 'Hide Scenario ▲';
+                        // Stop animation
+                        btnToggle.style.animation = 'none';
+                        // Show Sticky Bar
+                        stickyBar.classList.add('visible');
+                    } else {
+                        panel.style.display = 'none';
+                        btnToggle.innerHTML = '⚡ Customize Your Financial Reality ▼';
+                        // Hide Sticky Bar
+                        stickyBar.classList.remove('visible');
+                    }
+                });
+            }
+
+            // Slider Event Listeners (Real-time Debounced)
+            const inputs = ['input-401k', 'input-insurance', 'input-equity', 'input-commute', 'input-sidehustle', 'input-leaks'];
+
+            // Update labels immediately
+            document.getElementById('input-401k').addEventListener('input', (e) => document.getElementById('val-401k').innerText = e.target.value + '%');
+            document.getElementById('input-insurance').addEventListener('input', (e) => document.getElementById('val-insurance').innerText = '$' + Number(e.target.value).toLocaleString());
+            document.getElementById('input-equity').addEventListener('input', (e) => document.getElementById('val-equity').innerText = '$' + Number(e.target.value).toLocaleString());
+            document.getElementById('input-commute').addEventListener('input', (e) => document.getElementById('val-commute').innerText = e.target.value + 'm');
+            document.getElementById('input-sidehustle').addEventListener('input', (e) => document.getElementById('val-sidehustle').innerText = '$' + Number(e.target.value).toLocaleString());
+            document.getElementById('input-leaks').addEventListener('input', (e) => document.getElementById('val-leaks').innerText = '$' + Number(e.target.value).toLocaleString());
+
+            // Debounce function
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Calculation Logic
+            const performCalculation = () => {
+                const payload = {
+                    citySlug: citySlug,
+                    salary: baseSalary,
+                    fourOhOneKRate: Number(document.getElementById('input-401k').value),
+                    monthlyInsurance: Number(document.getElementById('input-insurance').value),
+                    equityAnnual: Number(document.getElementById('input-equity').value),
+                    commuteTime: Number(document.getElementById('input-commute').value),
+                    sideHustle: Number(document.getElementById('input-sidehustle').value),
+                    otherLeaks: Number(document.getElementById('input-leaks').value),
+                    isMarried: false // Default
+                };
+
+                // Show loading state on sticky
+                stickyValue.style.opacity = '0.5';
+
+                fetch('/api/simulate-single', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Update UI
+                        const residual = data.breakdown.residual; // Updated access path
+                        const impactText = fmtMoney(residual) + '/mo';
+
+                        document.getElementById('disp-residual-top').innerText = impactText;
+                        document.getElementById('disp-residual').innerText = fmtMoney(residual);
+                        if (data.breakdown.taxResult) {
+                            document.getElementById('disp-tax').innerText = '-$' + Math.floor(data.breakdown.taxResult.totalTax / 12).toLocaleString();
+                        }
+                        if (data.breakdown.transportCost) {
+                            document.getElementById('disp-transport').innerText = '-$' + Math.floor(data.breakdown.transportCost).toLocaleString();
+                        }
+
+                        // Logic Check: Commute shouldn't change residual (it's time cost), 401k should
+                        const benefitsCost = (payload.fourOhOneKRate * baseSalary / 100 / 12) + payload.monthlyInsurance;
+                        document.getElementById('disp-benefits').innerText = '-$' + Math.floor(benefitsCost).toLocaleString();
+
+                        // Update Sticky
+                        stickyValue.innerText = impactText;
+                        stickyValue.style.opacity = '1';
+
+                        // --- Dynamic Verdict Update ---
+                        const verdictSection = document.querySelector('.verdict-section');
+                        if (verdictSection) {
+                            // 1. Force removal of ALL possible status classes
+                            verdictSection.classList.remove('premium-gold', 'neutral-blue', 'harsh-red');
+
+                            // 2. Add new class from API
+                            verdictSection.classList.add(data.verdictCssClass);
+
+                            // 3. Update Text (h1.verdict-text)
+                            const verdictTextEl = verdictSection.querySelector('.verdict-text');
+
+                            // Map text to user-friendly title? No, for single verdict usually just "GO", "NO-GO" is shown as H1
+                            // But let's keep it simple and consistent with initial render
+                            // Initial render just does th:text="${verdict}" which is enum name usually
+
+                            if (verdictTextEl) {
+                                verdictTextEl.innerText = data.verdictText.replace("-", " ");
+                            }
+
+                            // 4. Update Subtitle & Leverage Msg to avoid contradictions
+                            const subEl = document.querySelector('.verdict-sub');
+                            const levEl = document.querySelector('.leverage-msg');
+
+                            let subText = "Current scenario analysis.";
+                            let levText = "Review your budget specifics below.";
+
+                            if (data.verdictText === "NO-GO") {
+                                subText = "This scenario creates a negative cash flow.";
+                                levText = "Warning: Projected expenses exceed income.";
+                            } else if (data.verdictText === "WARNING") {
+                                subText = "Tight budget. Little room for error.";
+                                levText = "Caution: Savings rate is critically low.";
+                            } else if (data.verdictText === "CONDITIONAL") {
+                                subText = "Doable, but requires discipline.";
+                                levText = "You can make this work with strict budgeting.";
+                            } else if (data.verdictText === "GO") {
+                                subText = "A statistically superior move.";
+                                levText = "You are in a commanding financial position.";
+                            }
+
+                            if (subEl) subEl.innerText = subText;
+                            if (levEl) levEl.innerText = levText;
+                        }
+
+                        // Add glow effect
+                        document.getElementById('disp-residual-top').classList.add('flash-change');
+                        setTimeout(() => document.getElementById('disp-residual-top').classList.remove('flash-change'), 1000);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
+            };
+
+            const debouncedCalc = debounce(performCalculation, 300); // 300ms delay
+
+            // Attach to all inputs
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', debouncedCalc);
+            });
+        });
+    </script>
 </body>
 
 </html>

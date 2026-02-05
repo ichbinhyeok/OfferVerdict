@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://livingcostcheck.com/sitemap-index.xml
+Sitemap: https://livingcostcheck.com/sitemap.xml
