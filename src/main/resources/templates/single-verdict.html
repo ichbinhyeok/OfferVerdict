@@ -156,6 +156,69 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Contextual Fake Door CTA -->
+                <div class="lead-capture-box"
+                    style="margin-top: 2rem; background: linear-gradient(135deg, #f0f4ff, #e5edff); border: 1px solid #c3d4ff; border-radius: 12px; padding: 2rem; text-align: center;"
+                    id="cta-box">
+                    <div id="cta-content" th:if="${jobInfo != null}">
+                        <h3 style="color: #1a365d; font-size: 1.25rem; margin-bottom: 0.5rem;">Is your <span
+                                th:text="${jobInfo.title}"></span> salary below market?</h3>
+                        <p style="color: #4a5568; margin-bottom: 1.5rem; font-size: 0.95rem;">Get your resume reviewed
+                            by tech industry experts and learn how to negotiate a <span th:text="${city.city}"></span>
+                            offer.</p>
+                        <button onclick="showLeadForm('resume_review')"
+                            style="background: var(--brand-primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer;">Get
+                            Free Review Quote</button>
+                    </div>
+                    <div id="cta-content" th:unless="${jobInfo != null}">
+                        <h3 style="color: #1a365d; font-size: 1.25rem; margin-bottom: 0.5rem;">Planning a move to <span
+                                th:text="${city.city}"></span>?</h3>
+                        <p style="color: #4a5568; margin-bottom: 1.5rem; font-size: 0.95rem;">Compare top-rated moving
+                            companies and save up to 30% on your cross-state relocation.</p>
+                        <button onclick="showLeadForm('moving_quote')"
+                            style="background: var(--brand-primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer;">Compare
+                            Moving Quotes</button>
+                    </div>
+                </div>
+
+                <script th:inline="javascript">
+                    function showLeadForm(intentType) {
+                        const ctaBox = document.getElementById('cta-box');
+                        ctaBox.innerHTML = `
+                        <h3 style="color: #1a365d; font-size: 1.15rem; margin-bottom: 0.5rem;">Coming soon to this area!</h3>
+                        <p style="color: #4a5568; margin-bottom: 1rem; font-size: 0.9rem;">We are finalizing our partner network. Leave your email to get notified.</p>
+                        <div style="display: flex; justify-content: center; gap: 0.5rem; max-width: 400px; margin: 0 auto; flex-wrap: wrap;">
+                            <input type="email" id="lead-email" placeholder="Enter your email" style="flex: 1; min-width: 200px; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                            <button onclick="submitLead('${intentType}')" style="background: var(--brand-primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer;">Notify Me</button>
+                        </div>
+                        <p id="lead-msg" style="margin-top: 1rem; font-size: 0.85rem; color: #059669; display: none; font-weight: 600;">Thanks! We've saved your info.</p>
+                    `;
+                    }
+
+                    function submitLead(intentType) {
+                        const email = document.getElementById('lead-email').value;
+                        if (!email || !email.includes('@')) {
+                            alert('Please enter a valid email.');
+                            return;
+                        }
+
+                        const citySlug = /*[[${city.slug}]]*/ 'unknown';
+                        const jobSlug = /*[[${jobInfo != null ? jobInfo.slug : 'none'}]]*/ 'none';
+
+                        fetch('/api/leads/capture', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: email, intent: intentType, citySlug: citySlug, jobSlug: jobSlug })
+                        }).then(res => {
+                            document.getElementById('lead-msg').style.display = 'block';
+                            document.getElementById('lead-email').value = '';
+                        }).catch(err => {
+                            console.error('Lead capture failed', err);
+                            alert('Something went wrong. Please try again.');
+                        });
+                    }
+                </script>
             </div>
             <!-- SIMULATION UI (PHASE 6) -->
             <div class="simulation-section container" style="margin-top: 2rem; margin-bottom: 3rem;">
