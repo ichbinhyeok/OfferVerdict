@@ -27,6 +27,15 @@ public class LeadCaptureController {
         String citySlug = payload.get("citySlug");
         String jobSlug = payload.getOrDefault("jobSlug", "none");
 
+        String honeypot = payload.get("honeypot");
+
+        // Simple Bot Honeypot: If this hidden field is filled, it's a bot. Silently
+        // drop.
+        if (honeypot != null && !honeypot.trim().isEmpty()) {
+            logger.warn("Bot detected via honeypot field. Dropping request.");
+            return ResponseEntity.ok(Map.of("status", "success", "message", "Lead captured")); // Fake success to bot
+        }
+
         if (email == null || email.trim().isEmpty() || !email.contains("@")) {
             return ResponseEntity.badRequest().body(Map.of("status", "error", "message", "Invalid email"));
         }

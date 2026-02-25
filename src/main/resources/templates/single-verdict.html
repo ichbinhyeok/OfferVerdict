@@ -197,19 +197,32 @@
                         <h3 style="color: #1a365d; font-size: 1.15rem; margin-bottom: 0.5rem;">Coming soon to this area!</h3>
                         <p style="color: #4a5568; margin-bottom: 1rem; font-size: 0.9rem;">We are finalizing our partner network. Leave your email to get notified.</p>
                         <div style="display: flex; justify-content: center; gap: 0.5rem; max-width: 400px; margin: 0 auto; flex-wrap: wrap;">
+                            <!-- Honeypot field (hidden from users, filled by bots) -->
+                            <input type="text" id="lead-hp" tabindex="-1" autocomplete="off" style="display:none;">
+                            
                             <input type="email" id="lead-email" placeholder="Enter your email" style="flex: 1; min-width: 200px; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px;" required>
-                            <button onclick="submitLead('${intentType}')" style="background: var(--brand-primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer;">Notify Me</button>
+                            <button id="lead-btn" onclick="submitLead('${intentType}')" style="background: var(--brand-primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;">Notify Me</button>
                         </div>
+                        <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.8rem; text-align: center;">By submitting, you agree to our <a href="/privacy" style="color: var(--brand-primary); text-decoration: underline;">Privacy Policy</a>.</p>
                         <p id="lead-msg" style="margin-top: 1rem; font-size: 0.85rem; color: #059669; display: none; font-weight: 600;">Thanks! We've saved your info.</p>
                     `;
                     }
 
                     function submitLead(intentType) {
-                        const email = document.getElementById('lead-email').value;
+                        const emailInput = document.getElementById('lead-email');
+                        const honeypot = document.getElementById('lead-hp').value;
+                        const btn = document.getElementById('lead-btn');
+                        const email = emailInput.value;
+
                         if (!email || !email.includes('@')) {
                             alert('Please enter a valid email.');
                             return;
                         }
+
+                        // Prevent double submission
+                        btn.disabled = true;
+                        btn.style.opacity = '0.7';
+                        btn.innerText = 'Sending...';
 
                         const citySlug = /*[[${city.slug}]]*/ 'unknown';
                         const jobSlug = /*[[${jobInfo != null ? jobInfo.slug : 'none'}]]*/ 'none';
@@ -217,13 +230,17 @@
                         fetch('/api/leads/capture', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email: email, intent: intentType, citySlug: citySlug, jobSlug: jobSlug })
+                            body: JSON.stringify({ email: email, intent: intentType, citySlug: citySlug, jobSlug: jobSlug, honeypot: honeypot })
                         }).then(res => {
                             document.getElementById('lead-msg').style.display = 'block';
-                            document.getElementById('lead-email').value = '';
+                            emailInput.value = '';
+                            btn.innerText = 'Done';
                         }).catch(err => {
                             console.error('Lead capture failed', err);
                             alert('Something went wrong. Please try again.');
+                            btn.disabled = false;
+                            btn.style.opacity = '1';
+                            btn.innerText = 'Notify Me';
                         });
                     }
                 </script>
