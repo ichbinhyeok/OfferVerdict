@@ -182,10 +182,24 @@ public class SingleCityController {
 
         String verdictMsg = verdictAdviser.generateVerdictMessage(verdict, 0, city.getCity());
 
-        // 5. Dynamic Content
-        String introText = dynamicContentService.generateSingleCityIntro(result);
-        String housingWarning = dynamicContentService.generateHousingWarning(result);
-        String analysisText = dynamicContentService.generateVerdictAnalysis(verdict, result);
+        // 5. Dynamic Content (Check for Premium AI Review First)
+        String jobSlugSafe = (jobInfo != null) ? jobInfo.getSlug() : "none";
+        com.offerverdict.service.DynamicContentService.PremiumReview premium = dynamicContentService
+                .getPremiumReview(citySlug, jobSlugSafe, salaryInt);
+
+        String introText;
+        String housingWarning;
+        String analysisText;
+
+        if (premium != null) {
+            introText = premium.introText;
+            housingWarning = premium.housingWarning;
+            analysisText = premium.analysisText;
+        } else {
+            introText = dynamicContentService.generateSingleCityIntro(result);
+            housingWarning = dynamicContentService.generateHousingWarning(result);
+            analysisText = dynamicContentService.generateVerdictAnalysis(verdict, result);
+        }
 
         // 6. Navigation Neighbors (Previous/Next Salary)
         String prevSalaryUrl = null;

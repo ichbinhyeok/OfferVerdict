@@ -1,0 +1,82 @@
+[
+    {
+        "citySlug": "austin-tx",
+        "jobSlug": "software-engineer",
+        "salaryBucket": 110000,
+        "introText": "Earning $110,000 as a Software Engineer in Austin (widely known as Silicon Hills) provides a solid foundation but requires strategic budgeting. Texas boasts no state income tax, meaning your $110k goes further than it would in California or New York, granting you an immediate liquidity advantage.",
+        "housingWarning": "Be cautious: Austin's housing market has stabilized but remains expensive. With average centralized rents around $2,000, you will be dedicating nearly 30% of your post-tax income to housing. Avoid luxury builds in The Domain if you plan to save aggressively for a down payment.",
+        "analysisText": "Verdict: Conditional. It's a respectable entry or mid-level tech salary, but inflation in local services and high property taxes (if buying) will eat into your margins. It's a great resume-building move, but negotiate hard for a sign-on bonus or RSUs."
+    },
+    {
+        "citySlug": "austin-tx",
+        "jobSlug": "software-engineer",
+        "salaryBucket": 140000,
+        "introText": "A $140,000 base salary for a Software Engineer in Austin puts you in an excellent financial striking position. You get the full benefit of zero state income tax, transforming this mid-senior tech salary into an exceptionally high net-yield compared to coastal tech hubs.",
+        "housingWarning": "Housing at this income tier is a non-issue if renting. You can comfortably afford a premium $2,500/month apartment in trendy neighborhoods like South Congress or East Austin while keeping your rent-to-net ratio well below the dangerous 30% threshold.",
+        "analysisText": "Verdict: Strong GO. This compensation allows you to max out retirement accounts and still enjoy significant disposable income. Austin’s tech ecosystem at this salary band offers one of the best ROI (Return on Income) metrics in the United States."
+    },
+    {
+        "citySlug": "austin-tx",
+        "jobSlug": "data-scientist",
+        "salaryBucket": 130000,
+        "introText": "For a Data Scientist, securing $130,000 in Austin aligns perfectly with the current local market index. You bypass the notorious state income taxes of the coasts, effectively increasing your monthly take-home pay by hundreds of dollars while situating yourself in a massive AI and analytics hub.",
+        "housingWarning": "With a take-home pay of roughly $8,300, a typical $2,100 housing expense leaves plenty of breathing room. However, you must factor in the hidden costs of Texas living: high utility bills during the relentless summer and absolute car dependency.",
+        "analysisText": "Verdict: GO. This is a highly competitive offer that balances career growth with financial security. The math works beautifully for a single professional looking to build wealth while enjoying the city's robust cultural scene."
+    },
+    {
+        "citySlug": "seattle-wa",
+        "jobSlug": "software-engineer",
+        "salaryBucket": 140000,
+        "introText": "A $140,000 Software Engineer salary in Seattle offers a unique dual advantage: access to top-tier Big Tech (Amazon, Microsoft) and zero state income tax. This salary firmly establishes you in the tech-heavy middle class of the Pacific Northwest.",
+        "housingWarning": "Seattle's housing market is unforgiving. Expect to pay anywhere from $2,400 to $2,800 for a modern apartment in tech-centric areas like South Lake Union or Capitol Hill. You will be spending an uncomfortable chunk of your net income just to stay close to the office.",
+        "analysisText": "Verdict: Conditional. Financially, the lack of state income tax is mostly offset by staggering housing and grocery costs. It's a fantastic career move for your resume, but purely from a wealth-accumulation standpoint, $140k in Seattle feels much like $100k elsewhere."
+    },
+    {
+        "citySlug": "seattle-wa",
+        "jobSlug": "software-engineer",
+        "salaryBucket": 180000,
+        "introText": "Securing $180,000 as a Senior Software Engineer in Seattle is where the region's lack of state income tax truly accelerates wealth building. You are shielding a massive portion of your income from the government compared to peers in California, making this an elite compensation package.",
+        "housingWarning": "Even with Seattle's notorious housing costs, $180k gives you absolute leverage. You can comfortably budget $3,000 a month for premium housing and still maintain a massive savings rate, easily bypassing the 50/30/20 rule's savings target.",
+        "analysisText": "Verdict: Strong GO. The mathematical synergy of high tech compensation and zero state tax creates a wealth generation engine. If you can handle the gloomy winters, this salary band makes Seattle one of the most lucrative cities in the world for engineers."
+    },
+    {
+        "citySlug": "dallas-tx",
+        "jobSlug": "registered-nurse",
+        "salaryBucket": 80000,
+        "introText": "A $80,000 salary for a Registered Nurse in Dallas, home to massive healthcare networks like Baylor Scott & White, is a standard starting or early-career rate. The zero state income tax of Texas helps stretch this base pay, but it requires diligent financial planning.",
+        "housingWarning": "Dallas is massive and varied. While $1,500/month apartments exist, they often mandate long commutes in heavy traffic. To live in safer, central areas close to the major hospital districts, you might push your rent-to-income ratio close to the uncomfortable 35% mark.",
+        "analysisText": "Verdict: Conditional. It's a survivable wage offering solid clinical experience, but the hidden costs of massive commutes (gas, tolls, car maintenance) in the DFW metroplex will slowly erode your savings. Highly recommend seeking shift differentials or PRN shifts to boost this baseline."
+    },
+    {
+        "citySlug": "dallas-tx",
+        "jobSlug": "registered-nurse",
+        "salaryBucket": 100000,
+        "introText": "Breaking the six-figure mark at $100,000 as a Registered Nurse in Dallas is a significant milestone. At this tier, the cost-of-living benefits of Texas finally outweigh the localized inflation, placing you in a very comfortable financial standing within the DFW metroplex.",
+        "housingWarning": "Housing affordability becomes a non-issue here. You can easily allocate $1,800 to $2,000 for a quality apartment in Uptown or a quieter suburb like Plano without sacrificing your ability to save or invest for the future.",
+        "analysisText": "Verdict: GO. This compensation level for clinical staff in Dallas allows for financial freedom, aggressive debt payoff, and a comfortable lifestyle. It is a highly sustainable long-term financial position."
+    },
+    {
+        "citySlug": "denver-co",
+        "jobSlug": "software-engineer",
+        "salaryBucket": 130000,
+        "introText": "Earning $130,000 as a Software Engineer in Denver places you right in the sweet spot of the city's burgeoning tech scene. However, unlike Texas or Washington, Colorado imposes a flat state income tax (around 4.4%), which will slightly drag down your monthly liquidity.",
+        "housingWarning": "Denver's housing market demands respect. With median rents hovering near $2,000, you aren't rent-burdened, but you must factor in the 'mountain tax'—the hidden costs of outdoor gear, ski passes, and the inevitable all-wheel-drive vehicle required for the Rockies lifestyle.",
+        "analysisText": "Verdict: GO. Financially, $130k is perfectly adequate for Denver, but you are trading pure wealth accumulation for access to unparalleled outdoor recreation. It's a lifestyle-first financial decision that requires mindful budgeting."
+    },
+    {
+        "citySlug": "atlanta-ga",
+        "jobSlug": "data-scientist",
+        "salaryBucket": 140000,
+        "introText": "A $140,000 offer for a Data Scientist in Atlanta is exceptionally strong. As the 'Silicon Orchard' continues to grow, this salary leverages Atlanta's historically reasonable cost of living against a high-tier tech income, though you must account for Georgia's 5.49% state income tax.",
+        "housingWarning": "Atlanta's real estate has surged, but $140k still commands immense buying power here. You can easily afford a $2,200 luxury apartment in Midtown or a spacious rental in the suburbs while keeping your housing costs strictly under 25% of your net income.",
+        "analysisText": "Verdict: Strong GO. The purchasing power of $140k in Atlanta currently vastly outperforms the same salary in Austin or Seattle. It offers an incredible balance of disposable income, cultural access, and long-term homeownership potential."
+    },
+    {
+        "citySlug": "atlanta-ga",
+        "jobSlug": "software-engineer",
+        "salaryBucket": 120000,
+        "introText": "An offer of $120,000 for a Software Engineer in Atlanta provides a very spacious upper-middle-class lifestyle. While the city's infrastructure and traffic can be challenging, the local tech ecosystem is booming, and your dollars stretch significantly further than in traditional coastal hubs.",
+        "housingWarning": "With a net monthly take-home around $7,000 (after federal and Georgia state taxes), spending $1,800 on an apartment in a popular area like the BeltLine is completely manageable. You avoid the extreme rent burdens seen in similar-sized metros.",
+        "analysisText": "Verdict: GO. This is a highly strategic financial move. You secure a major tech hub salary while enjoying Southern cost-of-living metrics, allowing for rapid savings accumulation or early property investments."
+    }
+]
