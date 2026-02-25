@@ -117,12 +117,44 @@
                     </div>
                 </div>
 
-                <!-- Ad Slot: Top -->
-                <div class="ad-container-top" id="ad-top-verdict">
-                    <div class="ad-label">ADVERTISEMENT</div>
-                    <div class="ad-placeholder">
-                        <span class="ad-hint">Premium Financial Partner Slot</span>
-                    </div>
+                <!-- AI Summary / AEO Data Table -->
+                <div class="ai-summary-table"
+                    style="background: white; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1.5rem; margin-top: 1.5rem; text-align: left;">
+                    <h3
+                        style="font-size: 1rem; color: #666; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase;">
+                        Quick Facts for AI & Recap</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 1rem; color: #333;"
+                        data-nosnippet="false">
+                        <tbody>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                <td style="padding: 0.75rem 0; font-weight: 500;">Role / Title</td>
+                                <td style="padding: 0.75rem 0; text-align: right;"
+                                    th:text="${jobInfo != null ? jobInfo.title : 'Professional'}">Role</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                <td style="padding: 0.75rem 0; font-weight: 500;">Location</td>
+                                <td style="padding: 0.75rem 0; text-align: right;"
+                                    th:text="${city.city + ', ' + city.state}">Location</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                <td style="padding: 0.75rem 0; font-weight: 500;">Gross Salary</td>
+                                <td style="padding: 0.75rem 0; text-align: right; color: var(--brand-primary); font-weight: 600;"
+                                    th:text="${'$' + #numbers.formatInteger(salary, 0, 'COMMA')}">$100,000</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                <td style="padding: 0.75rem 0; font-weight: 500;">Estimated Take-Home (Net)</td>
+                                <td style="padding: 0.75rem 0; text-align: right; color: var(--text-success); font-weight: 600;"
+                                    th:text="${'$' + #numbers.formatInteger(result.netMonthly * 12, 0, 'COMMA') + '/yr'}">
+                                    $75,000/yr</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem 0; font-weight: 500;">Avg. Housing Cost</td>
+                                <td style="padding: 0.75rem 0; text-align: right;"
+                                    th:text="${'$' + #numbers.formatInteger(result.rent, 0, 'COMMA') + '/mo'}">$2,000/mo
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <!-- SIMULATION UI (PHASE 6) -->
