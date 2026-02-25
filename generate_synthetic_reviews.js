@@ -9,7 +9,12 @@ const targetJobs = [
     { slug: "registered-nurse", name: "Registered Nurse", prestige: "medical" },
     { slug: "financial-analyst", name: "Financial Analyst", prestige: "finance" },
     { slug: "marketing-manager", name: "Marketing Manager", prestige: "business" },
-    { slug: "graphic-designer", name: "Graphic Designer", prestige: "creative" }
+    { slug: "graphic-designer", name: "Graphic Designer", prestige: "creative" },
+    { slug: "teacher", name: "Teacher", prestige: "education" },
+    { slug: "police-officer", name: "Police Officer", prestige: "public-service" },
+    { slug: "truck-driver", name: "Truck Driver", prestige: "logistics" },
+    { slug: "civil-engineer", name: "Civil Engineer", prestige: "engineering" },
+    { slug: "accountant", name: "Accountant", prestige: "finance" }
 ];
 
 // Target High-Relocation Metros
@@ -23,7 +28,15 @@ const targetCities = [
     { slug: "chicago-il", name: "Chicago", taxState: "flat", rentVibe: "moderate", region: "Midwest" },
     { slug: "boston-ma", name: "Boston", taxState: "flat", rentVibe: "expensive", region: "East Coast" },
     { slug: "miami-fl", name: "Miami", taxState: "zero", rentVibe: "expensive", region: "Sunbelt" },
-    { slug: "denver-co", name: "Denver", taxState: "flat", rentVibe: "expensive", region: "Rockies" }
+    { slug: "denver-co", name: "Denver", taxState: "flat", rentVibe: "expensive", region: "Rockies" },
+    { slug: "atlanta-ga", name: "Atlanta", taxState: "flat", rentVibe: "expensive", region: "Southeast" },
+    { slug: "los-angeles-ca", name: "Los Angeles", taxState: "high", rentVibe: "extreme", region: "West Coast" },
+    { slug: "las-vegas-nv", name: "Las Vegas", taxState: "zero", rentVibe: "moderate", region: "Southwest" },
+    { slug: "phoenix-az", name: "Phoenix", taxState: "flat", rentVibe: "expensive", region: "Southwest" },
+    { slug: "orlando-fl", name: "Orlando", taxState: "zero", rentVibe: "moderate", region: "Sunbelt" },
+    { slug: "nashville-tn", name: "Nashville", taxState: "zero", rentVibe: "expensive", region: "South" },
+    { slug: "charlotte-nc", name: "Charlotte", taxState: "flat", rentVibe: "moderate", region: "Southeast" },
+    { slug: "tampa-fl", name: "Tampa", taxState: "zero", rentVibe: "expensive", region: "Sunbelt" }
 ];
 
 const salaryBuckets = [60000, 80000, 100000, 120000, 150000, 200000];
@@ -49,7 +62,13 @@ function generateIntro(city, job, salary) {
     } else if (job.prestige === "medical") {
         text = `For a ${job.name} moving to ${city.name}, a ${formatted} salary establishes a solid foundation in the local healthcare system. ${taxBenefit}Given the grueling nature of clinical shifts, optimizing your commute and living costs is paramount to avoiding burnout.`;
     } else if (job.prestige === "finance") {
-        text = `Commanding ${formatted} as a ${job.name} in ${city.name} signals excellent career positioning. ${taxBenefit}Financial professionals often face high lifestyle inflation, so keeping fixed costs anchored will dictate your actual wealth accumulation.`;
+        text = `Commanding ${formatted} as a ${job.name} in ${city.name} signals excellent career positioning in a competitive sector. ${taxBenefit}Financial professionals often face high lifestyle inflation, so keeping fixed costs anchored will dictate your actual wealth accumulation.`;
+    } else if (job.prestige === "education") {
+        text = `Securing ${formatted} as a ${job.name} in ${city.name} is a vital benchmark. ${taxBenefit}Educators must balance proximity to quality districts with housing affordability, making this calculation critical.`;
+    } else if (job.prestige === "public-service") {
+        text = `Working as a ${job.name} in ${city.name} for ${formatted} involves a careful calculation of municipal benefits versus local living costs. ${taxBenefit}Balancing commute safety and housing is essential for public servants in this metro.`;
+    } else if (job.prestige === "logistics") {
+        text = `For a ${job.name}, a ${formatted} base in ${city.name} reflects the heavy demand for logistics and supply chain professionals. ${taxBenefit}Your mobility is a major asset depending on regional warehouse density.`;
     } else {
         text = `Securing a ${formatted} salary as a ${job.name} in ${city.name} places you squarely in the competitive professional class of the ${city.region}. ${taxBenefit}Your primary objective should be shielding these earnings from rapid cost-of-living increases.`;
     }
