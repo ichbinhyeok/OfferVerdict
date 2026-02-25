@@ -195,6 +195,9 @@ public class SingleCityController {
             introText = premium.introText;
             housingWarning = premium.housingWarning;
             analysisText = premium.analysisText;
+            // Removed: Overriding the mathematical verdict with static JSON text.
+            // The math (residual) correctly determines GO/NO-GO.
+            // The JSON text just provides deeper qualitative context.
         } else {
             introText = dynamicContentService.generateSingleCityIntro(result);
             housingWarning = dynamicContentService.generateHousingWarning(result);

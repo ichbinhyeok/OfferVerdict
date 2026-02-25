@@ -92,12 +92,17 @@ function generateHousing(city, job, salary) {
 }
 
 function generateAnalysis(city, job, salary) {
+    let formatted = "$" + (salary / 1000).toFixed(0) + "k";
     if (salary <= 60000 && (city.rentVibe === "extreme" || city.rentVibe === "expensive")) {
-        return `Verdict: NO-GO without drastic lifestyle adjustments. The math simply does not support wealth building for a ${job.name} at this tier in ${city.name}. Treat this solely as a stepping-stone resume builder.`;
+        return `In a brutal ${city.rentVibe} market like ${city.name}, attempting to build wealth on a ${formatted} salary is mathematically formidable. This move should be viewed as a temporary career stepping-stone rather than a long-term financial play.`;
     } else if (salary >= 150000) {
-        return `Verdict: STRONG GO. The leverage provided by a ${"$" + (salary / 1000)}k salary creates an unshakable financial fortress. You have full command over housing choices and aggressive retirement maxing.`;
+        return `The sheer leverage provided by a ${formatted} compensation package in ${city.name} creates an unshakable financial fortress. You have full command over prime real estate choices and can aggressively max out your retirement vehicles.`;
+    } else if (city.taxState === "zero") {
+        return `The key to maximizing this ${formatted} package in ${city.name} is aggressively saving the tax-free surplus. Be warned that local inflation—particularly in housing and services—can quickly erode these tax benefits if lifestyle creep sets in.`;
+    } else if (city.rentVibe === "extreme") {
+        return `At ${formatted}, you are earning a strong national salary, but the specific cost-of-living penalties in ${city.name} require strict discipline. To achieve meaningful savings, you must actively compromise on either commute time or apartment size.`;
     } else {
-        return `Verdict: CONDITIONAL. It is a strategically sound move for a ${job.name}, but inflation and lifestyle creep in ${city.name} are silent killers. Focus relentlessly on maintaining a 20% savings rate.`;
+        return `Overall, a ${formatted} salary establishes a strategically sound position for a ${job.name} in ${city.name}. However, mitigating lifestyle creep and maintaining a strict 20% savings rate will be your biggest ongoing challenges.`;
     }
 }
 
