@@ -185,9 +185,9 @@ public class ComparisonController {
             jakarta.servlet.http.HttpServletResponse response,
             Model model) {
 
-        // SEO SIGNAL: Last-Modified Header (Always fresh)
+        // SEO SIGNAL: Last-Modified Header (Static update time to prevent crawl limits)
         response.setHeader(org.springframework.http.HttpHeaders.LAST_MODIFIED,
-                java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME.format(java.time.ZonedDateTime.now()));
+                "Sun, 15 Feb 2026 00:00:00 GMT");
 
         String normalizedJob = SlugNormalizer.normalize(job);
         String normalizedCityA = SlugNormalizer.normalize(cityA);

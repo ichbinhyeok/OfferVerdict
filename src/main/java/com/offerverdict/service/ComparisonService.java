@@ -246,15 +246,23 @@ public class ComparisonService {
             double reqGain = 40000.0; // The threshold
             double salaryNeeded = result.getOffer().getGrossSalary()
                     + ((reqGain - yearlyGain) / (1.0 - offerEffectiveTaxRate));
-            result.setAuthorityAdvice(String.format("Don't go unless you negotiate at least $%,.0f more.",
-                    salaryNeeded - result.getOffer().getGrossSalary()));
-            result.setReverseSalaryGoal(Math.round(salaryNeeded / 1000.0) * 1000.0);
+            double additionalNeeded = Math.max(0, salaryNeeded - result.getOffer().getGrossSalary());
+
+            if (additionalNeeded > 0) {
+                result.setAuthorityAdvice(
+                        String.format("Don't go unless you negotiate at least $%,.0f more.", additionalNeeded));
+            } else {
+                result.setAuthorityAdvice("Negotiation buffer satisfied. Meets wealth threshold.");
+            }
+            result.setReverseSalaryGoal(
+                    Math.max(result.getOffer().getGrossSalary(), Math.round(salaryNeeded / 1000.0) * 1000.0));
         } else {
             result.setAuthorityAdvice("Safe to proceed. This move meets the authoritative growth threshold.");
             result.setReverseSalaryGoal(result.getOffer().getGrossSalary());
         }
 
-        result.setLeverageMsg(verdictAdviser.getNegotiationLever(gap * 12 / (1.0 - offerEffectiveTaxRate)));
+        result.setLeverageMsg(
+                verdictAdviser.getNegotiationLever(Math.max(0, gap * 12 / (1.0 - offerEffectiveTaxRate))));
 
         // 5. Benchmark Context (The Receipts)
         if (metrics != null) {

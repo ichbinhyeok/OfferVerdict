@@ -104,8 +104,16 @@
                             th:text="|Verdict for a ${job.title} in ${cityB.city}, ${cityB.state}|">Verdict for a Job in
                             City</span>
                     </div>
-                    <h1 class="verdict-text animate-pop" th:text="${result.verdictCopy}"
-                        th:classappend="${result.verdict.name()}">DON'T GO</h1>
+
+                    <!-- SEO Hidden H1. -->
+                    <h1 class="sr-only" th:if="${job.slug == 'general-professional'}"
+                        th:text="|Is a ${'$' + #numbers.formatInteger(offerSalary, 0, 'COMMA')} salary in ${cityB.city} better than ${'$' + #numbers.formatInteger(currentSalary, 0, 'COMMA')} in ${cityA.city}?|">
+                    </h1>
+                    <h1 class="sr-only" th:unless="${job.slug == 'general-professional'}"
+                        th:text="|${job.title} salary comparison: ${cityA.city} vs ${cityB.city}|"></h1>
+
+                    <div class="verdict-text animate-pop" th:text="${result.verdictCopy}"
+                        th:classappend="${result.verdict.name()}">DON'T GO</div>
                     <div class="verdict-sub" th:text="${result.valueDiffMsg}">You get poorer.</div>
 
                     <!-- Negotiation Leverage -->

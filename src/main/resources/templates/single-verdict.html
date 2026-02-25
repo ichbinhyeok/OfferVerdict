@@ -95,8 +95,16 @@
                         CITY ANALYSIS</span>
                 </div>
 
+                <!-- SEO Hidden H1. The visual title is the verdict, but Google needs the keyword context. -->
+                <h1 class="sr-only" th:if="${jobInfo != null}"
+                    th:text="'Is ' + ${'$' + #numbers.formatInteger(salary, 0, 'COMMA')} + ' a good salary for a ' + ${jobInfo.title} + ' in ' + ${city.city} + '?'">
+                </h1>
+                <h1 class="sr-only" th:unless="${jobInfo != null}"
+                    th:text="'Is ' + ${'$' + #numbers.formatInteger(salary, 0, 'COMMA')} + ' a good salary in ' + ${city.city} + '?'">
+                </h1>
+
                 <div class="verdict-display">
-                    <h1 class="verdict-text animate-pop" th:text="${verdict}">GO</h1>
+                    <div class="verdict-text animate-pop" th:text="${verdict}">GO</div>
                     <div class="verdict-sub" th:text="${verdictMsg}">This salary offers a strong lifestyle.</div>
 
                     <div class="leverage-card">
