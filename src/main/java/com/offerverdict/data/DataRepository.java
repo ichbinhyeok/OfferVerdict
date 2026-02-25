@@ -208,6 +208,17 @@ public class DataRepository {
                 .toList();
     }
 
+    public List<JobInfo> getRelatedJobs(String category, String currentJobSlug, int limit) {
+        if (category == null || category.isEmpty() || "Custom".equalsIgnoreCase(category)) {
+            return Collections.emptyList();
+        }
+        return jobs.stream()
+                .filter(j -> category.equalsIgnoreCase(j.getCategory()))
+                .filter(j -> !SlugNormalizer.normalize(j.getSlug()).equals(SlugNormalizer.normalize(currentJobSlug)))
+                .limit(limit)
+                .toList();
+    }
+
     public Map<String, StateTax> stateTaxMap() {
         return taxData.getStates().stream()
                 .collect(Collectors.toMap(s -> s.getState().toUpperCase(Locale.US), s -> s));

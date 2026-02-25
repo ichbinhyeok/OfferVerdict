@@ -373,46 +373,45 @@ public class SingleCityController {
 
         // 2. City Neighbors (Same State or Popular)
         Map<String, String> cityLinks = new java.util.LinkedHashMap<>();
-        // Simple logic: if in TX, show Dallas/Houston. If CA, show SF/LA. Else show top
-        // hubs.
-        String state = city.getState();
-        List<String> neighborCities = List.of("austin-tx", "dallas-tx", "houston-tx", "san-francisco-ca", "new-york-ny",
-                "seattle-wa");
-
-        for (String slug : neighborCities) {
-            if (!slug.equals(citySlug)) {
-                // Get city name roughly from slug
-                String name = slug.replace("-", " ").toUpperCase();
-                // Pretty Print
-                if (name.contains("TX"))
-                    name = name.replace("TX", ", TX");
-                else if (name.contains("CA"))
-                    name = name.replace("CA", ", CA");
-                else if (name.contains("NY"))
-                    name = name.replace("NY", ", NY");
-                else if (name.contains("WA"))
-                    name = name.replace("WA", ", WA");
-
-                cityLinks.put(name, "/salary-check/" + jobSegment + slug + "/" + salaryInt);
-            }
+        for (CityCostEntry c : relatedCities) {
+            cityLinks.put(c.getCity() + ", " + c.getState(),
+                    "/salary-check/" + jobSegment + c.getSlug() + "/" + salaryInt);
             if (cityLinks.size() >= 4)
                 break;
+        }
+        // Fallback to top cities if not enough related cities
+        if (cityLinks.size() < 4) {
+            List<String> fallbacks = List.of("austin-tx", "dallas-tx", "new-york-ny", "seattle-wa");
+            for (String fSlug : fallbacks) {
+                if (!fSlug.equals(citySlug) && !cityLinks.values().stream().anyMatch(v -> v.contains(fSlug))) {
+                    cityLinks.put(fSlug.replace("-", " ").toUpperCase(),
+                            "/salary-check/" + jobSegment + fSlug + "/" + salaryInt);
+                }
+                if (cityLinks.size() >= 4)
+                    break;
+            }
         }
         model.addAttribute("cityLinks", cityLinks);
 
         // 3. Job Neighbors (Link to other roles in same city)
         Map<String, String> jobLinks = new java.util.LinkedHashMap<>();
         if (jobInfo != null) {
-            List<String> otherJobs = List.of("product-manager", "data-scientist", "software-engineer",
-                    "marketing-manager", "finance");
-
-            for (String jSlug : otherJobs) {
-                if (!jSlug.equals(jobInfo.getSlug())) {
-                    String name = jSlug.replace("-", " ").toUpperCase();
-                    jobLinks.put(name, "/salary-check/" + jSlug + "/" + citySlug + "/" + salaryInt);
+            List<JobInfo> relatedJobs = repository.getRelatedJobs(jobInfo.getCategory(), jobInfo.getSlug(), 4);
+            for (JobInfo j : relatedJobs) {
+                jobLinks.put(j.getTitle(), "/salary-check/" + j.getSlug() + "/" + citySlug + "/" + salaryInt);
+            }
+            // Fallback if category results are empty
+            if (jobLinks.isEmpty()) {
+                List<String> otherJobs = List.of("product-manager", "data-scientist", "software-engineer",
+                        "marketing-manager");
+                for (String jSlug : otherJobs) {
+                    if (!jSlug.equals(jobInfo.getSlug())) {
+                        jobLinks.put(jSlug.replace("-", " ").toUpperCase(),
+                                "/salary-check/" + jSlug + "/" + citySlug + "/" + salaryInt);
+                    }
+                    if (jobLinks.size() >= 4)
+                        break;
                 }
-                if (jobLinks.size() >= 4)
-                    break;
             }
             model.addAttribute("jobLinks", jobLinks);
         }
