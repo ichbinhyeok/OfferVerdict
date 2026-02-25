@@ -1,10 +1,11 @@
 spring:
   application:
     name: offer-verdict
+  thymeleaf:
+    cache: true
+
 server:
   port: 8080
-  thymeleaf:
-    cache: false
 
 app:
   publicBaseUrl: http://localhost:8080

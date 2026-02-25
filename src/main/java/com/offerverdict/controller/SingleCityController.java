@@ -113,9 +113,11 @@ public class SingleCityController {
         // 2b. Load Job Data (Optional)
         JobInfo jobInfo = null;
         if (jobSlug != null) {
-            jobInfo = repository.findJobLoosely(jobSlug).orElse(null);
-            // If job slug is invalid, should we 404 or just ignore?
-            // Ideally 404 to avoid duplicate content, but ignoring is safer for now.
+            jobInfo = repository.findJobLoosely(jobSlug)
+                    .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                            org.springframework.http.HttpStatus.NOT_FOUND, "Job not found"));
+            // SEO FIX: If job slug is invalid, we MUST 404 to avoid infinite duplicate
+            // content URLs.
         }
 
         // 3. Analyze (Default Parameters used for landing page)
@@ -194,10 +196,15 @@ public class SingleCityController {
             urlPrefix += jobSlug + "/";
         }
 
-        if (salaryInt > interval) {
+        int minSalary = appProperties.getSeoSalaryBucketMin();
+        int maxSalary = appProperties.getSeoSalaryBucketMax();
+
+        if (salaryInt - interval >= minSalary) {
             prevSalaryUrl = urlPrefix + citySlug + "/" + (salaryInt - interval);
         }
-        nextSalaryUrl = urlPrefix + citySlug + "/" + (salaryInt + interval);
+        if (salaryInt + interval <= maxSalary) {
+            nextSalaryUrl = urlPrefix + citySlug + "/" + (salaryInt + interval);
+        }
 
         // 6b. State-based City Links (Internal Linking Grid)
         List<CityCostEntry> relatedCities = repository.getRelatedCities(city.getState(), citySlug, 5);
@@ -241,6 +248,13 @@ public class SingleCityController {
         model.addAttribute("nextSalaryUrl", nextSalaryUrl);
         model.addAttribute("relatedCities", relatedCities);
         model.addAttribute("salaryInterval", interval);
+
+        // SEO FIX: Add index gating to avoid indexing outlier salaries
+        boolean shouldIndex = (salaryInt >= minSalary && salaryInt <= maxSalary);
+        if (jobInfo != null && "Custom".equalsIgnoreCase(jobInfo.getCategory())) {
+            shouldIndex = false;
+        }
+        model.addAttribute("shouldIndex", shouldIndex);
 
         // 7c. Verdict CSS Class
         String verdictCssClass = "neutral-blue";

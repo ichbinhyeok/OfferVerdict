@@ -33,31 +33,34 @@ public class SitemapController {
         addUrl(xml, "/methodology", "0.8");
         addUrl(xml, "/cities", "0.9");
 
-        // Dynamic Seed Strategy: Focus on Tech Hubs & Rising Cities
-        // Instead of generating 5000+ thin pages, we focus on high-intent seeds.
+        // AI Strategy Update: Expand from ~200 seeds back to ~2,000-4,000 URLs.
+        // Include a smart mix of Tier 1/2/3 cities + high intent jobs to re-ignite
+        // indexing.
 
         List<CityCostEntry> allCities = repository.getCities();
         List<JobInfo> allJobs = repository.getJobs();
 
-        // 1. Tech Hubs (San Francisco, New York, Seattle, Austin, Boston)
-        List<String> targetCitySlugs = List.of("san-francisco-ca", "new-york-ny", "seattle-wa", "austin-tx",
-                "boston-ma", "los-angeles-ca", "denver-co", "chicago-il");
-        // 2. High Volume Roles
-        List<String> targetJobSlugs = List.of("software-engineer", "product-manager", "data-scientist",
-                "marketing-manager", "finance", "registered-nurse");
-
         for (CityCostEntry city : allCities) {
-            if (targetCitySlugs.contains(city.getSlug())) {
-                for (JobInfo job : allJobs) {
-                    if (targetJobSlugs.contains(job.getSlug())) {
-                        // Key Salaries Only: Start, Mid, Senior
-                        // This reduces bloat and focuses on "Is $100k good?" type intent.
-                        int[] salaryPoints = { 80000, 100000, 120000, 150000, 200000 };
+            for (JobInfo job : allJobs) {
+                boolean isTopCity = city.getTier() <= 2;
+                boolean isTopJob = "software-engineer".equals(job.getSlug()) ||
+                        "registered-nurse".equals(job.getSlug()) ||
+                        "product-manager".equals(job.getSlug()) ||
+                        "financial-analyst".equals(job.getSlug());
 
-                        for (int s : salaryPoints) {
-                            addUrl(xml, "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + s, "0.9");
-                        }
-                    }
+                int[] salaryPoints;
+                // Dynamically adjust density based on importance
+                if (isTopCity && isTopJob) {
+                    salaryPoints = new int[] { 60000, 80000, 100000, 120000, 150000, 200000 };
+                } else if (isTopCity || isTopJob) {
+                    salaryPoints = new int[] { 75000, 100000, 150000 };
+                } else {
+                    // Tier 3/Long-tail: Anchor around common question "Is 100k good?"
+                    salaryPoints = new int[] { 70000, 100000 };
+                }
+
+                for (int s : salaryPoints) {
+                    addUrl(xml, "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + s, "0.9");
                 }
             }
         }

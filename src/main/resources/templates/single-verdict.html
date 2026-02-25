@@ -21,6 +21,7 @@
     <!-- SEO: Canonical Tag -->
     <link rel="canonical" th:href="${canonicalUrl}">
     <meta name="description" th:content="${metaDescription}">
+    <meta name="robots" content="noindex" th:if="${!shouldIndex}">
 
     <!-- JSON-LD Structured Data - DECISION GAP FRAMEWORK (Phase 6 Extended) -->
     <script type="application/ld+json" th:inline="javascript">

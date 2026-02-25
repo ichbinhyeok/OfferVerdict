@@ -366,9 +366,9 @@ public class ComparisonController {
         // Let's stick to raw for query string to be safe, or effective?
         // If we use effective, it might clarify future clicks. Let's use effective for
         // links.)
-        String queryString = buildQueryString(effectiveCurrentSalary, effectiveOfferSalary, fourOhOneKRate,
-                monthlyInsurance, equityAnnual,
-                isMarried);
+        // SEO FIX: Internal links should NOT have query parameters to avoid duplicate
+        // content and crawler traps.
+        String queryString = "";
         model.addAttribute("otherJobLinks",
                 comparisonService.relatedJobComparisons(cityEntryA.getSlug(), cityEntryB.getSlug(), queryString));
         model.addAttribute("otherCityLinks", relatedCityComparisons(jobInfo.getSlug(),
@@ -758,23 +758,6 @@ public class ComparisonController {
             redirectAttributes.addAttribute("isTaxOptimized", isTaxOptimized);
         if (isCarOwner != null)
             redirectAttributes.addAttribute("isCarOwner", isCarOwner);
-    }
-
-    private String buildQueryString(double currentSalary, double offerSalary,
-            Double fourOhOneKRate, Double monthlyInsurance,
-            Double equityAnnual, Boolean isMarried) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("?currentSalary=").append(currentSalary);
-        sb.append("&offerSalary=").append(offerSalary);
-        if (fourOhOneKRate != null)
-            sb.append("&fourOhOneKRate=").append(fourOhOneKRate);
-        if (monthlyInsurance != null)
-            sb.append("&monthlyInsurance=").append(monthlyInsurance);
-        if (equityAnnual != null)
-            sb.append("&equityAnnual=").append(equityAnnual);
-        if (isMarried != null)
-            sb.append("&isMarried=").append(isMarried);
-        return sb.toString();
     }
 
     @GetMapping("/api/calculate")
