@@ -31,26 +31,26 @@
         "mainEntity": [
             {
                 "@type": "Question",
-                "name": "Is " + [[${'$' + #numbers.formatInteger(salary, 0, 'COMMA')}]] + " a good salary in " + [[${city.city}]] + "?",
+                "name": [[|Is ${'$' + #numbers.formatInteger(salary, 0, 'COMMA')} a good salary in ${city.city}?|]],
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Based on our analysis, a " + [[${'$' + #numbers.formatInteger(salary, 0, 'COMMA')}]] + " salary in " + [[${city.city}]] + " leaves you with an estimated " + [[${'$' + #numbers.formatInteger(result.residual, 0, 'COMMA')}]] + " monthly residual income after taxes and living expenses."
+                    "text": [[|Based on our analysis, a ${'$' + #numbers.formatInteger(salary, 0, 'COMMA')} salary in ${city.city} leaves you with an estimated ${'$' + #numbers.formatInteger(result.residual, 0, 'COMMA')} monthly residual income after taxes and living expenses.|]]
                 }
             },
             {
                 "@type": "Question",
-                "name": "What is the take-home pay for " + [[${'$' + #numbers.formatInteger(salary, 0, 'COMMA')}]] + " in " + [[${city.city}]] + "?",
+                "name": [[|What is the take-home pay for ${'$' + #numbers.formatInteger(salary, 0, 'COMMA')} in ${city.city}?|]],
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "After estimated taxes, your monthly take-home pay is approximately " + [[${'$' + #numbers.formatInteger(result.netMonthly, 0, 'COMMA')}]] + "."
+                    "text": [[|After estimated taxes, your monthly take-home pay is approximately ${'$' + #numbers.formatInteger(result.netMonthly * 12, 0, 'COMMA')}.|]]
                 }
             },
              {
                 "@type": "Question",
-                "name": "Is " + [[${city.city}]] + " expensive to live in?",
+                "name": [[|Is ${city.city} expensive to live in?|]],
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Housing costs in " + [[${city.city}]] + " are " + [[${result.rent} > 2000 ? 'relatively high' : 'moderate']] + ", with an average rent of " + [[${'$' + #numbers.formatInteger(result.rent, 0, 'COMMA')}]] + "/mo."
+                    "text": [[|Housing costs in ${city.city} are ${result.rent > 2000 ? 'relatively high' : 'moderate'}, with an average rent of ${'$' + #numbers.formatInteger(result.rent, 0, 'COMMA')}/mo.|]]
                 }
             }
         ]
