@@ -5,10 +5,10 @@ spring:
     cache: true
 
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 app:
-  publicBaseUrl: http://localhost:8080
+  publicBaseUrl: ${APP_PUBLIC_BASE_URL:https://livingcostcheck.com}
   baselineLivingCost: 1800
   sitemapChunkSize: 5000
   devReloadEnabled: true

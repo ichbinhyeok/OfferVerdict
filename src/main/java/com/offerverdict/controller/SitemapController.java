@@ -1,5 +1,6 @@
 package com.offerverdict.controller;
 
+import com.offerverdict.config.AppProperties;
 import com.offerverdict.data.DataRepository;
 import com.offerverdict.model.CityCostEntry;
 import com.offerverdict.model.JobInfo;
@@ -8,16 +9,19 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Controller
 public class SitemapController {
 
     private final DataRepository repository;
-    private final String BASE_URL = "https://livingcostcheck.com";
+    private final AppProperties appProperties;
 
-    public SitemapController(DataRepository repository) {
+    public SitemapController(DataRepository repository, AppProperties appProperties) {
         this.repository = repository;
+        this.appProperties = appProperties;
     }
 
     @GetMapping(value = "/sitemap.xml", produces = MediaType.APPLICATION_XML_VALUE)
@@ -39,6 +43,7 @@ public class SitemapController {
 
         List<CityCostEntry> allCities = repository.getCities();
         List<JobInfo> allJobs = repository.getJobs();
+        int salaryInterval = Math.max(1, appProperties.getSeoSalaryBucketInterval());
 
         for (CityCostEntry city : allCities) {
             for (JobInfo job : allJobs) {
@@ -51,12 +56,13 @@ public class SitemapController {
                 int[] salaryPoints;
                 // Dynamically adjust density based on importance
                 if (isTopCity && isTopJob) {
-                    salaryPoints = new int[] { 60000, 80000, 100000, 120000, 150000, 200000 };
+                    salaryPoints = alignToSeoInterval(new int[] { 60000, 80000, 100000, 120000, 150000, 200000 },
+                            salaryInterval);
                 } else if (isTopCity || isTopJob) {
-                    salaryPoints = new int[] { 75000, 100000, 150000 };
+                    salaryPoints = alignToSeoInterval(new int[] { 75000, 100000, 150000 }, salaryInterval);
                 } else {
                     // Tier 3/Long-tail: Anchor around common question "Is 100k good?"
-                    salaryPoints = new int[] { 70000, 100000 };
+                    salaryPoints = alignToSeoInterval(new int[] { 70000, 100000 }, salaryInterval);
                 }
 
                 for (int s : salaryPoints) {
@@ -74,10 +80,26 @@ public class SitemapController {
     }
 
     private void addUrl(StringBuilder xml, String path, String priority) {
+        String baseUrl = appProperties.getPublicBaseUrl();
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
         xml.append("  <url>\n");
-        xml.append("    <loc>").append(BASE_URL).append(path).append("</loc>\n");
+        xml.append("    <loc>").append(baseUrl).append(path).append("</loc>\n");
         xml.append("    <changefreq>weekly</changefreq>\n");
         xml.append("    <priority>").append(priority).append("</priority>\n");
         xml.append("  </url>\n");
+    }
+
+    private int[] alignToSeoInterval(int[] salaries, int interval) {
+        Set<Integer> aligned = new LinkedHashSet<>();
+        for (int salary : salaries) {
+            int rounded = (int) (Math.round((double) salary / interval) * interval);
+            if (rounded <= 0) {
+                rounded = interval;
+            }
+            aligned.add(rounded);
+        }
+        return aligned.stream().mapToInt(Integer::intValue).toArray();
     }
 }
