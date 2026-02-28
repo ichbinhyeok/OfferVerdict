@@ -1,522 +1,1202 @@
 {
-  "metadata": {
-    "source": "Composite Data (Numbeo, BLS, Expatistan)",
-    "lastUpdated": "2026-01-07",
-    "version": "2.1"
-  },
-  "cities": [
-    {
-      "city": "New York",
-      "state": "NY",
-      "slug": "new-york-ny",
-      "priority": 1,
-      "tier": 1,
-      "avgRent": 3800,
-      "colIndex": 160,
-      "medianIncome": 75000,
-      "avgHousePrice": 850000,
-      "details": {
-        "groceries": 550,
-        "transport": 140,
-        "utilities": 160,
-        "misc": 300
-      },
-      "lifestyle": {
-        "sunnyDays": 224,
-        "walkScore": 88,
-        "crimeRate": 35,
-        "avgCommute": 42,
-        "bikeScore": 67
-      }
-    },
-    {
-      "city": "San Francisco",
-      "state": "CA",
-      "slug": "san-francisco-ca",
-      "priority": 1,
-      "tier": 1,
-      "avgRent": 3500,
-      "colIndex": 180,
-      "medianIncome": 110000,
-      "avgHousePrice": 1300000,
-      "details": {
-        "groceries": 600,
-        "transport": 130,
-        "utilities": 150,
-        "misc": 350
-      },
-      "lifestyle": {
-        "sunnyDays": 259,
-        "walkScore": 86,
-        "crimeRate": 38,
-        "avgCommute": 33,
-        "bikeScore": 70
-      }
-    },
-    {
-      "city": "Austin",
-      "state": "TX",
-      "slug": "austin-tx",
-      "priority": 1,
-      "tier": 1,
-      "avgRent": 1900,
-      "colIndex": 110,
-      "medianIncome": 80000,
-      "avgHousePrice": 550000,
-      "details": {
-        "groceries": 400,
-        "transport": 100,
-        "utilities": 140,
-        "misc": 200
-      },
-      "lifestyle": {
-        "sunnyDays": 228,
-        "walkScore": 42,
-        "crimeRate": 35,
-        "avgCommute": 25,
-        "bikeScore": 70
-      }
-    },
-    {
-      "city": "Seattle",
-      "state": "WA",
-      "slug": "seattle-wa",
-      "priority": 1,
-      "tier": 1,
-      "avgRent": 2400,
-      "colIndex": 145,
-      "medianIncome": 105000,
-      "avgHousePrice": 800000,
-      "details": {
-        "groceries": 500,
-        "transport": 120,
-        "utilities": 110,
-        "misc": 250
-      },
-      "lifestyle": {
-        "sunnyDays": 152,
-        "walkScore": 73,
-        "crimeRate": 42,
-        "avgCommute": 28,
-        "bikeScore": 71
-      }
-    },
-    {
-      "city": "Los Angeles",
-      "state": "CA",
-      "slug": "los-angeles-ca",
-      "priority": 1,
-      "tier": 1,
-      "avgRent": 2900,
-      "colIndex": 150,
-      "medianIncome": 70000,
-      "avgHousePrice": 950000,
-      "details": {
-        "groceries": 480,
-        "transport": 150,
-        "utilities": 130,
-        "misc": 280
-      }
-    },
-    {
-      "city": "Chicago",
-      "state": "IL",
-      "slug": "chicago-il",
-      "priority": 1,
-      "tier": 1,
-      "avgRent": 2200,
-      "colIndex": 120,
-      "medianIncome": 72000,
-      "avgHousePrice": 350000,
-      "details": {
-        "groceries": 420,
-        "transport": 130,
-        "utilities": 120,
-        "misc": 220
-      }
-    },
-    {
-      "city": "Miami",
-      "state": "FL",
-      "slug": "miami-fl",
-      "priority": 2,
-      "tier": 2,
-      "avgRent": 2600,
-      "colIndex": 122,
-      "medianIncome": 55000,
-      "avgHousePrice": 500000,
-      "details": {
-        "groceries": 450,
-        "transport": 110,
-        "utilities": 140,
-        "misc": 240
-      }
-    },
-    {
-      "city": "Boston",
-      "state": "MA",
-      "slug": "boston-ma",
-      "priority": 2,
-      "tier": 2,
-      "avgRent": 3100,
-      "colIndex": 150,
-      "medianIncome": 85000,
-      "avgHousePrice": 750000,
-      "details": {
-        "groceries": 520,
-        "transport": 100,
-        "utilities": 180,
-        "misc": 260
-      }
-    },
-    {
-      "city": "Denver",
-      "state": "CO",
-      "slug": "denver-co",
-      "priority": 2,
-      "tier": 2,
-      "avgRent": 2100,
-      "colIndex": 115,
-      "medianIncome": 82000,
-      "avgHousePrice": 600000,
-      "details": {
-        "groceries": 410,
-        "transport": 110,
-        "utilities": 100,
-        "misc": 210
-      }
-    },
-    {
-      "city": "Las Vegas",
-      "state": "NV",
-      "slug": "las-vegas-nv",
-      "avgRent": 1700,
-      "colIndex": 103,
-      "medianIncome": 60000,
-      "avgHousePrice": 420000,
-      "details": {
-        "groceries": 380,
-        "transport": 120,
-        "utilities": 150,
-        "misc": 180
-      }
-    },
-    {
-      "city": "Atlanta",
-      "state": "GA",
-      "slug": "atlanta-ga",
-      "avgRent": 1900,
-      "colIndex": 102,
-      "medianIncome": 70000,
-      "avgHousePrice": 400000,
-      "details": {
-        "groceries": 390,
-        "transport": 100,
-        "utilities": 130,
-        "misc": 190
-      }
-    },
-    {
-      "city": "Phoenix",
-      "state": "AZ",
-      "slug": "phoenix-az",
-      "avgRent": 1800,
-      "colIndex": 104,
-      "medianIncome": 65000,
-      "avgHousePrice": 450000,
-      "details": {
-        "groceries": 380,
-        "transport": 110,
-        "utilities": 160,
-        "misc": 180
-      }
-    },
-    {
-      "city": "Dallas",
-      "state": "TX",
-      "slug": "dallas-tx",
-      "priority": 2,
-      "tier": 2,
-      "avgRent": 1850,
-      "colIndex": 102,
-      "medianIncome": 68000,
-      "avgHousePrice": 420000,
-      "details": {
-        "groceries": 390,
-        "transport": 110,
-        "utilities": 140,
-        "misc": 190
-      }
-    },
-    {
-      "city": "Houston",
-      "state": "TX",
-      "slug": "houston-tx",
-      "avgRent": 1600,
-      "colIndex": 98,
-      "medianIncome": 64000,
-      "avgHousePrice": 340000,
-      "details": {
-        "groceries": 370,
-        "transport": 120,
-        "utilities": 150,
-        "misc": 180
-      }
-    },
-    {
-      "city": "Raleigh",
-      "state": "NC",
-      "slug": "raleigh-nc",
-      "avgRent": 1650,
-      "colIndex": 96,
-      "medianIncome": 78000,
-      "avgHousePrice": 430000,
-      "details": {
-        "groceries": 380,
-        "transport": 90,
-        "utilities": 110,
-        "misc": 170
-      }
-    },
-    {
-      "city": "Nashville",
-      "state": "TN",
-      "slug": "nashville-tn",
-      "priority": 1,
-      "tier": 2,
-      "avgRent": 1800,
-      "colIndex": 102,
-      "medianIncome": 62000,
-      "avgHousePrice": 450000,
-      "details": {
-        "groceries": 380,
-        "transport": 100,
-        "utilities": 140,
-        "misc": 190
-      },
-      "lifestyle": {
-        "sunnyDays": 208,
-        "walkScore": 29,
-        "crimeRate": 45,
-        "avgCommute": 28,
-        "bikeScore": 30
-      }
-    },
-    {
-      "city": "Charlotte",
-      "state": "NC",
-      "slug": "charlotte-nc",
-      "priority": 1,
-      "tier": 2,
-      "avgRent": 1700,
-      "colIndex": 98,
-      "medianIncome": 68000,
-      "avgHousePrice": 410000,
-      "details": {
-        "groceries": 390,
-        "transport": 100,
-        "utilities": 130,
-        "misc": 180
-      },
-      "lifestyle": {
-        "sunnyDays": 218,
-        "walkScore": 26,
-        "crimeRate": 40,
-        "avgCommute": 25,
-        "bikeScore": 30
-      }
-    },
-    {
-      "city": "San Diego",
-      "state": "CA",
-      "slug": "san-diego-ca",
-      "priority": 1,
-      "tier": 1,
-      "avgRent": 2800,
-      "colIndex": 145,
-      "medianIncome": 85000,
-      "avgHousePrice": 900000,
-      "details": {
-        "groceries": 500,
-        "transport": 130,
-        "utilities": 120,
-        "misc": 250
-      },
-      "lifestyle": {
-        "sunnyDays": 266,
-        "walkScore": 53,
-        "crimeRate": 25,
-        "avgCommute": 26,
-        "bikeScore": 60
-      }
-    },
-    {
-      "city": "Orlando",
-      "state": "FL",
-      "slug": "orlando-fl",
-      "priority": 2,
-      "tier": 2,
-      "avgRent": 1900,
-      "colIndex": 105,
-      "medianIncome": 58000,
-      "avgHousePrice": 400000,
-      "details": {
-        "groceries": 410,
-        "transport": 110,
-        "utilities": 150,
-        "misc": 200
-      },
-      "lifestyle": {
-        "sunnyDays": 233,
-        "walkScore": 41,
-        "crimeRate": 48,
-        "avgCommute": 30,
-        "bikeScore": 55
-      }
-    },
-    {
-      "city": "Philadelphia",
-      "state": "PA",
-      "slug": "philadelphia-pa",
-      "priority": 2,
-      "tier": 2,
-      "avgRent": 1800,
-      "colIndex": 108,
-      "medianIncome": 60000,
-      "avgHousePrice": 250000,
-      "details": {
-        "groceries": 430,
-        "transport": 120,
-        "utilities": 140,
-        "misc": 210
-      },
-      "lifestyle": {
-        "sunnyDays": 207,
-        "walkScore": 79,
-        "crimeRate": 50,
-        "avgCommute": 35,
-        "bikeScore": 65
-      }
-    },
-    {
-      "city": "Washington",
-      "state": "DC",
-      "slug": "washington-dc",
-      "priority": 1,
-      "tier": 1,
-      "avgRent": 2600,
-      "colIndex": 140,
-      "medianIncome": 90000,
-      "avgHousePrice": 700000,
-      "details": {
-        "groceries": 520,
-        "transport": 130,
-        "utilities": 140,
-        "misc": 280
-      },
-      "lifestyle": {
-        "sunnyDays": 203,
-        "walkScore": 98,
-        "crimeRate": 60,
-        "avgCommute": 35,
-        "bikeScore": 70
-      }
-    },
-    {
-      "city": "Portland",
-      "state": "OR",
-      "slug": "portland-or",
-      "priority": 2,
-      "tier": 2,
-      "avgRent": 1800,
-      "colIndex": 125,
-      "medianIncome": 78000,
-      "avgHousePrice": 550000,
-      "details": {
-        "groceries": 460,
-        "transport": 120,
-        "utilities": 110,
-        "misc": 230
-      },
-      "lifestyle": {
-        "sunnyDays": 144,
-        "walkScore": 67,
-        "crimeRate": 45,
-        "avgCommute": 27,
-        "bikeScore": 82
-      }
-    },
-    {
-      "city": "San Antonio",
-      "state": "TX",
-      "slug": "san-antonio-tx",
-      "priority": 2,
-      "tier": 3,
-      "avgRent": 1400,
-      "colIndex": 92,
-      "medianIncome": 55000,
-      "avgHousePrice": 300000,
-      "details": {
-        "groceries": 350,
-        "transport": 100,
-        "utilities": 140,
-        "misc": 170
-      },
-      "lifestyle": {
-        "sunnyDays": 220,
-        "walkScore": 38,
-        "crimeRate": 42,
-        "avgCommute": 25,
-        "bikeScore": 45
-      }
-    },
-    {
-      "city": "Minneapolis",
-      "state": "MN",
-      "slug": "minneapolis-mn",
-      "priority": 3,
-      "tier": 3,
-      "avgRent": 1600,
-      "colIndex": 105,
-      "medianIncome": 70000,
-      "avgHousePrice": 350000,
-      "details": {
-        "groceries": 400,
-        "transport": 110,
-        "utilities": 130,
-        "misc": 200
-      },
-      "lifestyle": {
-        "sunnyDays": 198,
-        "walkScore": 70,
-        "crimeRate": 40,
-        "avgCommute": 24,
-        "bikeScore": 84
-      }
-    },
-    {
-      "city": "Indianapolis",
-      "state": "IN",
-      "slug": "indianapolis-in",
-      "priority": 3,
-      "tier": 3,
-      "avgRent": 1300,
-      "colIndex": 90,
-      "medianIncome": 58000,
-      "avgHousePrice": 250000,
-      "details": {
-        "groceries": 340,
-        "transport": 100,
-        "utilities": 130,
-        "misc": 160
-      },
-      "lifestyle": {
-        "sunnyDays": 187,
-        "walkScore": 30,
-        "crimeRate": 48,
-        "avgCommute": 25,
-        "bikeScore": 45
-      }
-    }
-  ]
+    "metadata":  {
+                     "source":  "Composite Data (legacy baseline + US Census ACS1 2023 + Zillow ZORI 2026-01-31 + Zillow ZHVI 2026-01-31)",
+                     "lastUpdated":  "2026-02-28",
+                     "version":  "2.3"
+                 },
+    "cities":  [
+                   {
+                       "city":  "New York",
+                       "state":  "NY",
+                       "slug":  "new-york-ny",
+                       "priority":  1,
+                       "tier":  1,
+                       "avgRent":  3800,
+                       "colIndex":  160,
+                       "medianIncome":  75000,
+                       "avgHousePrice":  850000,
+                       "details":  {
+                                       "groceries":  550,
+                                       "transport":  140,
+                                       "utilities":  160,
+                                       "misc":  300
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  224,
+                                         "walkScore":  88,
+                                         "crimeRate":  35,
+                                         "avgCommute":  42,
+                                         "bikeScore":  67
+                                     }
+                   },
+                   {
+                       "city":  "San Francisco",
+                       "state":  "CA",
+                       "slug":  "san-francisco-ca",
+                       "priority":  1,
+                       "tier":  1,
+                       "avgRent":  3500,
+                       "colIndex":  180,
+                       "medianIncome":  110000,
+                       "avgHousePrice":  1300000,
+                       "details":  {
+                                       "groceries":  600,
+                                       "transport":  130,
+                                       "utilities":  150,
+                                       "misc":  350
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  259,
+                                         "walkScore":  86,
+                                         "crimeRate":  38,
+                                         "avgCommute":  33,
+                                         "bikeScore":  70
+                                     }
+                   },
+                   {
+                       "city":  "Austin",
+                       "state":  "TX",
+                       "slug":  "austin-tx",
+                       "priority":  1,
+                       "tier":  1,
+                       "avgRent":  1900,
+                       "colIndex":  110,
+                       "medianIncome":  80000,
+                       "avgHousePrice":  550000,
+                       "details":  {
+                                       "groceries":  400,
+                                       "transport":  100,
+                                       "utilities":  140,
+                                       "misc":  200
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  228,
+                                         "walkScore":  42,
+                                         "crimeRate":  35,
+                                         "avgCommute":  25,
+                                         "bikeScore":  70
+                                     }
+                   },
+                   {
+                       "city":  "Seattle",
+                       "state":  "WA",
+                       "slug":  "seattle-wa",
+                       "priority":  1,
+                       "tier":  1,
+                       "avgRent":  2400,
+                       "colIndex":  145,
+                       "medianIncome":  105000,
+                       "avgHousePrice":  800000,
+                       "details":  {
+                                       "groceries":  500,
+                                       "transport":  120,
+                                       "utilities":  110,
+                                       "misc":  250
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  152,
+                                         "walkScore":  73,
+                                         "crimeRate":  42,
+                                         "avgCommute":  28,
+                                         "bikeScore":  71
+                                     }
+                   },
+                   {
+                       "city":  "Los Angeles",
+                       "state":  "CA",
+                       "slug":  "los-angeles-ca",
+                       "priority":  1,
+                       "tier":  1,
+                       "avgRent":  2900,
+                       "colIndex":  150,
+                       "medianIncome":  70000,
+                       "avgHousePrice":  950000,
+                       "details":  {
+                                       "groceries":  480,
+                                       "transport":  150,
+                                       "utilities":  130,
+                                       "misc":  280
+                                   }
+                   },
+                   {
+                       "city":  "Chicago",
+                       "state":  "IL",
+                       "slug":  "chicago-il",
+                       "priority":  1,
+                       "tier":  1,
+                       "avgRent":  2200,
+                       "colIndex":  120,
+                       "medianIncome":  72000,
+                       "avgHousePrice":  350000,
+                       "details":  {
+                                       "groceries":  420,
+                                       "transport":  130,
+                                       "utilities":  120,
+                                       "misc":  220
+                                   }
+                   },
+                   {
+                       "city":  "Miami",
+                       "state":  "FL",
+                       "slug":  "miami-fl",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  2600,
+                       "colIndex":  122,
+                       "medianIncome":  55000,
+                       "avgHousePrice":  500000,
+                       "details":  {
+                                       "groceries":  450,
+                                       "transport":  110,
+                                       "utilities":  140,
+                                       "misc":  240
+                                   }
+                   },
+                   {
+                       "city":  "Boston",
+                       "state":  "MA",
+                       "slug":  "boston-ma",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  3100,
+                       "colIndex":  150,
+                       "medianIncome":  85000,
+                       "avgHousePrice":  750000,
+                       "details":  {
+                                       "groceries":  520,
+                                       "transport":  100,
+                                       "utilities":  180,
+                                       "misc":  260
+                                   }
+                   },
+                   {
+                       "city":  "Denver",
+                       "state":  "CO",
+                       "slug":  "denver-co",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  2100,
+                       "colIndex":  115,
+                       "medianIncome":  82000,
+                       "avgHousePrice":  600000,
+                       "details":  {
+                                       "groceries":  410,
+                                       "transport":  110,
+                                       "utilities":  100,
+                                       "misc":  210
+                                   }
+                   },
+                   {
+                       "city":  "Las Vegas",
+                       "state":  "NV",
+                       "slug":  "las-vegas-nv",
+                       "avgRent":  1700,
+                       "colIndex":  103,
+                       "medianIncome":  60000,
+                       "avgHousePrice":  420000,
+                       "details":  {
+                                       "groceries":  380,
+                                       "transport":  120,
+                                       "utilities":  150,
+                                       "misc":  180
+                                   }
+                   },
+                   {
+                       "city":  "Atlanta",
+                       "state":  "GA",
+                       "slug":  "atlanta-ga",
+                       "avgRent":  1900,
+                       "colIndex":  102,
+                       "medianIncome":  70000,
+                       "avgHousePrice":  400000,
+                       "details":  {
+                                       "groceries":  390,
+                                       "transport":  100,
+                                       "utilities":  130,
+                                       "misc":  190
+                                   }
+                   },
+                   {
+                       "city":  "Phoenix",
+                       "state":  "AZ",
+                       "slug":  "phoenix-az",
+                       "avgRent":  1800,
+                       "colIndex":  104,
+                       "medianIncome":  65000,
+                       "avgHousePrice":  450000,
+                       "details":  {
+                                       "groceries":  380,
+                                       "transport":  110,
+                                       "utilities":  160,
+                                       "misc":  180
+                                   }
+                   },
+                   {
+                       "city":  "Dallas",
+                       "state":  "TX",
+                       "slug":  "dallas-tx",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1850,
+                       "colIndex":  102,
+                       "medianIncome":  68000,
+                       "avgHousePrice":  420000,
+                       "details":  {
+                                       "groceries":  390,
+                                       "transport":  110,
+                                       "utilities":  140,
+                                       "misc":  190
+                                   }
+                   },
+                   {
+                       "city":  "Houston",
+                       "state":  "TX",
+                       "slug":  "houston-tx",
+                       "avgRent":  1600,
+                       "colIndex":  98,
+                       "medianIncome":  64000,
+                       "avgHousePrice":  340000,
+                       "details":  {
+                                       "groceries":  370,
+                                       "transport":  120,
+                                       "utilities":  150,
+                                       "misc":  180
+                                   }
+                   },
+                   {
+                       "city":  "Raleigh",
+                       "state":  "NC",
+                       "slug":  "raleigh-nc",
+                       "avgRent":  1650,
+                       "colIndex":  96,
+                       "medianIncome":  78000,
+                       "avgHousePrice":  430000,
+                       "details":  {
+                                       "groceries":  380,
+                                       "transport":  90,
+                                       "utilities":  110,
+                                       "misc":  170
+                                   }
+                   },
+                   {
+                       "city":  "Nashville",
+                       "state":  "TN",
+                       "slug":  "nashville-tn",
+                       "priority":  1,
+                       "tier":  2,
+                       "avgRent":  1800,
+                       "colIndex":  102,
+                       "medianIncome":  62000,
+                       "avgHousePrice":  450000,
+                       "details":  {
+                                       "groceries":  380,
+                                       "transport":  100,
+                                       "utilities":  140,
+                                       "misc":  190
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  208,
+                                         "walkScore":  29,
+                                         "crimeRate":  45,
+                                         "avgCommute":  28,
+                                         "bikeScore":  30
+                                     }
+                   },
+                   {
+                       "city":  "Charlotte",
+                       "state":  "NC",
+                       "slug":  "charlotte-nc",
+                       "priority":  1,
+                       "tier":  2,
+                       "avgRent":  1700,
+                       "colIndex":  98,
+                       "medianIncome":  68000,
+                       "avgHousePrice":  410000,
+                       "details":  {
+                                       "groceries":  390,
+                                       "transport":  100,
+                                       "utilities":  130,
+                                       "misc":  180
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  218,
+                                         "walkScore":  26,
+                                         "crimeRate":  40,
+                                         "avgCommute":  25,
+                                         "bikeScore":  30
+                                     }
+                   },
+                   {
+                       "city":  "San Diego",
+                       "state":  "CA",
+                       "slug":  "san-diego-ca",
+                       "priority":  1,
+                       "tier":  1,
+                       "avgRent":  2800,
+                       "colIndex":  145,
+                       "medianIncome":  85000,
+                       "avgHousePrice":  900000,
+                       "details":  {
+                                       "groceries":  500,
+                                       "transport":  130,
+                                       "utilities":  120,
+                                       "misc":  250
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  266,
+                                         "walkScore":  53,
+                                         "crimeRate":  25,
+                                         "avgCommute":  26,
+                                         "bikeScore":  60
+                                     }
+                   },
+                   {
+                       "city":  "Orlando",
+                       "state":  "FL",
+                       "slug":  "orlando-fl",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1900,
+                       "colIndex":  105,
+                       "medianIncome":  58000,
+                       "avgHousePrice":  400000,
+                       "details":  {
+                                       "groceries":  410,
+                                       "transport":  110,
+                                       "utilities":  150,
+                                       "misc":  200
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  233,
+                                         "walkScore":  41,
+                                         "crimeRate":  48,
+                                         "avgCommute":  30,
+                                         "bikeScore":  55
+                                     }
+                   },
+                   {
+                       "city":  "Philadelphia",
+                       "state":  "PA",
+                       "slug":  "philadelphia-pa",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1800,
+                       "colIndex":  108,
+                       "medianIncome":  60000,
+                       "avgHousePrice":  250000,
+                       "details":  {
+                                       "groceries":  430,
+                                       "transport":  120,
+                                       "utilities":  140,
+                                       "misc":  210
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  207,
+                                         "walkScore":  79,
+                                         "crimeRate":  50,
+                                         "avgCommute":  35,
+                                         "bikeScore":  65
+                                     }
+                   },
+                   {
+                       "city":  "Washington",
+                       "state":  "DC",
+                       "slug":  "washington-dc",
+                       "priority":  1,
+                       "tier":  1,
+                       "avgRent":  2600,
+                       "colIndex":  140,
+                       "medianIncome":  90000,
+                       "avgHousePrice":  700000,
+                       "details":  {
+                                       "groceries":  520,
+                                       "transport":  130,
+                                       "utilities":  140,
+                                       "misc":  280
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  203,
+                                         "walkScore":  98,
+                                         "crimeRate":  60,
+                                         "avgCommute":  35,
+                                         "bikeScore":  70
+                                     }
+                   },
+                   {
+                       "city":  "Portland",
+                       "state":  "OR",
+                       "slug":  "portland-or",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1800,
+                       "colIndex":  125,
+                       "medianIncome":  78000,
+                       "avgHousePrice":  550000,
+                       "details":  {
+                                       "groceries":  460,
+                                       "transport":  120,
+                                       "utilities":  110,
+                                       "misc":  230
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  144,
+                                         "walkScore":  67,
+                                         "crimeRate":  45,
+                                         "avgCommute":  27,
+                                         "bikeScore":  82
+                                     }
+                   },
+                   {
+                       "city":  "San Antonio",
+                       "state":  "TX",
+                       "slug":  "san-antonio-tx",
+                       "priority":  2,
+                       "tier":  3,
+                       "avgRent":  1400,
+                       "colIndex":  92,
+                       "medianIncome":  55000,
+                       "avgHousePrice":  300000,
+                       "details":  {
+                                       "groceries":  350,
+                                       "transport":  100,
+                                       "utilities":  140,
+                                       "misc":  170
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  220,
+                                         "walkScore":  38,
+                                         "crimeRate":  42,
+                                         "avgCommute":  25,
+                                         "bikeScore":  45
+                                     }
+                   },
+                   {
+                       "city":  "Minneapolis",
+                       "state":  "MN",
+                       "slug":  "minneapolis-mn",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  1600,
+                       "colIndex":  105,
+                       "medianIncome":  70000,
+                       "avgHousePrice":  350000,
+                       "details":  {
+                                       "groceries":  400,
+                                       "transport":  110,
+                                       "utilities":  130,
+                                       "misc":  200
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  198,
+                                         "walkScore":  70,
+                                         "crimeRate":  40,
+                                         "avgCommute":  24,
+                                         "bikeScore":  84
+                                     }
+                   },
+                   {
+                       "city":  "Indianapolis",
+                       "state":  "IN",
+                       "slug":  "indianapolis-in",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  1300,
+                       "colIndex":  90,
+                       "medianIncome":  58000,
+                       "avgHousePrice":  250000,
+                       "details":  {
+                                       "groceries":  340,
+                                       "transport":  100,
+                                       "utilities":  130,
+                                       "misc":  160
+                                   },
+                       "lifestyle":  {
+                                         "sunnyDays":  187,
+                                         "walkScore":  30,
+                                         "crimeRate":  48,
+                                         "avgCommute":  25,
+                                         "bikeScore":  45
+                                     }
+                   },
+                   {
+                       "city":  "Jacksonville",
+                       "state":  "FL",
+                       "slug":  "jacksonville-fl",
+                       "priority":  1,
+                       "tier":  1,
+                       "avgRent":  1568,
+                       "colIndex":  98,
+                       "medianIncome":  68069,
+                       "avgHousePrice":  279095,
+                       "details":  {
+                                       "groceries":  340,
+                                       "transport":  100,
+                                       "utilities":  100,
+                                       "misc":  180
+                                   }
+                   },
+                   {
+                       "city":  "Fort Worth",
+                       "state":  "TX",
+                       "slug":  "fort-worth-tx",
+                       "priority":  1,
+                       "tier":  1,
+                       "avgRent":  1547,
+                       "colIndex":  98,
+                       "medianIncome":  77082,
+                       "avgHousePrice":  292122,
+                       "details":  {
+                                       "groceries":  340,
+                                       "transport":  100,
+                                       "utilities":  100,
+                                       "misc":  180
+                                   }
+                   },
+                   {
+                       "city":  "San Jose",
+                       "state":  "CA",
+                       "slug":  "san-jose-ca",
+                       "priority":  1,
+                       "tier":  1,
+                       "avgRent":  3219,
+                       "colIndex":  158,
+                       "medianIncome":  136229,
+                       "avgHousePrice":  1401449,
+                       "details":  {
+                                       "groceries":  520,
+                                       "transport":  190,
+                                       "utilities":  170,
+                                       "misc":  300
+                                   }
+                   },
+                   {
+                       "city":  "Columbus",
+                       "state":  "OH",
+                       "slug":  "columbus-oh",
+                       "priority":  1,
+                       "tier":  1,
+                       "avgRent":  1380,
+                       "colIndex":  93,
+                       "medianIncome":  62350,
+                       "avgHousePrice":  239151,
+                       "details":  {
+                                       "groceries":  330,
+                                       "transport":  90,
+                                       "utilities":  100,
+                                       "misc":  170
+                                   }
+                   },
+                   {
+                       "city":  "Oklahoma City",
+                       "state":  "OK",
+                       "slug":  "oklahoma-city-ok",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1252,
+                       "colIndex":  89,
+                       "medianIncome":  67015,
+                       "avgHousePrice":  202648,
+                       "details":  {
+                                       "groceries":  320,
+                                       "transport":  90,
+                                       "utilities":  90,
+                                       "misc":  160
+                                   }
+                   },
+                   {
+                       "city":  "El Paso",
+                       "state":  "TX",
+                       "slug":  "el-paso-tx",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1479,
+                       "colIndex":  95,
+                       "medianIncome":  57317,
+                       "avgHousePrice":  229877,
+                       "details":  {
+                                       "groceries":  340,
+                                       "transport":  100,
+                                       "utilities":  100,
+                                       "misc":  170
+                                   }
+                   },
+                   {
+                       "city":  "Memphis",
+                       "state":  "TN",
+                       "slug":  "memphis-tn",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1232,
+                       "colIndex":  88,
+                       "medianIncome":  51399,
+                       "avgHousePrice":  141489,
+                       "details":  {
+                                       "groceries":  310,
+                                       "transport":  90,
+                                       "utilities":  90,
+                                       "misc":  160
+                                   }
+                   },
+                   {
+                       "city":  "Baltimore",
+                       "state":  "MD",
+                       "slug":  "baltimore-md",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1714,
+                       "colIndex":  101,
+                       "medianIncome":  59579,
+                       "avgHousePrice":  185223,
+                       "details":  {
+                                       "groceries":  350,
+                                       "transport":  110,
+                                       "utilities":  110,
+                                       "misc":  180
+                                   }
+                   },
+                   {
+                       "city":  "Milwaukee",
+                       "state":  "WI",
+                       "slug":  "milwaukee-wi",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1366,
+                       "colIndex":  92,
+                       "medianIncome":  52992,
+                       "avgHousePrice":  211874,
+                       "details":  {
+                                       "groceries":  330,
+                                       "transport":  90,
+                                       "utilities":  100,
+                                       "misc":  160
+                                   }
+                   },
+                   {
+                       "city":  "Albuquerque",
+                       "state":  "NM",
+                       "slug":  "albuquerque-nm",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1477,
+                       "colIndex":  97,
+                       "medianIncome":  67907,
+                       "avgHousePrice":  336224,
+                       "details":  {
+                                       "groceries":  340,
+                                       "transport":  100,
+                                       "utilities":  100,
+                                       "misc":  170
+                                   }
+                   },
+                   {
+                       "city":  "Tucson",
+                       "state":  "AZ",
+                       "slug":  "tucson-az",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1399,
+                       "colIndex":  95,
+                       "medianIncome":  55708,
+                       "avgHousePrice":  320343,
+                       "details":  {
+                                       "groceries":  340,
+                                       "transport":  100,
+                                       "utilities":  100,
+                                       "misc":  170
+                                   }
+                   },
+                   {
+                       "city":  "Fresno",
+                       "state":  "CA",
+                       "slug":  "fresno-ca",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1705,
+                       "colIndex":  104,
+                       "medianIncome":  67603,
+                       "avgHousePrice":  383440,
+                       "details":  {
+                                       "groceries":  360,
+                                       "transport":  110,
+                                       "utilities":  110,
+                                       "misc":  190
+                                   }
+                   },
+                   {
+                       "city":  "Sacramento",
+                       "state":  "CA",
+                       "slug":  "sacramento-ca",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  2015,
+                       "colIndex":  113,
+                       "medianIncome":  85928,
+                       "avgHousePrice":  468296,
+                       "details":  {
+                                       "groceries":  390,
+                                       "transport":  120,
+                                       "utilities":  120,
+                                       "misc":  210
+                                   }
+                   },
+                   {
+                       "city":  "Mesa",
+                       "state":  "AZ",
+                       "slug":  "mesa-az",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1554,
+                       "colIndex":  101,
+                       "medianIncome":  79145,
+                       "avgHousePrice":  427544,
+                       "details":  {
+                                       "groceries":  350,
+                                       "transport":  110,
+                                       "utilities":  110,
+                                       "misc":  180
+                                   }
+                   },
+                   {
+                       "city":  "Kansas City",
+                       "state":  "MO",
+                       "slug":  "kansas-city-mo",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1395,
+                       "colIndex":  94,
+                       "medianIncome":  65225,
+                       "avgHousePrice":  241730,
+                       "details":  {
+                                       "groceries":  330,
+                                       "transport":  100,
+                                       "utilities":  100,
+                                       "misc":  170
+                                   }
+                   },
+                   {
+                       "city":  "Colorado Springs",
+                       "state":  "CO",
+                       "slug":  "colorado-springs-co",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1656,
+                       "colIndex":  103,
+                       "medianIncome":  83215,
+                       "avgHousePrice":  441854,
+                       "details":  {
+                                       "groceries":  360,
+                                       "transport":  110,
+                                       "utilities":  110,
+                                       "misc":  190
+                                   }
+                   },
+                   {
+                       "city":  "Omaha",
+                       "state":  "NE",
+                       "slug":  "omaha-ne",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1391,
+                       "colIndex":  94,
+                       "medianIncome":  71238,
+                       "avgHousePrice":  284874,
+                       "details":  {
+                                       "groceries":  330,
+                                       "transport":  100,
+                                       "utilities":  100,
+                                       "misc":  170
+                                   }
+                   },
+                   {
+                       "city":  "Virginia Beach",
+                       "state":  "VA",
+                       "slug":  "virginia-beach-va",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1975,
+                       "colIndex":  111,
+                       "medianIncome":  91141,
+                       "avgHousePrice":  414961,
+                       "details":  {
+                                       "groceries":  380,
+                                       "transport":  120,
+                                       "utilities":  120,
+                                       "misc":  200
+                                   }
+                   },
+                   {
+                       "city":  "Long Beach",
+                       "state":  "CA",
+                       "slug":  "long-beach-ca",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  2283,
+                       "colIndex":  125,
+                       "medianIncome":  81606,
+                       "avgHousePrice":  838598,
+                       "details":  {
+                                       "groceries":  420,
+                                       "transport":  140,
+                                       "utilities":  130,
+                                       "misc":  230
+                                   }
+                   },
+                   {
+                       "city":  "Oakland",
+                       "state":  "CA",
+                       "slug":  "oakland-ca",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  2499,
+                       "colIndex":  128,
+                       "medianIncome":  96828,
+                       "avgHousePrice":  684251,
+                       "details":  {
+                                       "groceries":  430,
+                                       "transport":  140,
+                                       "utilities":  140,
+                                       "misc":  240
+                                   }
+                   },
+                   {
+                       "city":  "Bakersfield",
+                       "state":  "CA",
+                       "slug":  "bakersfield-ca",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1901,
+                       "colIndex":  109,
+                       "medianIncome":  79355,
+                       "avgHousePrice":  390137,
+                       "details":  {
+                                       "groceries":  380,
+                                       "transport":  120,
+                                       "utilities":  120,
+                                       "misc":  200
+                                   }
+                   },
+                   {
+                       "city":  "Tulsa",
+                       "state":  "OK",
+                       "slug":  "tulsa-ok",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1221,
+                       "colIndex":  89,
+                       "medianIncome":  56821,
+                       "avgHousePrice":  210935,
+                       "details":  {
+                                       "groceries":  320,
+                                       "transport":  90,
+                                       "utilities":  90,
+                                       "misc":  160
+                                   }
+                   },
+                   {
+                       "city":  "Tampa",
+                       "state":  "FL",
+                       "slug":  "tampa-fl",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1971,
+                       "colIndex":  110,
+                       "medianIncome":  72851,
+                       "avgHousePrice":  366612,
+                       "details":  {
+                                       "groceries":  380,
+                                       "transport":  120,
+                                       "utilities":  120,
+                                       "misc":  200
+                                   }
+                   },
+                   {
+                       "city":  "Arlington",
+                       "state":  "TX",
+                       "slug":  "arlington-tx",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1488,
+                       "colIndex":  97,
+                       "medianIncome":  69208,
+                       "avgHousePrice":  303597,
+                       "details":  {
+                                       "groceries":  340,
+                                       "transport":  100,
+                                       "utilities":  100,
+                                       "misc":  170
+                                   }
+                   },
+                   {
+                       "city":  "Wichita",
+                       "state":  "KS",
+                       "slug":  "wichita-ks",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1127,
+                       "colIndex":  88,
+                       "medianIncome":  61281,
+                       "avgHousePrice":  195309,
+                       "details":  {
+                                       "groceries":  310,
+                                       "transport":  90,
+                                       "utilities":  90,
+                                       "misc":  160
+                                   }
+                   },
+                   {
+                       "city":  "Aurora",
+                       "state":  "CO",
+                       "slug":  "aurora-co",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1686,
+                       "colIndex":  104,
+                       "medianIncome":  89300,
+                       "avgHousePrice":  454389,
+                       "details":  {
+                                       "groceries":  360,
+                                       "transport":  110,
+                                       "utilities":  110,
+                                       "misc":  190
+                                   }
+                   },
+                   {
+                       "city":  "New Orleans",
+                       "state":  "LA",
+                       "slug":  "new-orleans-la",
+                       "priority":  2,
+                       "tier":  2,
+                       "avgRent":  1615,
+                       "colIndex":  99,
+                       "medianIncome":  55580,
+                       "avgHousePrice":  236136,
+                       "details":  {
+                                       "groceries":  350,
+                                       "transport":  100,
+                                       "utilities":  100,
+                                       "misc":  180
+                                   }
+                   },
+                   {
+                       "city":  "Anaheim",
+                       "state":  "CA",
+                       "slug":  "anaheim-ca",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  2704,
+                       "colIndex":  137,
+                       "medianIncome":  84872,
+                       "avgHousePrice":  922676,
+                       "details":  {
+                                       "groceries":  460,
+                                       "transport":  160,
+                                       "utilities":  150,
+                                       "misc":  260
+                                   }
+                   },
+                   {
+                       "city":  "Henderson",
+                       "state":  "NV",
+                       "slug":  "henderson-nv",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  1773,
+                       "colIndex":  107,
+                       "medianIncome":  82476,
+                       "avgHousePrice":  481110,
+                       "details":  {
+                                       "groceries":  370,
+                                       "transport":  110,
+                                       "utilities":  110,
+                                       "misc":  200
+                                   }
+                   },
+                   {
+                       "city":  "Stockton",
+                       "state":  "CA",
+                       "slug":  "stockton-ca",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  2006,
+                       "colIndex":  112,
+                       "medianIncome":  76191,
+                       "avgHousePrice":  423113,
+                       "details":  {
+                                       "groceries":  390,
+                                       "transport":  120,
+                                       "utilities":  120,
+                                       "misc":  210
+                                   }
+                   },
+                   {
+                       "city":  "Riverside",
+                       "state":  "CA",
+                       "slug":  "riverside-ca",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  2369,
+                       "colIndex":  124,
+                       "medianIncome":  88175,
+                       "avgHousePrice":  635032,
+                       "details":  {
+                                       "groceries":  420,
+                                       "transport":  140,
+                                       "utilities":  130,
+                                       "misc":  230
+                                   }
+                   },
+                   {
+                       "city":  "Corpus Christi",
+                       "state":  "TX",
+                       "slug":  "corpus-christi-tx",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  1441,
+                       "colIndex":  94,
+                       "medianIncome":  65138,
+                       "avgHousePrice":  217911,
+                       "details":  {
+                                       "groceries":  330,
+                                       "transport":  100,
+                                       "utilities":  100,
+                                       "misc":  170
+                                   }
+                   },
+                   {
+                       "city":  "Irvine",
+                       "state":  "CA",
+                       "slug":  "irvine-ca",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  3400,
+                       "colIndex":  165,
+                       "medianIncome":  127989,
+                       "avgHousePrice":  1517282,
+                       "details":  {
+                                       "groceries":  540,
+                                       "transport":  200,
+                                       "utilities":  180,
+                                       "misc":  320
+                                   }
+                   },
+                   {
+                       "city":  "Cincinnati",
+                       "state":  "OH",
+                       "slug":  "cincinnati-oh",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  1414,
+                       "colIndex":  94,
+                       "medianIncome":  54314,
+                       "avgHousePrice":  240511,
+                       "details":  {
+                                       "groceries":  330,
+                                       "transport":  100,
+                                       "utilities":  100,
+                                       "misc":  170
+                                   }
+                   },
+                   {
+                       "city":  "Santa Ana",
+                       "state":  "CA",
+                       "slug":  "santa-ana-ca",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  2762,
+                       "colIndex":  137,
+                       "medianIncome":  85914,
+                       "avgHousePrice":  838852,
+                       "details":  {
+                                       "groceries":  460,
+                                       "transport":  160,
+                                       "utilities":  150,
+                                       "misc":  260
+                                   }
+                   },
+                   {
+                       "city":  "Newark",
+                       "state":  "NJ",
+                       "slug":  "newark-nj",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  2143,
+                       "colIndex":  116,
+                       "medianIncome":  53818,
+                       "avgHousePrice":  479280,
+                       "details":  {
+                                       "groceries":  400,
+                                       "transport":  130,
+                                       "utilities":  120,
+                                       "misc":  210
+                                   }
+                   },
+                   {
+                       "city":  "Pittsburgh",
+                       "state":  "PA",
+                       "slug":  "pittsburgh-pa",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  1543,
+                       "colIndex":  97,
+                       "medianIncome":  66219,
+                       "avgHousePrice":  227934,
+                       "details":  {
+                                       "groceries":  340,
+                                       "transport":  100,
+                                       "utilities":  100,
+                                       "misc":  170
+                                   }
+                   },
+                   {
+                       "city":  "Greensboro",
+                       "state":  "NC",
+                       "slug":  "greensboro-nc",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  1381,
+                       "colIndex":  93,
+                       "medianIncome":  61747,
+                       "avgHousePrice":  257450,
+                       "details":  {
+                                       "groceries":  330,
+                                       "transport":  90,
+                                       "utilities":  100,
+                                       "misc":  170
+                                   }
+                   },
+                   {
+                       "city":  "Durham",
+                       "state":  "NC",
+                       "slug":  "durham-nc",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  1629,
+                       "colIndex":  102,
+                       "medianIncome":  80064,
+                       "avgHousePrice":  390598,
+                       "details":  {
+                                       "groceries":  360,
+                                       "transport":  110,
+                                       "utilities":  110,
+                                       "misc":  190
+                                   }
+                   },
+                   {
+                       "city":  "Lincoln",
+                       "state":  "NE",
+                       "slug":  "lincoln-ne",
+                       "priority":  3,
+                       "tier":  3,
+                       "avgRent":  1279,
+                       "colIndex":  91,
+                       "medianIncome":  68050,
+                       "avgHousePrice":  281140,
+                       "details":  {
+                                       "groceries":  320,
+                                       "transport":  90,
+                                       "utilities":  100,
+                                       "misc":  160
+                                   }
+                   }
+               ]
 }

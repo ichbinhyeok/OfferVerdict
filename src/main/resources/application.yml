@@ -12,12 +12,18 @@ app:
   baselineLivingCost: 1800
   sitemapChunkSize: 5000
   devReloadEnabled: true
-
-seo:
-  salary-bucket:
-    interval: 10000
-    min: 30000
-    max: 500000
+  seoSalaryBucketInterval: ${APP_SEO_SALARY_BUCKET_INTERVAL:10000}
+  seoSalaryBucketMin: ${APP_SEO_SALARY_BUCKET_MIN:30000}
+  seoSalaryBucketMax: ${APP_SEO_SALARY_BUCKET_MAX:500000}
+  authorityYearlyGainThreshold: ${APP_AUTHORITY_YEARLY_GAIN_THRESHOLD:40000}
+  relocationBaselineSalarySf: ${APP_RELOCATION_BASELINE_SALARY_SF:180000}
+  relocationBaselineSalaryNyc: ${APP_RELOCATION_BASELINE_SALARY_NYC:170000}
+  carAffordabilityTarget: ${APP_CAR_AFFORDABILITY_TARGET:50000}
+  commuteCostPerMinute: ${APP_COMMUTE_COST_PER_MINUTE:5}
+  leads:
+    storageDir: ${APP_LEADS_STORAGE_DIR:./data/leads}
+    backupDir: ${APP_LEADS_BACKUP_DIR:./data/leads-backup}
+    dedupeMinutes: ${APP_LEADS_DEDUPE_MINUTES:15}
 
 logging:
   level:

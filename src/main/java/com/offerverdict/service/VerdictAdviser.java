@@ -9,24 +9,24 @@ public class VerdictAdviser {
     public String generateVerdictMessage(Verdict verdict, double deltaPercent, String cityB) {
         if (verdict == Verdict.GO) {
             return String.format(
-                    "A statistically superior move. Relocating to %s accelerates your wealth trajectory by %.1f%% and provides a clear strategic advantage.",
+                    "Under current assumptions, relocating to %s improves monthly purchasing-power residual by about %.1f%%.",
                     cityB, deltaPercent * 100);
         } else if (verdict == Verdict.NO_GO) {
             return String.format(
-                    "High personal risk. Unless you negotiate at least $40,000 above parity, moving to %s is a regression in purchasing power.",
+                    "Under current assumptions, moving to %s reduces purchasing-power residual. Reprice the offer before deciding.",
                     cityB);
         } else if (verdict == Verdict.WARNING) {
-            return "Proceed with extreme caution. The nominal raise is almost entirely consumed by hidden cost-of-living leaks and localized inflation.";
+            return "Net gain is narrow after taxes and core costs. Treat this as a tight scenario and stress-test assumptions.";
         } else {
-            return "This move is a lateral shift. Negotiate for a sign-on bonus or equity kicker to justify the transition risk.";
+            return "This result is close to parity. Small changes in rent, commute, or taxes can flip the outcome.";
         }
     }
 
     public String getNegotiationLever(double gap) {
         if (gap <= 0)
-            return "You have full leverage. Reiterate your value and focus on non-monetary perks.";
+            return "You are at or above modeled parity. Prioritize role scope, growth path, and downside protections.";
         return String.format(
-                "Fiscal parity requires an additional $%,.0f in base compensation. Use this as your primary negotiation anchor.",
+                "Modeled parity requires about $%,.0f more in annual base compensation.",
                 gap);
     }
 }

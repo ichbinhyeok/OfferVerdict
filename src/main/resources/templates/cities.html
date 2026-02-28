@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title th:text="${title}">Cities</title>
     <meta name="description" th:attr="content=${metaDescription}" />
+    <meta name="robots" content="noindex,follow">
     <link rel="stylesheet" href="/css/tokens.css">
     <link rel="stylesheet" href="/css/core.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
@@ -45,7 +46,6 @@
                                     onmouseover="this.style.background='var(--surface-2)'"
                                     onmouseout="this.style.background='transparent'">
                                     <span th:text="${job.title}">Software Engineer</span>
-                                    <span style="color: var(--text-3); font-size: 0.9em;">→</span>
                                 </a>
                             </li>
                         </ul>

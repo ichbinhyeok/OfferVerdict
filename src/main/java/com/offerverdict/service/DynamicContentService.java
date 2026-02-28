@@ -1,120 +1,114 @@
 package com.offerverdict.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.offerverdict.model.ComparisonBreakdown;
 import com.offerverdict.model.Verdict;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.annotation.PostConstruct;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.Locale;
 
 @Service
 public class DynamicContentService {
 
-    private static final Logger logger = LoggerFactory.getLogger(DynamicContentService.class);
-    private final Random random = new Random();
-    private final Map<String, PremiumReview> premiumReviews = new HashMap<>();
-
-    public static class PremiumReview {
-        public String citySlug;
-        public String jobSlug;
-        public int salaryBucket;
-        public String introText;
-        public String housingWarning;
-        public String analysisText;
-    }
-
-    @PostConstruct
-    public void init() {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            InputStream is = new ClassPathResource("data/AiPremiumReviews.json").getInputStream();
-            List<PremiumReview> reviews = mapper.readValue(is, new TypeReference<List<PremiumReview>>() {
-            });
-            for (PremiumReview pr : reviews) {
-                String key = buildKey(pr.citySlug, pr.jobSlug, pr.salaryBucket);
-                premiumReviews.put(key, pr);
-            }
-            logger.info("Loaded {} Premium AI Reviews", premiumReviews.size());
-        } catch (Exception e) {
-            logger.warn("Could not load AiPremiumReviews.json: {}", e.getMessage());
-        }
-    }
-
-    private String buildKey(String citySlug, String jobSlug, int salary) {
-        return citySlug + "_" + (jobSlug == null ? "none" : jobSlug) + "_" + salary;
-    }
-
-    public PremiumReview getPremiumReview(String citySlug, String jobSlug, int salary) {
-        return premiumReviews.get(buildKey(citySlug, jobSlug, salary));
-    }
-
     public String generateSingleCityIntro(ComparisonBreakdown breakdown) {
-        double residualRatio = breakdown.getResidual() / breakdown.getNetMonthly();
         String city = breakdown.getCityName();
         String salaryStr = String.format("$%,.0f", breakdown.getGrossSalary());
+        double monthlyResidual = breakdown.getResidual();
+        double annualTakeHome = breakdown.getNetMonthly() * 12;
 
-        List<String> options = new ArrayList<>();
-
-        if (residualRatio < 0) {
-            options.add(
-                    String.format("Making %s in %s poses a serious financial challenge based on current market rates.",
-                            salaryStr, city));
-            options.add(String.format(
-                    "Living in %s with a %s salary requires strict budgeting according to our latest cost models.",
-                    city, salaryStr));
-        } else if (residualRatio < 0.2) {
-            options.add(
-                    String.format("A salary of %s in %s offers a tight but manageable lifestyle.", salaryStr, city));
-            options.add(String.format("Surviving in %s on %s is possible, but saving for the future will be slow.",
-                    city, salaryStr));
-        } else if (residualRatio > 0.4) {
-            options.add(
-                    String.format("Congratulations! %s is a powerful income in %s, unlocking rapid wealth generation.",
-                            salaryStr, city));
-            options.add(String.format("%s in %s puts you in a commanding financial position.", salaryStr, city));
-        } else {
-            options.add(String.format(
-                    "Earning %s in %s provides a standard middle-class lifestyle with some room for savings.",
-                    salaryStr, city));
-            options.add(String.format("A %s income in %s is respectable, though inflation makes budgeting important.",
-                    salaryStr, city));
+        if (monthlyResidual < 0) {
+            return String.format(
+                    Locale.US,
+                    "In %s, a %s salary is estimated to produce %s take-home pay per year but still runs a monthly deficit of %s after core costs.",
+                    city,
+                    salaryStr,
+                    formatMoney(annualTakeHome),
+                    formatMoney(Math.abs(monthlyResidual)));
         }
 
-        return options.get(random.nextInt(options.size()));
+        return String.format(
+                Locale.US,
+                "In %s, a %s salary is estimated to produce %s take-home pay per year and leaves about %s monthly after core costs.",
+                city,
+                salaryStr,
+                formatMoney(annualTakeHome),
+                formatMoney(monthlyResidual));
     }
 
     public String generateHousingWarning(ComparisonBreakdown breakdown) {
-        double housingRatio = (breakdown.getRent()) / breakdown.getNetMonthly();
+        double housingRatio = safeRatio(breakdown.getRent(), breakdown.getNetMonthly());
 
         if (housingRatio > 0.45) {
-            return "WARNING: Housing costs consume over 45% of your net income. This is considered 'Rent Burdened' and high risk.";
-        } else if (housingRatio > 0.35) {
-            return "Note: Housing expenses are on the higher side (>35%), leaving less room for discretionary spending.";
-        } else if (housingRatio < 0.20) {
-            return "Excellent: Housing is very affordable here, taking less than 20% of your take-home pay.";
+            return "Housing costs are above 45% of take-home pay, which is a high-burden scenario.";
         }
-        return "Housing costs are within the standard recommended range (approx. 30%).";
+        if (housingRatio > 0.35) {
+            return "Housing costs are elevated and can limit savings flexibility.";
+        }
+        if (housingRatio < 0.20) {
+            return "Housing costs are relatively efficient for this income level.";
+        }
+        return "Housing costs are within a typical range for a balanced budget.";
     }
 
     public String generateVerdictAnalysis(Verdict verdict, ComparisonBreakdown breakdown) {
+        double savingsRate = safeRatio(breakdown.getResidual(), breakdown.getNetMonthly());
+
         if (verdict == Verdict.NO_GO) {
             return String.format(
-                    "Our algorithms strongly advise against this move to %s without a significantly higher offer.",
-                    breakdown.getCityName());
-        } else if (verdict == Verdict.GO) {
-            return String.format("This is a green-light opportunity. %s offers a clear financial advantage.",
+                    Locale.US,
+                    "At current assumptions, this scenario is not sustainable without reducing costs or increasing income in %s.",
                     breakdown.getCityName());
         }
-        return "This scenario has pros and cons. Review the detailed breakdown below to see if the lifestyle trade-offs are worth it.";
+        if (verdict == Verdict.WARNING) {
+            return String.format(
+                    Locale.US,
+                    "This scenario is workable but tight. Estimated savings rate is %.1f%%, so unexpected costs could quickly reduce buffer.",
+                    savingsRate * 100.0);
+        }
+        if (verdict == Verdict.CONDITIONAL) {
+            return String.format(
+                    Locale.US,
+                    "This scenario is generally viable with an estimated savings rate of %.1f%% if spending assumptions hold.",
+                    savingsRate * 100.0);
+        }
+        return String.format(
+                Locale.US,
+                "This scenario appears strong with an estimated savings rate of %.1f%% after taxes and core costs.",
+                savingsRate * 100.0);
+    }
+
+    public String generateSingleCityVerdictMessage(Verdict verdict, ComparisonBreakdown breakdown) {
+        double residual = breakdown.getResidual();
+        if (verdict == Verdict.NO_GO) {
+            return String.format(
+                    Locale.US,
+                    "At current assumptions, this budget runs short by about %s per month.",
+                    formatMoney(Math.abs(residual)));
+        }
+        if (verdict == Verdict.WARNING) {
+            return String.format(
+                    Locale.US,
+                    "This budget is positive but tight, leaving roughly %s per month after core costs.",
+                    formatMoney(residual));
+        }
+        if (verdict == Verdict.CONDITIONAL) {
+            return String.format(
+                    Locale.US,
+                    "This salary is workable, with roughly %s monthly residual after taxes and core costs.",
+                    formatMoney(residual));
+        }
+        return String.format(
+                Locale.US,
+                "This scenario leaves roughly %s monthly residual after taxes and core costs.",
+                formatMoney(residual));
+    }
+
+    private String formatMoney(double amount) {
+        return String.format(Locale.US, "$%,.0f", amount);
+    }
+
+    private double safeRatio(double numerator, double denominator) {
+        if (denominator <= 0) {
+            return 0.0;
+        }
+        return numerator / denominator;
     }
 }

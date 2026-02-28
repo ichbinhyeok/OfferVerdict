@@ -56,7 +56,7 @@
                 <span class="sticky-text" th:text="${result.verdictCopy}">DON'T GO</span>
             </div>
             <div class="sticky-center">
-                <span class="sticky-gain" th:text="${result.monthlyGainStr}">+$1,200</span>
+                <span class="sticky-gain" th:text="${result.monthlyGainStr}">+$1,200/mo</span>
             </div>
             <div class="sticky-right">
                 <a href="#simulator" class="btn-lab-jump">Simulation Lab</a>
@@ -126,14 +126,18 @@
                                 <strong class="mono" th:if="${result.reverseSalaryGoal > offerSalary}"
                                     th:text="${'$' + #numbers.formatInteger(result.reverseSalaryGoal, 0, 'COMMA')}">$145,000</strong>
                             </span>
+                            <span style="display:block; margin-top: 0.35rem; font-size: 0.78rem; color: var(--text-2);"
+                                th:text="${'Model threshold: +' + '$' + #numbers.formatInteger(authorityYearlyGainThreshold, 0, 'COMMA') + '/yr net residual improvement.'}">
+                                Model threshold: +$40,000/yr net residual improvement.
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <div class="financial-impact">
                     <div class="impact-label">Monthly Cash Flow Impact</div>
-                    <div class="impact-value" th:text="${result.monthlyGainStr != null ? result.monthlyGainStr : '$0'}">
-                        -$1,200</div>
+                    <div class="impact-value" th:text="${result.monthlyGainStr != null ? result.monthlyGainStr : '$0/mo'}">
+                        -$1,200/mo</div>
                     <div class="contextual-disclaimer"
                         style="margin-top: 12px; font-size: 0.85rem; color: #666; font-style: italic;">
                         *Figures are estimates based on public data. Actual costs vary by neighborhood and lifestyle.
@@ -177,17 +181,17 @@
                             <span class="badge">Current</span>
                         </div>
                         <div class="line-item">
-                            <span class="label">Gross Salary</span>
+                            <span class="label">Gross Salary (Annual)</span>
                             <span class="value mono"
                                 th:text="${'$' + #numbers.formatInteger(currentSalary, 0, 'COMMA')}">$100,000</span>
                         </div>
                         <div class="line-item danger-text">
-                            <span class="label">Fed + State Tax (Est.)</span>
+                            <span class="label">Fed + State Tax (Annual Est.)</span>
                             <span class="value mono line-tax"
                                 th:text="${'-$' + #numbers.formatInteger(result.current.taxResult.totalTax, 0, 'COMMA')}">-$24,000</span>
                         </div>
                         <div class="line-item danger-text">
-                            <span class="label">Local Income Tax</span>
+                            <span class="label">Local Income Tax (Annual)</span>
                             <span class="value mono line-local"
                                 th:text="${'-$' + #numbers.formatInteger(result.current.localTax * 12, 0, 'COMMA')}">-$0</span>
                         </div>
@@ -197,33 +201,33 @@
                                 th:text="${'-$' + #numbers.formatInteger(result.current.rent * 12, 0, 'COMMA')}">-$36,000</span>
                         </div>
                         <div class="line-item warning-text">
-                            <span class="label">Living Costs (Est.)</span>
+                            <span class="label">Living Costs (Annual Est.)</span>
                             <span class="value mono line-living"
                                 th:text="${'-$' + #numbers.formatInteger(result.current.livingCost * 12, 0, 'COMMA')}">-$12,000</span>
                         </div>
                         <div class="line-item danger-text">
-                            <span class="label">Benefits & 401k</span>
+                            <span class="label">Other Adjustments (Est.)</span>
                             <span class="value mono"
                                 th:text="${'-$' + #numbers.formatInteger(gapA, 0, 'COMMA')}">-$5,000</span>
                         </div>
                         <!-- Hidden Rows for Dynamic Simulation -->
                         <div class="line-item success-text hidden-row" id="row-equity-current" style="display:none;">
-                            <span class="label">Equity & Bonuses</span>
+                            <span class="label">Equity & Bonuses (Annual)</span>
                             <span class="value mono line-equity">+$0</span>
                         </div>
                         <div class="line-item danger-text hidden-row" id="row-transport-current" style="display:none;">
-                            <span class="label">Transport & Ins.</span>
+                            <span class="label">Transport & Ins. (Annual)</span>
                             <!-- Note: Transport is now part of Living Costs by default unless separated -->
                             <span class="value mono line-transport">-$0</span>
                         </div>
                         <div class="line-item danger-text hidden-row" id="row-leaks-current" style="display:none;">
-                            <span class="label">Monthly Leaks</span>
+                            <span class="label">Leaks (Annual)</span>
                             <span class="value mono line-leaks">-$0</span>
                         </div>
                         <div class="line-item success-text highlight-row">
-                            <span class="label">Residual (Savings Potential)</span>
+                            <span class="label">Residual (Annual Savings Potential)</span>
                             <span class="value mono line-residual"
-                                th:text="${'$' + #numbers.formatInteger(result.current.residual * 12, 0, 'COMMA')}">$40,000</span>
+                                th:text="${'$' + #numbers.formatInteger(result.current.residual * 12, 0, 'COMMA') + '/yr'}">$40,000/yr</span>
                         </div>
                         <div style="margin-top: 1rem; text-align: center;">
                             <a th:href="${'/salary-check/' + cityA.slug + '/' + #numbers.formatInteger(currentSalary,0,'NONE')}"
@@ -240,17 +244,17 @@
                             <span class="badge brand">Offer</span>
                         </div>
                         <div class="line-item">
-                            <span class="label">Gross Salary</span>
+                            <span class="label">Gross Salary (Annual)</span>
                             <span class="value mono"
                                 th:text="${'$' + #numbers.formatInteger(offerSalary, 0, 'COMMA')}">$120,000</span>
                         </div>
                         <div class="line-item danger-text">
-                            <span class="label">Fed + State Tax (Est.)</span>
+                            <span class="label">Fed + State Tax (Annual Est.)</span>
                             <span class="value mono line-tax"
                                 th:text="${'-$' + #numbers.formatInteger(result.offer.taxResult.totalTax, 0, 'COMMA')}">-$32,000</span>
                         </div>
                         <div class="line-item danger-text">
-                            <span class="label">Local Income Tax</span>
+                            <span class="label">Local Income Tax (Annual)</span>
                             <span class="value mono line-local"
                                 th:text="${'-$' + #numbers.formatInteger(result.offer.localTax * 12, 0, 'COMMA')}">-$0</span>
                         </div>
@@ -260,33 +264,33 @@
                                 th:text="${'-$' + #numbers.formatInteger(result.offer.rent * 12, 0, 'COMMA')}">-$48,000</span>
                         </div>
                         <div class="line-item warning-text">
-                            <span class="label">Living Costs (Est.)</span>
+                            <span class="label">Living Costs (Annual Est.)</span>
                             <span class="value mono line-living"
                                 th:text="${'-$' + #numbers.formatInteger(result.offer.livingCost * 12, 0, 'COMMA')}">-$15,000</span>
                         </div>
                         <div class="line-item danger-text">
-                            <span class="label">Benefits & 401k</span>
+                            <span class="label">Other Adjustments (Est.)</span>
                             <span class="value mono"
                                 th:text="${'-$' + #numbers.formatInteger(gapB, 0, 'COMMA')}">-$6,000</span>
                         </div>
                         <!-- Hidden Rows for Dynamic Simulation -->
                         <div class="line-item success-text hidden-row" id="row-equity-offer" style="display:none;">
-                            <span class="label">Equity & Bonuses</span>
+                            <span class="label">Equity & Bonuses (Annual)</span>
                             <span class="value mono line-equity">+$0</span>
                         </div>
                         <div class="line-item danger-text hidden-row" id="row-transport-offer" style="display:none;">
-                            <span class="label">Transport & Ins.</span>
+                            <span class="label">Transport & Ins. (Annual)</span>
                             <!-- Note: Transport is now part of Living Costs by default unless separated -->
                             <span class="value mono line-transport">-$0</span>
                         </div>
                         <div class="line-item danger-text hidden-row" id="row-leaks-offer" style="display:none;">
-                            <span class="label">Monthly Leaks</span>
+                            <span class="label">Leaks (Annual)</span>
                             <span class="value mono line-leaks">-$0</span>
                         </div>
                         <div class="line-item success-text highlight-row">
-                            <span class="label">Residual (Savings Potential)</span>
+                            <span class="label">Residual (Annual Savings Potential)</span>
                             <span class="value mono line-residual"
-                                th:text="${'$' + #numbers.formatInteger(result.offer.residual * 12, 0, 'COMMA')}">$40,000</span>
+                                th:text="${'$' + #numbers.formatInteger(result.offer.residual * 12, 0, 'COMMA') + '/yr'}">$40,000/yr</span>
                         </div>
                         <div style="margin-top: 1rem; text-align: center;">
                             <a th:href="${'/salary-check/' + cityB.slug + '/' + #numbers.formatInteger(offerSalary,0,'NONE')}"
@@ -442,11 +446,13 @@
                 </div>
 
                 <div class="reality-grid">
-                    <!-- Tesla Index -->
+                    <!-- Car Affordability Proxy -->
                     <div class="reality-card">
                         <div class="icon">🚗</div>
                         <div class="reality-content">
-                            <h4>Tesla Model 3 Index</h4>
+                            <h4 th:text="${'Car Affordability Proxy ($' + #numbers.formatInteger(carAffordabilityTarget, 0, 'COMMA') + ')'}">
+                                Car Affordability Proxy ($50,000)
+                            </h4>
                             <p>
                                 In <span th:text="${cityA.city}">City A</span>, it takes <strong
                                     th:text="${#numbers.formatDecimal(result.current.monthsToBuyTesla, 1, 1)}">8.2</strong>
@@ -458,10 +464,10 @@
                             </p>
                             <div class="mini-verdict"
                                 th:if="${result.offer.monthsToBuyTesla < result.current.monthsToBuyTesla}">You get
-                                wheels faster.</div>
+                                to this purchase faster.</div>
                             <div class="mini-verdict negative"
                                 th:if="${result.offer.monthsToBuyTesla >= result.current.monthsToBuyTesla}">You work
-                                longer for the same car.</div>
+                                longer to reach the same purchase target.</div>
                         </div>
                     </div>
 
@@ -625,8 +631,8 @@
                         interplay of
                         <span th:if="${result.offer.taxResult.stateTax > 0}">state taxes, </span>
                         housing costs, and local purchasing power can significantly alter your real standards of living.
-                        This analysis isolates your "disposable margin" to reveal if a move actually builds wealth or
-                        just increases throughput.
+                        This analysis isolates your post-cost residual to show whether the move improves real monthly
+                        flexibility.
                     </p>
 
                     <h3 style="color: var(--text-1); font-size: 1.5rem; margin-bottom: 1rem;">What most people overlook
@@ -634,7 +640,7 @@
                     <p>
                         When relocating for a <span th:text="${job.title}">Job</span> role, it's easy to fixate on the
                         gross annual offer.
-                        However, the "Hidden Inflation" of lifestyle costs in <span th:text="${cityB.city}">City
+                        However, layered lifestyle costs in <span th:text="${cityB.city}">City
                             B</span>—specifically
                         rent multipliers and insurance variances—often eats into that raise.
                         Our <strong>Wealth Buffer Index</strong> (shown above) accounts for these leakages to show you
@@ -702,6 +708,12 @@
                 </div>
 
                 <div class="faq-grid" style="display: grid; gap: 1.5rem; max-width: 800px; margin: 0 auto;">
+                    <div class="faq-item" th:each="item : ${faqItems}">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-1);"
+                            th:text="${item.question}">Question</h3>
+                        <p style="color: var(--text-2); line-height: 1.6;" th:text="${item.answer}">Answer</p>
+                    </div>
+
                     <div class="faq-item">
                         <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-1);">How are these
                             relocation cost calculations made?</h3>
@@ -716,10 +728,10 @@
                     <div class="faq-item">
                         <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-1);">How accurate are
                             these estimates?</h3>
-                        <p style="color: var(--text-2); line-height: 1.6;">They are high-fidelity estimates based on
-                            statistical averages. While we account for local tax rates and cost of living differences,
-                            your specific lifestyle (debt, spending habits, housing choice) will ultimately determine
-                            your personal bottom line. Treat this as a strategic baseline, not a bank statement.</p>
+                        <p style="color: var(--text-2); line-height: 1.6;">They are model-based estimates built from
+                            public data and city-level averages. While we account for local tax rates and cost-of-living
+                            differences, your specific lifestyle (debt, spending habits, housing choice) can materially
+                            change outcomes. Treat this as a decision baseline, not a guarantee.</p>
                     </div>
 
                     <div class="faq-item">

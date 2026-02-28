@@ -11,10 +11,28 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Comparator;
 import java.util.Set;
 
 @Controller
 public class SitemapController {
+    private static final int MAX_CITY_COUNT = 15;
+    private static final int MAX_COMPARISON_SEEDS = 24;
+    private static final List<String> CORE_JOB_SLUGS = List.of(
+            "software-engineer",
+            "product-manager",
+            "data-scientist",
+            "financial-analyst",
+            "registered-nurse",
+            "marketing-manager",
+            "sales-manager",
+            "mechanical-engineer");
+
+    private static final List<String> CORE_COMPARISON_JOBS = List.of(
+            "software-engineer",
+            "financial-analyst",
+            "registered-nurse");
+
 
     private final DataRepository repository;
     private final AppProperties appProperties;
@@ -35,45 +53,61 @@ public class SitemapController {
         addUrl(xml, "/", "1.0");
         addUrl(xml, "/about", "0.8");
         addUrl(xml, "/methodology", "0.8");
-        addUrl(xml, "/cities", "0.9");
 
-        // AI Strategy Update: Expand from ~200 seeds back to ~2,000-4,000 URLs.
-        // Include a smart mix of Tier 1/2/3 cities + high intent jobs to re-ignite
-        // indexing.
+        // Focus sitemap on high-intent, high-quality seeds first.
+        List<CityCostEntry> seedCities = repository.getCities().stream()
+                .sorted(Comparator.comparingInt(CityCostEntry::getTier)
+                        .thenComparingInt(CityCostEntry::getPriority)
+                        .thenComparing(CityCostEntry::getCity))
+                .limit(MAX_CITY_COUNT)
+                .toList();
+        Set<String> coreJobSet = new LinkedHashSet<>(CORE_JOB_SLUGS);
+        List<JobInfo> coreJobs = repository.getJobs().stream()
+                .filter(job -> coreJobSet.contains(job.getSlug()))
+                .sorted(Comparator.comparingInt(job -> CORE_JOB_SLUGS.indexOf(job.getSlug())))
+                .toList();
 
-        List<CityCostEntry> allCities = repository.getCities();
-        List<JobInfo> allJobs = repository.getJobs();
         int salaryInterval = Math.max(1, appProperties.getSeoSalaryBucketInterval());
+        int[] primarySalaryPoints = alignToSeoInterval(new int[] { 60000, 80000, 100000, 120000, 150000 },
+                salaryInterval);
+        int[] genericSalaryPoints = alignToSeoInterval(new int[] { 70000, 100000, 130000 }, salaryInterval);
 
-        for (CityCostEntry city : allCities) {
-            for (JobInfo job : allJobs) {
-                boolean isTopCity = city.getTier() <= 2;
-                boolean isTopJob = "software-engineer".equals(job.getSlug()) ||
-                        "registered-nurse".equals(job.getSlug()) ||
-                        "product-manager".equals(job.getSlug()) ||
-                        "financial-analyst".equals(job.getSlug());
-
-                int[] salaryPoints;
-                // Dynamically adjust density based on importance
-                if (isTopCity && isTopJob) {
-                    salaryPoints = alignToSeoInterval(new int[] { 60000, 80000, 100000, 120000, 150000, 200000 },
-                            salaryInterval);
-                } else if (isTopCity || isTopJob) {
-                    salaryPoints = alignToSeoInterval(new int[] { 75000, 100000, 150000 }, salaryInterval);
-                } else {
-                    // Tier 3/Long-tail: Anchor around common question "Is 100k good?"
-                    salaryPoints = alignToSeoInterval(new int[] { 70000, 100000 }, salaryInterval);
-                }
-
-                for (int s : salaryPoints) {
+        for (CityCostEntry city : seedCities) {
+            for (JobInfo job : coreJobs) {
+                for (int s : primarySalaryPoints) {
                     addUrl(xml, "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + s, "0.9");
                 }
             }
         }
 
-        // Add Comparisons Seed
-        addUrl(xml, "/software-engineer-salary-san-francisco-ca-vs-austin-tx", "0.8");
-        addUrl(xml, "/financial-analyst-salary-new-york-ny-vs-chicago-il", "0.8");
+        for (CityCostEntry city : seedCities) {
+            for (int s : genericSalaryPoints) {
+                addUrl(xml, "/salary-check/" + city.getSlug() + "/" + s, "0.7");
+            }
+        }
+
+        int comparisonCount = 0;
+        List<CityCostEntry> comparisonCities = seedCities.stream().limit(8).toList();
+        for (String jobSlug : CORE_COMPARISON_JOBS) {
+            for (int i = 0; i < comparisonCities.size(); i++) {
+                for (int j = i + 1; j < comparisonCities.size(); j++) {
+                    addUrl(xml,
+                            "/" + jobSlug + "-salary-" + comparisonCities.get(i).getSlug() + "-vs-"
+                                    + comparisonCities.get(j).getSlug(),
+                            "0.8");
+                    comparisonCount++;
+                    if (comparisonCount >= MAX_COMPARISON_SEEDS) {
+                        break;
+                    }
+                }
+                if (comparisonCount >= MAX_COMPARISON_SEEDS) {
+                    break;
+                }
+            }
+            if (comparisonCount >= MAX_COMPARISON_SEEDS) {
+                break;
+            }
+        }
 
         xml.append("</urlset>");
         return xml.toString();

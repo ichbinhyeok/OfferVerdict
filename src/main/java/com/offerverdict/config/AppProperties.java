@@ -16,6 +16,13 @@ public class AppProperties {
     private int seoSalaryBucketMin = 30000;
     private int seoSalaryBucketMax = 500000;
 
+    // Decision-model assumptions (tunable without code changes)
+    private double authorityYearlyGainThreshold = 40000;
+    private double relocationBaselineSalarySf = 180000;
+    private double relocationBaselineSalaryNyc = 170000;
+    private double carAffordabilityTarget = 50000;
+    private double commuteCostPerMinute = 5;
+
     public String getPublicBaseUrl() {
         return publicBaseUrl;
     }
@@ -70,5 +77,45 @@ public class AppProperties {
 
     public void setSeoSalaryBucketMax(int seoSalaryBucketMax) {
         this.seoSalaryBucketMax = seoSalaryBucketMax;
+    }
+
+    public double getAuthorityYearlyGainThreshold() {
+        return authorityYearlyGainThreshold;
+    }
+
+    public void setAuthorityYearlyGainThreshold(double authorityYearlyGainThreshold) {
+        this.authorityYearlyGainThreshold = authorityYearlyGainThreshold;
+    }
+
+    public double getRelocationBaselineSalarySf() {
+        return relocationBaselineSalarySf;
+    }
+
+    public void setRelocationBaselineSalarySf(double relocationBaselineSalarySf) {
+        this.relocationBaselineSalarySf = relocationBaselineSalarySf;
+    }
+
+    public double getRelocationBaselineSalaryNyc() {
+        return relocationBaselineSalaryNyc;
+    }
+
+    public void setRelocationBaselineSalaryNyc(double relocationBaselineSalaryNyc) {
+        this.relocationBaselineSalaryNyc = relocationBaselineSalaryNyc;
+    }
+
+    public double getCarAffordabilityTarget() {
+        return carAffordabilityTarget;
+    }
+
+    public void setCarAffordabilityTarget(double carAffordabilityTarget) {
+        this.carAffordabilityTarget = carAffordabilityTarget;
+    }
+
+    public double getCommuteCostPerMinute() {
+        return commuteCostPerMinute;
+    }
+
+    public void setCommuteCostPerMinute(double commuteCostPerMinute) {
+        this.commuteCostPerMinute = commuteCostPerMinute;
     }
 }

@@ -49,3 +49,15 @@ Desktop.ini
 .env
 secrets.properties
 local.properties
+
+### PC Bang & Temp Files ###
+*_log.txt
+*_log_*.txt
+app_log*.txt
+check.html
+source.html
+tmp/
+.pcbang/
+
+### Local QA Runtime Data ###
+data/

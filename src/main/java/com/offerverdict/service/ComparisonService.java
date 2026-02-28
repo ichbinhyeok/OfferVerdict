@@ -120,8 +120,7 @@ public class ComparisonService {
 
         // 1. Monthly Gain
         double monthlyGain = offer.getResidual() - current.getResidual();
-        String sign = monthlyGain >= 0 ? "+" : "";
-        result.setMonthlyGainStr(sign + currency.format(monthlyGain));
+        result.setMonthlyGainStr(formatSignedMonthlyDelta(monthlyGain));
 
         // 2. Freedom Index (Residual / Net Income)
         double netMonthly = offer.getNetMonthly();
@@ -240,10 +239,11 @@ public class ComparisonService {
         double offerEffectiveTaxRate = result.getOffer().getTaxResult().getEffectiveTaxRate();
         double gap = currentResidual - offerResidual;
 
-        // Strict Authority Logic: Don't go if gain < $40,000 (roughly 3.3k/mo)
+        // Authority logic: threshold is configurable via app properties.
+        double authorityYearlyGainThreshold = appProperties.getAuthorityYearlyGainThreshold();
         double yearlyGain = diff * 12;
-        if (verdict == Verdict.NO_GO || verdict == Verdict.WARNING || yearlyGain < 40000) {
-            double reqGain = 40000.0; // The threshold
+        if (verdict == Verdict.NO_GO || verdict == Verdict.WARNING || yearlyGain < authorityYearlyGainThreshold) {
+            double reqGain = authorityYearlyGainThreshold;
             double salaryNeeded = result.getOffer().getGrossSalary()
                     + ((reqGain - yearlyGain) / (1.0 - offerEffectiveTaxRate));
             double additionalNeeded = Math.max(0, salaryNeeded - result.getOffer().getGrossSalary());
@@ -270,11 +270,11 @@ public class ComparisonService {
                     metrics.getMetadata().source, metrics.getMetadata().lastUpdated));
         }
 
-        result.setMonthlyGainStr((diff >= 0 ? "+" : "") + formatMoney(diff));
     }
 
-    private String formatMoney(double amount) {
-        return String.format("%,.0f", amount);
+    private String formatSignedMonthlyDelta(double amount) {
+        String sign = amount >= 0 ? "+" : "-";
+        return sign + "$" + String.format("%,.0f", Math.abs(amount)) + "/mo";
     }
 
     public Verdict classifyVerdict(double deltaPercent) {

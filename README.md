@@ -21,6 +21,23 @@ The service evaluates whether a job offer in a new city is financially sustainab
 - **Jobs:** update `src/main/resources/data/Jobs.json` with `{title, slug}` entries.  
 - **Reload in dev:** if `app.devReloadEnabled=true`, hit `/admin/reload-data` to reload JSON without restarting.
 
+## Lead Tracking and Persistence
+- **Analytics:** GA4 is loaded from `templates/fragments/analytics.html`. Lead funnel events are emitted from `single-verdict.html` (`lead_form_open`, `lead_submit_click`, `lead_submit_attempt`, `lead_submit_success`, `lead_submit_error`, `generate_lead`).
+- **Server event log:** `POST /api/leads/event` stores lead funnel events in CSV.
+- **Lead capture log:** `POST /api/leads/capture` stores captured leads in CSV.
+- **Storage path:** configure `APP_LEADS_STORAGE_DIR` (default `./data/leads`).
+- **Backup path:** configure `APP_LEADS_BACKUP_DIR` (default `./data/leads-backup`).
+- **De-duplication:** configure `APP_LEADS_DEDUPE_MINUTES` (default `15`) to suppress rapid duplicate submissions.
+- **CSV outputs:** rolling + backup files are written together: `leads.csv`, `lead_events.csv`, `leads-YYYY-MM-DD.csv`, `lead_events-YYYY-MM-DD.csv`.
+- **Docker persistence:** mount a host volume to `/app/data`, set `APP_LEADS_STORAGE_DIR=/app/data/leads`, and set `APP_LEADS_BACKUP_DIR=/app/data/leads-backup` so redeployments do not lose CSV files.
+
+## Playwright Beta Smoke Suite
+- **Scope:** end-to-end multi-persona smoke and beta flows (home, single analysis, comparison, SEO/noindex/canonical, robots/sitemap, lead funnel, simulation lab, mobile rendering).
+- **Test class:** `src/test/java/com/offerverdict/e2e/PlaywrightBetaSmokeTest.java`
+- **Run only beta suite:** `./gradlew test --tests com.offerverdict.e2e.PlaywrightBetaSmokeTest --no-daemon`
+- **Run full regression:** `./gradlew test --no-daemon`
+- **Artifacts:** screenshots are saved to `build/reports/playwright-beta/`
+
 ## Calculation logic
 1. **Taxes:** progressive federal + state brackets from `StateTax.json`, plus FICA (SS up to the cap + Medicare).  
 2. **Net monthly:** net annual / 12.  

@@ -137,7 +137,7 @@ public class SingleCityAnalysisService {
             // 30 min commute -> $450/mo total transport cost impact? Maybe too high.
             // Conservative: $5 per minute. 30 min -> $150 extra/mo.
             if (commuteTime > 0) {
-                transport += (commuteTime * 5.0);
+                transport += (commuteTime * appProperties.getCommuteCostPerMinute());
             }
 
             utilities = city.getDetails().getOrDefault("utilities", 0.0) * householdMultiplier;
@@ -179,7 +179,7 @@ public class SingleCityAnalysisService {
         double monthlyResidual = residual;
         double yearsToBuyHouse = monthlyResidual > 0 ? (city.getAvgHousePrice() * 0.20) / (monthlyResidual * 12)
                 : 99.0;
-        double monthsToBuyTesla = monthlyResidual > 0 ? 50000.0 / monthlyResidual : 99.0;
+        double monthsToBuyTesla = monthlyResidual > 0 ? appProperties.getCarAffordabilityTarget() / monthlyResidual : 99.0;
 
         // Starbucks Index: $6/coffee * 22 working days = $132 potential savings
         double starbucksSavings = 6.0 * 22.0;

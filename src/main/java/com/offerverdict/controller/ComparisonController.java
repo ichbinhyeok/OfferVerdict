@@ -13,6 +13,8 @@ import com.offerverdict.service.ComparisonService;
 
 import com.offerverdict.util.SlugNormalizer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,12 +34,26 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 @Controller
 public class ComparisonController {
     // Flexible validation: 1,000 ~ 10,000,000 allowed
     private static final double MIN_SALARY = 1_000;
     private static final double MAX_SALARY = 10_000_000;
+    private static final String[] DATA_RESOURCE_PATHS = new String[] {
+            "data/AuthoritativeData.json",
+            "data/StateTax.json",
+            "data/CityCost.json",
+            "data/Jobs.json",
+            "data/JobMarketData.json",
+            "data/city-context.json",
+            "data/job-context.json"
+    };
 
     private final DataRepository repository;
     private final ComparisonService comparisonService;
@@ -184,10 +200,10 @@ public class ComparisonController {
             RedirectAttributes redirectAttributes,
             jakarta.servlet.http.HttpServletResponse response,
             Model model) {
-
-        // SEO SIGNAL: Last-Modified Header (Static update time to prevent crawl limits)
-        response.setHeader(org.springframework.http.HttpHeaders.LAST_MODIFIED,
-                "Sun, 15 Feb 2026 00:00:00 GMT");
+        ZonedDateTime dataLastModified = resolveDataLastModifiedUtc();
+        String dataModifiedDate = dataLastModified.toLocalDate().toString();
+        response.setHeader(HttpHeaders.LAST_MODIFIED,
+                DateTimeFormatter.RFC_1123_DATE_TIME.format(dataLastModified));
 
         String normalizedJob = SlugNormalizer.normalize(job);
         String normalizedCityA = SlugNormalizer.normalize(cityA);
@@ -356,6 +372,8 @@ public class ComparisonController {
         model.addAttribute("householdType", parsedHouseholdType);
         model.addAttribute("housingType", parsedHousingType);
         model.addAttribute("validationMessage", validationMessage);
+        model.addAttribute("authorityYearlyGainThreshold", appProperties.getAuthorityYearlyGainThreshold());
+        model.addAttribute("carAffordabilityTarget", appProperties.getCarAffordabilityTarget());
         model.addAttribute("cities", repository.getCities());
         model.addAttribute("jobs", repository.getJobs());
 
@@ -374,15 +392,12 @@ public class ComparisonController {
         model.addAttribute("otherCityLinks", relatedCityComparisons(jobInfo.getSlug(),
                 cityEntryA.getSlug(), cityEntryB.getSlug(), queryString));
 
+        List<Map<String, String>> faqItems = buildFaqItems(result, cityEntryA, cityEntryB, effectiveOfferSalary);
         // Build robust Structured Data (WebPage + FAQ + Breadcrumbs + Dataset)
         Map<String, Object> schemaMap = buildStructuredData(title, metaDescription, canonicalUrl, result, cityEntryA,
-                cityEntryB, effectiveOfferSalary, jobInfo);
+                cityEntryB, effectiveOfferSalary, jobInfo, faqItems, dataModifiedDate);
         model.addAttribute("structuredDataJson", toJson(schemaMap));
-
-        // Pass FAQ list for visible rendering if needed (optional, keeping it in schema
-        // for now)
-        // model.addAttribute("faqList", schemaMap.get("faqList")); // Future
-        // enhancement
+        model.addAttribute("faqItems", faqItems);
 
         model.addAttribute("currentTaxBreakdown",
                 comparisonService.getTaxBreakdown(safeCurrentSalary, cityEntryA.getState()));
@@ -548,22 +563,15 @@ public class ComparisonController {
             return false;
         }
 
-        // Logic: Instead of blocking "minor" pages, we allow them but mark their
-        // importance in the Sitemap.
-        // However, we still have a "Quality Floor" to avoid truly thin combinations.
-
-        // Pruning Case 1: Extreme salary outliers (Stay within $25k - $750k range for
-        // SEO safety)
-        if (currentSalary < 25000 || currentSalary > 750000) {
+        // Keep comparison pages within the same SEO salary boundaries as single pages.
+        double minSalary = appProperties.getSeoSalaryBucketMin();
+        double maxSalary = appProperties.getSeoSalaryBucketMax();
+        if (currentSalary < minSalary || currentSalary > maxSalary) {
             return false;
         }
-        if (offerSalary < 25000 || offerSalary > 750000) {
+        if (offerSalary < minSalary || offerSalary > maxSalary) {
             return false;
         }
-
-        // Pruning Case 2: If BOTH cities are very low priority (Tier 4+ if we had it),
-        // we'd block.
-        // For now, we allow almost all real city/job combinations.
         return true;
     }
 
@@ -580,7 +588,7 @@ public class ComparisonController {
 
     private Map<String, Object> buildStructuredData(String title, String description, String canonicalUrl,
             ComparisonResult result, CityCostEntry cityEntryA, CityCostEntry cityEntryB, double offerSalary,
-            JobInfo job) {
+            JobInfo job, List<Map<String, String>> faqItems, String dataModifiedDate) {
 
         List<Map<String, Object>> graph = new ArrayList<>();
 
@@ -591,8 +599,8 @@ public class ComparisonController {
         webpage.put("name", title);
         webpage.put("description", description);
         webpage.put("url", canonicalUrl);
-        webpage.put("datePublished", "2025-01-01"); // Static start
-        webpage.put("dateModified", java.time.LocalDate.now().toString()); // Dynamic freshness
+        webpage.put("datePublished", "2025-01-01");
+        webpage.put("dateModified", dataModifiedDate);
         graph.add(webpage);
 
         // 2. BreadcrumbList (Hierarchy Power)
@@ -613,8 +621,8 @@ public class ComparisonController {
         itemListElement.add(Map.of(
                 "@type", "ListItem",
                 "position", 2,
-                "name", "Salary Check",
-                "item", appProperties.getPublicBaseUrl() + "/cities"));
+                "name", "Compare Offers",
+                "item", appProperties.getPublicBaseUrl() + "/"));
 
         // Current Page
         itemListElement.add(Map.of(
@@ -637,7 +645,7 @@ public class ComparisonController {
                 job.getTitle(), cityEntryB.getCity()));
         dataset.put("license", "https://creativecommons.org/licenses/by-sa/4.0/");
         dataset.put("creator", Map.of("@type", "Organization", "name", "OfferVerdict"));
-        dataset.put("dateModified", java.time.LocalDate.now().toString());
+        dataset.put("dateModified", dataModifiedDate);
         graph.add(dataset);
 
         // 4. FAQPage (Dynamic & Specific)
@@ -646,51 +654,14 @@ public class ComparisonController {
         faq.put("@type", "FAQPage");
 
         List<Map<String, Object>> questions = new ArrayList<>();
-
-        // Q1: The Verdict
-        questions.add(Map.of(
-                "@type", "Question",
-                "name", String.format("Is a salary of $%s good in %s vs %s?",
-                        String.format("%,.0f", offerSalary), cityEntryB.getCity(), cityEntryA.getCity()),
-                "acceptedAnswer", Map.of(
-                        "@type", "Answer",
-                        "text", result.getVerdictCopy() + " " + result.getValueDiffMsg())));
-
-        // Q2: Cost of Living Context (Dynamic Numbers)
-        String housingDiff = result.getOffer().getRent() > result.getCurrent().getRent() ? "higher" : "lower";
-        double rentDiffVal = Math.abs(result.getOffer().getRent() - result.getCurrent().getRent());
-
-        questions.add(Map.of(
-                "@type", "Question",
-                "name",
-                String.format("How much is rent in %s compared to %s?", cityEntryB.getCity(), cityEntryA.getCity()),
-                "acceptedAnswer", Map.of(
-                        "@type", "Answer",
-                        "text",
-                        String.format(
-                                "Housing in %s is %s. You would pay roughly $%s/month (~$%s difference) for a similar quality of life.",
-                                cityEntryB.getCity(), housingDiff,
-                                String.format("%,.0f", result.getOffer().getRent()),
-                                String.format("%,.0f", rentDiffVal)))));
-
-        // Q3: Tax Context
-        double totalTax = (result.getOffer().getTaxResult() != null)
-                ? result.getOffer().getTaxResult().getTotalTax()
-                : 0.0;
-
-        questions.add(Map.of(
-                "@type", "Question",
-                "name",
-                String.format("What is the take-home pay for $%s in %s?", String.format("%,.0f", offerSalary),
-                        cityEntryB.getCity()),
-                "acceptedAnswer", Map.of(
-                        "@type", "Answer",
-                        "text",
-                        String.format(
-                                "For a single filer earning $%s in %s, estimated total tax (Federal + State + Local) is roughly $%s/year (Effective Rate: %.1f%%).",
-                                String.format("%,.0f", offerSalary), cityEntryB.getCity(),
-                                String.format("%,.0f", totalTax),
-                                result.getOffer().getTaxResult().getEffectiveTaxRate()))));
+        for (Map<String, String> faqItem : faqItems) {
+            questions.add(Map.of(
+                    "@type", "Question",
+                    "name", faqItem.getOrDefault("question", ""),
+                    "acceptedAnswer", Map.of(
+                            "@type", "Answer",
+                            "text", faqItem.getOrDefault("answer", ""))));
+        }
 
         faq.put("mainEntity", questions);
         graph.add(faq);
@@ -698,6 +669,73 @@ public class ComparisonController {
         Map<String, Object> data = new HashMap<>();
         data.put("@graph", graph);
         return data;
+    }
+
+    private List<Map<String, String>> buildFaqItems(ComparisonResult result, CityCostEntry cityEntryA,
+            CityCostEntry cityEntryB, double offerSalary) {
+        String q1 = String.format("Is a salary of $%s good in %s vs %s?",
+                String.format("%,.0f", offerSalary), cityEntryB.getCity(), cityEntryA.getCity());
+        String a1 = result.getVerdictCopy() + " " + result.getValueDiffMsg();
+
+        String housingDiff = result.getOffer().getRent() > result.getCurrent().getRent() ? "higher" : "lower";
+        double rentDiffVal = Math.abs(result.getOffer().getRent() - result.getCurrent().getRent());
+        String q2 = String.format("How much is rent in %s compared to %s?", cityEntryB.getCity(), cityEntryA.getCity());
+        String a2 = String.format(
+                "Housing in %s is %s. You would pay roughly $%s/month (~$%s difference) for a similar quality of life.",
+                cityEntryB.getCity(), housingDiff,
+                String.format("%,.0f", result.getOffer().getRent()),
+                String.format("%,.0f", rentDiffVal));
+
+        double totalTax = (result.getOffer().getTaxResult() != null)
+                ? result.getOffer().getTaxResult().getTotalTax()
+                : 0.0;
+        double effectiveTaxRate = (result.getOffer().getTaxResult() != null)
+                ? result.getOffer().getTaxResult().getEffectiveTaxRate()
+                : 0.0;
+        String q3 = String.format("What is the take-home pay for $%s in %s?", String.format("%,.0f", offerSalary),
+                cityEntryB.getCity());
+        String a3 = String.format(
+                "For a single filer earning $%s in %s, estimated total tax (Federal + State + Local) is roughly $%s/year (Effective Rate: %.1f%%).",
+                String.format("%,.0f", offerSalary), cityEntryB.getCity(),
+                String.format("%,.0f", totalTax), effectiveTaxRate);
+
+        return List.of(
+                Map.of("question", q1, "answer", a1),
+                Map.of("question", q2, "answer", a2),
+                Map.of("question", q3, "answer", a3));
+    }
+
+    private ZonedDateTime resolveDataLastModifiedUtc() {
+        long latest = 0L;
+        for (String resourcePath : DATA_RESOURCE_PATHS) {
+            try {
+                ClassPathResource resource = new ClassPathResource(resourcePath);
+                if (!resource.exists()) {
+                    continue;
+                }
+                latest = Math.max(latest, resource.lastModified());
+            } catch (Exception ignored) {
+                // Ignore and continue with remaining resources.
+            }
+        }
+
+        if (latest > 0L) {
+            return java.time.Instant.ofEpochMilli(latest).atZone(ZoneOffset.UTC).withNano(0);
+        }
+
+        try {
+            if (repository.getAuthoritativeMetrics() != null
+                    && repository.getAuthoritativeMetrics().getMetadata() != null
+                    && repository.getAuthoritativeMetrics().getMetadata().lastUpdated != null) {
+                LocalDate fromMetadata = LocalDate.parse(
+                        repository.getAuthoritativeMetrics().getMetadata().lastUpdated);
+                return fromMetadata.atStartOfDay(ZoneOffset.UTC);
+            }
+        } catch (DateTimeParseException ignored) {
+            // Fallback below.
+        }
+
+        return ZonedDateTime.now(ZoneOffset.UTC).withNano(0);
     }
 
     private String toJson(Object obj) {

@@ -21,7 +21,7 @@
     <!-- SEO: Canonical Tag -->
     <link rel="canonical" th:href="${canonicalUrl}">
     <meta name="description" th:content="${metaDescription}">
-    <meta name="robots" content="noindex" th:if="${!shouldIndex}">
+    <meta name="robots" content="noindex,follow" th:if="${!shouldIndex}">
 
     <!-- JSON-LD Structured Data - DECISION GAP FRAMEWORK (Phase 6 Extended) -->
     <script type="application/ld+json" th:inline="javascript">
@@ -31,26 +31,26 @@
         "mainEntity": [
             {
                 "@type": "Question",
-                "name": [[|Is ${'$' + #numbers.formatInteger(salary, 0, 'COMMA')} a good salary in ${city.city}?|]],
+                "name": [[${faqQ1}]],
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": [[|Based on our analysis, a ${'$' + #numbers.formatInteger(salary, 0, 'COMMA')} salary in ${city.city} leaves you with an estimated ${'$' + #numbers.formatInteger(result.residual, 0, 'COMMA')} monthly residual income after taxes and living expenses.|]]
+                    "text": [[${faqA1}]]
                 }
             },
             {
                 "@type": "Question",
-                "name": [[|What is the take-home pay for ${'$' + #numbers.formatInteger(salary, 0, 'COMMA')} in ${city.city}?|]],
+                "name": [[${faqQ2}]],
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": [[|After estimated taxes, your monthly take-home pay is approximately ${'$' + #numbers.formatInteger(result.netMonthly * 12, 0, 'COMMA')}.|]]
+                    "text": [[${faqA2}]]
                 }
             },
              {
                 "@type": "Question",
-                "name": [[|Is ${city.city} expensive to live in?|]],
+                "name": [[${faqQ3}]],
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": [[|Housing costs in ${city.city} are ${result.rent > 2000 ? 'relatively high' : 'moderate'}, with an average rent of ${'$' + #numbers.formatInteger(result.rent, 0, 'COMMA')}/mo.|]]
+                    "text": [[${faqA3}]]
                 }
             }
         ]
@@ -130,14 +130,14 @@
                     style="background: white; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1.5rem; margin-top: 1.5rem; text-align: left;">
                     <h3
                         style="font-size: 1rem; color: #666; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase;">
-                        Quick Facts for AI & Recap</h3>
+                        Quick Summary</h3>
                     <table style="width: 100%; border-collapse: collapse; font-size: 1rem; color: #333;"
                         data-nosnippet="false">
                         <tbody>
                             <tr style="border-bottom: 1px solid var(--border-subtle);">
                                 <td style="padding: 0.75rem 0; font-weight: 500;">Role / Title</td>
                                 <td style="padding: 0.75rem 0; text-align: right;"
-                                    th:text="${jobInfo != null ? jobInfo.title : 'Professional'}">Role</td>
+                                    th:text="${jobInfo != null ? jobInfo.title : 'All occupations'}">Role</td>
                             </tr>
                             <tr style="border-bottom: 1px solid var(--border-subtle);">
                                 <td style="padding: 0.75rem 0; font-weight: 500;">Location</td>
@@ -191,8 +191,50 @@
                 </div>
 
                 <script th:inline="javascript">
+                    const leadCitySlug = /*[[${city.slug}]]*/ 'unknown';
+                    const leadJobSlug = /*[[${jobInfo != null ? jobInfo.slug : 'none'}]]*/ 'none';
+
+                    function trackLeadEvent(eventName, intentType) {
+                        const sourcePath = window.location.pathname + window.location.search;
+                        const payload = {
+                            eventName: eventName,
+                            intent: intentType || 'unknown',
+                            citySlug: leadCitySlug,
+                            jobSlug: leadJobSlug,
+                            sourcePath: sourcePath,
+                            referrer: document.referrer || ''
+                        };
+
+                        if (typeof window.gtag === 'function') {
+                            window.gtag('event', eventName, {
+                                intent: payload.intent,
+                                city_slug: payload.citySlug,
+                                job_slug: payload.jobSlug
+                            });
+                            if (eventName === 'lead_submit_success') {
+                                window.gtag('event', 'generate_lead', {
+                                    currency: 'USD',
+                                    value: 1,
+                                    intent: payload.intent,
+                                    city_slug: payload.citySlug,
+                                    job_slug: payload.jobSlug
+                                });
+                            }
+                        }
+
+                        fetch('/api/leads/event', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload),
+                            keepalive: true
+                        }).catch(() => {
+                            // Intentionally ignore analytics failures.
+                        });
+                    }
+
                     function showLeadForm(intentType) {
                         const ctaBox = document.getElementById('cta-box');
+                        trackLeadEvent('lead_form_open', intentType);
                         ctaBox.innerHTML = `
                         <h3 style="color: #1a365d; font-size: 1.15rem; margin-bottom: 0.5rem;">Coming soon to this area!</h3>
                         <p style="color: #4a5568; margin-bottom: 1rem; font-size: 0.9rem;">We are finalizing our partner network. Leave your email to get notified.</p>
@@ -213,8 +255,13 @@
                         const honeypot = document.getElementById('lead-hp').value;
                         const btn = document.getElementById('lead-btn');
                         const email = emailInput.value;
+                        const sourcePath = window.location.pathname + window.location.search;
+                        const referrer = document.referrer || '';
+
+                        trackLeadEvent('lead_submit_click', intentType);
 
                         if (!email || !email.includes('@')) {
+                            trackLeadEvent('lead_submit_invalid', intentType);
                             alert('Please enter a valid email.');
                             return;
                         }
@@ -224,19 +271,31 @@
                         btn.style.opacity = '0.7';
                         btn.innerText = 'Sending...';
 
-                        const citySlug = /*[[${city.slug}]]*/ 'unknown';
-                        const jobSlug = /*[[${jobInfo != null ? jobInfo.slug : 'none'}]]*/ 'none';
+                        trackLeadEvent('lead_submit_attempt', intentType);
 
                         fetch('/api/leads/capture', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email: email, intent: intentType, citySlug: citySlug, jobSlug: jobSlug, honeypot: honeypot })
+                            body: JSON.stringify({
+                                email: email,
+                                intent: intentType,
+                                citySlug: leadCitySlug,
+                                jobSlug: leadJobSlug,
+                                honeypot: honeypot,
+                                sourcePath: sourcePath,
+                                referrer: referrer
+                            })
                         }).then(res => {
+                            if (!res.ok) {
+                                throw new Error('Lead capture request failed');
+                            }
                             document.getElementById('lead-msg').style.display = 'block';
                             emailInput.value = '';
                             btn.innerText = 'Done';
+                            trackLeadEvent('lead_submit_success', intentType);
                         }).catch(err => {
                             console.error('Lead capture failed', err);
+                            trackLeadEvent('lead_submit_error', intentType);
                             alert('Something went wrong. Please try again.');
                             btn.disabled = false;
                             btn.style.opacity = '1';
@@ -385,7 +444,9 @@
                         style="display:flex; justify-content:space-between; align-items:center; width:100%;">
                         <div>
                             <span class="sticky-label">New Monthly Residual</span>
-                            <div class="sticky-value" id="sticky-residual-val">$2,500</div>
+                            <div class="sticky-value" id="sticky-residual-val"
+                                th:text="${'$' + #numbers.formatInteger(result.residual, 0, 'COMMA') + '/mo'}">$2,500/mo
+                            </div>
                         </div>
                         <button
                             onclick="document.getElementById('simulation-panel').scrollIntoView({behavior: 'smooth'})"
@@ -438,7 +499,7 @@
                                 th:text="${'-$' + #numbers.formatInteger(livingCostMonthly, 0, 'COMMA')}">-$1,200</span>
                         </div>
                         <div class="line-item danger-text">
-                            <span class="label">Benefits & 401k</span>
+                            <span class="label">Benefits / Insurance (Est.)</span>
                             <span class="value mono" id="disp-benefits"
                                 th:text="${'-$' + #numbers.formatInteger(gapMonthly, 0, 'COMMA')}">-$610</span>
                         </div>
@@ -457,6 +518,14 @@
                             solid financial move.</span></p>
                 </div>
 
+                <div class="analysis-box" style="margin-top: 1rem;">
+                    <p><strong>Data Sources:</strong> <span th:text="${dataSourceSummary}">IRS, BLS, Numbeo</span></p>
+                    <p><strong>Data Last Updated:</strong> <span th:text="${dataLastUpdated}">2025-02-15</span></p>
+                    <p style="font-size: 0.9rem; color: #64748b; margin-top: 0.5rem;">
+                        Detailed assumptions and methodology: <a href="/methodology">/methodology</a>
+                    </p>
+                </div>
+
                 <!-- NEW: MARKET INTELLIGENCE -->
                 <div class="market-intelligence-container" th:if="${marketRating != null}"
                     style="margin-top: 3rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
@@ -470,11 +539,9 @@
 
                     <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6;">
                         In <span th:text="${city.city}">Austin</span>, the median salary for a
-                        <span th:text="${jobTitle}">Professional role</span> is approximately
+                        <span th:text="${jobTitle}">all occupations</span> is approximately
                         <strong th:text="${'$' + #numbers.formatInteger(marketMedian, 0, 'COMMA')}">$135,000</strong>.
-                        Your offer is <strong
-                            th:text="${#numbers.formatDecimal(marketPositionAbs, 1, 1) + '%'}">0%</strong>
-                        <span th:text="${marketPosition >= 0 ? 'above' : 'below'}">above</span> the local market median.
+                        Your offer is <strong th:text="${marketPositionText}">in line with the local median</strong>.
                     </p>
 
                     <div class="market-bar-wrapper" style="margin-top: 2rem;">
@@ -506,17 +573,16 @@
                         <div
                             style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 12px;">
                             <span
-                                style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Moving
-                                from SF ($180k)</span>
+                                style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;"
+                                th:text="${'Benchmark: SF at $' + #numbers.formatInteger(relocationBaselineSalarySf, 0, 'COMMA')}">Benchmark:
+                                SF at $180,000</span>
                             <div style="font-size: 1.5rem; font-weight: 800; margin-top: 0.5rem;"
                                 th:classappend="${isGainSF ? 'success-text' : 'danger-text'}"
                                 th:text="${(relocationGainSF >= 0 ? '+' : '-') + '$' + #numbers.formatInteger(relocationGainSFAbs, 0, 'COMMA') + '/mo'}">
                                 +$1,200/mo
                             </div>
                             <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">
-                                Equivalent to a net <span
-                                    th:text="${isGainSF ? 'increase' : 'decrease'}">increase</span> in
-                                monthly discretionary income compared to a tech hub baseline.
+                                Difference in modeled monthly residual versus a fixed SF baseline scenario.
                             </p>
                         </div>
 
@@ -524,15 +590,16 @@
                         <div
                             style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 12px;">
                             <span
-                                style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Moving
-                                from NYC ($170k)</span>
+                                style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;"
+                                th:text="${'Benchmark: NYC at $' + #numbers.formatInteger(relocationBaselineSalaryNyc, 0, 'COMMA')}">Benchmark:
+                                NYC at $170,000</span>
                             <div style="font-size: 1.5rem; font-weight: 800; margin-top: 0.5rem;"
                                 th:classappend="${isGainNYC ? 'success-text' : 'danger-text'}"
                                 th:text="${(relocationGainNYC >= 0 ? '+' : '-') + '$' + #numbers.formatInteger(relocationGainNYCAbs, 0, 'COMMA') + '/mo'}">
                                 +$950/mo
                             </div>
                             <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">
-                                Based on local tax and housing cost parity.
+                                Difference in modeled monthly residual versus a fixed NYC baseline scenario.
                             </p>
                         </div>
                         <!-- Big Mac Tangibility -->
@@ -545,10 +612,11 @@
                                 <div style="font-size: 1.5rem;">🍔</div>
                                 <div>
                                     <div style="font-size: 1.1rem; font-weight: 700;"
-                                        th:text="${bigMacIsCheaper ? 'Lower Daily Costs' : 'Higher Daily Costs'}">Lower
-                                        Daily Costs</div>
+                                        th:text="${bigMacIsCheaper ? 'Lower Price Proxy' : 'Higher Price Proxy'}">Lower
+                                        Price Proxy</div>
                                     <p style="font-size: 0.8rem; color: #64748b; margin: 0;">
-                                        A Big Mac here is <strong th:text="${'$' + bigMacTarget}">$4.36</strong>
+                                        Illustrative item-price check: Big Mac here is <strong
+                                            th:text="${'$' + bigMacTarget}">$4.36</strong>
                                         vs <span th:text="${'$' + bigMacSF}">$6.50</span> in SF.
                                     </p>
                                 </div>
@@ -562,14 +630,13 @@
                         <span style="font-size: 1.25rem;">💡</span>
                         <p style="font-size: 0.9rem; color: #4338ca; margin: 0; font-weight: 500;">
                             <strong>Strategic Insight:</strong>
-                            <span th:if="${isGainSF}">Since you are saving <span
-                                    th:text="${'$' + #numbers.formatInteger(relocationGainSFAbs, 0, 'COMMA')}">money</span>
-                                compared to SF, your "Lifestyle Stability" is high.</span>
-                            <span th:if="${!isGainSF}">While this is a <span
-                                    th:text="${'$' + #numbers.formatInteger(relocationGainSFAbs, 0, 'COMMA')}">money</span>
-                                reduction from a top-tier SF baseline,</span>
-                            if your Market Position is below median, use the high local rent trends to negotiate a
-                            housing stipend.
+                            <span th:if="${isGainSF}">Compared with the fixed SF baseline, this scenario leaves about
+                                <span th:text="${'$' + #numbers.formatInteger(relocationGainSFAbs, 0, 'COMMA')}">money</span>
+                                more per month in modeled residual.</span>
+                            <span th:if="${!isGainSF}">Compared with the fixed SF baseline, this scenario leaves about
+                                <span th:text="${'$' + #numbers.formatInteger(relocationGainSFAbs, 0, 'COMMA')}">money</span>
+                                less per month in modeled residual.</span>
+                            Use this as a benchmark reference, not a personal guarantee.
                         </p>
                     </div>
                 </div>
@@ -740,6 +807,30 @@
             </div>
         </section>
 
+        <section class="faq-section"
+            style="padding: 3rem 0; background: var(--bg-page); border-top: 1px solid var(--border-subtle);">
+            <div class="container" style="max-width: 900px;">
+                <div class="section-title">
+                    <h2>Frequently Asked Questions</h2>
+                    <p>Core assumptions behind this city-level salary estimate.</p>
+                </div>
+                <div class="faq-grid" style="display: grid; gap: 1rem;">
+                    <div class="faq-item" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.25rem;">
+                        <h3 style="font-size: 1.05rem; margin-bottom: 0.4rem;" th:text="${faqQ1}">Is this salary good in this city?</h3>
+                        <p style="color: #64748b; line-height: 1.6;" th:text="${faqA1}">Answer</p>
+                    </div>
+                    <div class="faq-item" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.25rem;">
+                        <h3 style="font-size: 1.05rem; margin-bottom: 0.4rem;" th:text="${faqQ2}">What is the take-home pay?</h3>
+                        <p style="color: #64748b; line-height: 1.6;" th:text="${faqA2}">Answer</p>
+                    </div>
+                    <div class="faq-item" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.25rem;">
+                        <h3 style="font-size: 1.05rem; margin-bottom: 0.4rem;" th:text="${faqQ3}">Is housing expensive?</h3>
+                        <p style="color: #64748b; line-height: 1.6;" th:text="${faqA3}">Answer</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- RETENTION & CROSS-LINK -->
         <section class="retention-section">
             <div class="container">
@@ -899,13 +990,13 @@
                                 levText = "Warning: Projected expenses exceed income.";
                             } else if (data.verdictText === "WARNING") {
                                 subText = "Tight budget. Little room for error.";
-                                levText = "Caution: Savings rate is critically low.";
+                                levText = "Caution: small assumption changes can flip the result.";
                             } else if (data.verdictText === "CONDITIONAL") {
-                                subText = "Doable, but requires discipline.";
-                                levText = "You can make this work with strict budgeting.";
+                                subText = "Close call under current assumptions.";
+                                levText = "Validate rent, taxes, and commute inputs before deciding.";
                             } else if (data.verdictText === "GO") {
-                                subText = "A statistically superior move.";
-                                levText = "You are in a commanding financial position.";
+                                subText = "Projected monthly residual is comfortably positive.";
+                                levText = "Keep validating assumptions; this is still a model estimate.";
                             }
 
                             if (subEl) subEl.innerText = subText;

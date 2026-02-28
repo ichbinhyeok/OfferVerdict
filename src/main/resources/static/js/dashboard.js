@@ -138,7 +138,7 @@ function updateLayer2_Evidence(result) {
         if (val_tax) val_tax.textContent = '-' + fmt(breakdown.taxResult.totalTax);
         if (val_local) val_local.textContent = '-' + fmt(breakdown.localTax * 12);
         if (val_rent) val_rent.textContent = '-' + fmt(breakdown.rent * 12);
-        if (val_res) val_res.textContent = fmt(breakdown.residual * 12);
+        if (val_res) val_res.textContent = fmt(breakdown.residual * 12) + '/yr';
 
         // --- DYNAMIC ROWS ---
         const rowEquity = card.querySelector('.hidden-row .line-equity')?.parentElement;

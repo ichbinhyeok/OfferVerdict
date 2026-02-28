@@ -13,7 +13,6 @@ import com.offerverdict.model.JobInfo;
 import com.offerverdict.service.ComparisonService;
 import com.offerverdict.service.DynamicContentService;
 import com.offerverdict.service.SingleCityAnalysisService;
-import com.offerverdict.service.VerdictAdviser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Controller
@@ -31,7 +31,6 @@ public class SingleCityController {
     private final ComparisonService comparisonService; // For canonical helper
     private final DynamicContentService dynamicContentService;
     private final AppProperties appProperties;
-    private final VerdictAdviser verdictAdviser;
     private final com.offerverdict.service.ContentEnrichmentService enrichmentService;
 
     public SingleCityController(DataRepository repository,
@@ -39,14 +38,12 @@ public class SingleCityController {
             ComparisonService comparisonService,
             DynamicContentService dynamicContentService,
             AppProperties appProperties,
-            VerdictAdviser verdictAdviser,
             com.offerverdict.service.ContentEnrichmentService enrichmentService) {
         this.repository = repository;
         this.analysisService = analysisService;
         this.comparisonService = comparisonService;
         this.dynamicContentService = dynamicContentService;
         this.appProperties = appProperties;
-        this.verdictAdviser = verdictAdviser;
         this.enrichmentService = enrichmentService;
     }
 
@@ -76,10 +73,7 @@ public class SingleCityController {
             int salaryInt,
             jakarta.servlet.http.HttpServletResponse response,
             Model model) {
-
-        // SEO SIGNAL: Last-Modified Header
-        response.setHeader(org.springframework.http.HttpHeaders.LAST_MODIFIED,
-                java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME.format(java.time.ZonedDateTime.now()));
+        // Response kept for future cache tuning; avoid synthetic Last-Modified headers.
 
         // 1. SEO Rounding Check (301 Redirect)
         int interval = appProperties.getSeoSalaryBucketInterval();
@@ -180,29 +174,38 @@ public class SingleCityController {
         else
             verdict = Verdict.GO;
 
-        String verdictMsg = verdictAdviser.generateVerdictMessage(verdict, 0, city.getCity());
+        String verdictMsg = dynamicContentService.generateSingleCityVerdictMessage(verdict, result);
 
-        // 5. Dynamic Content (Check for Premium AI Review First)
-        String jobSlugSafe = (jobInfo != null) ? jobInfo.getSlug() : "none";
-        com.offerverdict.service.DynamicContentService.PremiumReview premium = dynamicContentService
-                .getPremiumReview(citySlug, jobSlugSafe, salaryInt);
+        // 5. Dynamic Content: deterministic, data-driven copy.
+        String introText = dynamicContentService.generateSingleCityIntro(result);
+        String housingWarning = dynamicContentService.generateHousingWarning(result);
+        String analysisText = dynamicContentService.generateVerdictAnalysis(verdict, result);
 
-        String introText;
-        String housingWarning;
-        String analysisText;
+        // 5b. FAQ content shared by JSON-LD and visible FAQ section.
+        String residualImpact = (result.getResidual() < 0)
+                ? String.format("an estimated monthly deficit of $%,.0f", Math.abs(result.getResidual()))
+                : String.format("about $%,.0f left each month", result.getResidual());
+        String faqQ1 = String.format("Is $%,d a good salary in %s?", salaryInt, city.getCity());
+        String faqA1 = String.format("Under current assumptions, this salary results in %s after taxes and core costs in %s.",
+                residualImpact, city.getCity());
 
-        if (premium != null) {
-            introText = premium.introText;
-            housingWarning = premium.housingWarning;
-            analysisText = premium.analysisText;
-            // Removed: Overriding the mathematical verdict with static JSON text.
-            // The math (residual) correctly determines GO/NO-GO.
-            // The JSON text just provides deeper qualitative context.
+        String faqQ2 = String.format("What is the estimated take-home pay for $%,d in %s?", salaryInt, city.getCity());
+        String faqA2 = String.format("Estimated annual take-home pay is about $%,.0f before lifestyle-specific adjustments.",
+                result.getNetMonthly() * 12.0);
+
+        double housingRatio = result.getNetMonthly() > 0 ? result.getRent() / result.getNetMonthly() : 0.0;
+        String housingLoad;
+        if (housingRatio >= 0.45) {
+            housingLoad = "high";
+        } else if (housingRatio >= 0.35) {
+            housingLoad = "elevated";
         } else {
-            introText = dynamicContentService.generateSingleCityIntro(result);
-            housingWarning = dynamicContentService.generateHousingWarning(result);
-            analysisText = dynamicContentService.generateVerdictAnalysis(verdict, result);
+            housingLoad = "moderate";
         }
+        String faqQ3 = String.format("Is %s expensive for housing?", city.getCity());
+        String faqA3 = String.format(Locale.US,
+                "Average rent used in this model is about $%,.0f per month in %s (roughly %.0f%% of estimated take-home pay), indicating a %s housing burden for many single-income households.",
+                result.getRent(), city.getCity(), housingRatio * 100.0, housingLoad);
 
         // 6. Navigation Neighbors (Previous/Next Salary)
         String prevSalaryUrl = null;
@@ -253,6 +256,12 @@ public class SingleCityController {
         model.addAttribute("introText", introText);
         model.addAttribute("housingWarning", housingWarning);
         model.addAttribute("analysisText", analysisText);
+        model.addAttribute("faqQ1", faqQ1);
+        model.addAttribute("faqA1", faqA1);
+        model.addAttribute("faqQ2", faqQ2);
+        model.addAttribute("faqA2", faqA2);
+        model.addAttribute("faqQ3", faqQ3);
+        model.addAttribute("faqA3", faqA3);
 
         // SAFE PRE-CALCULATED VALUES
         model.addAttribute("grossMonthly", grossMonthly);
@@ -307,27 +316,41 @@ public class SingleCityController {
             double position = (salary / p50) * 100 - 100;
             model.addAttribute("marketPosition", position);
             model.addAttribute("marketPositionAbs", Math.abs(position));
+            if (Math.abs(position) < 0.5) {
+                model.addAttribute("marketPositionText", "in line with the local median");
+            } else if (position > 0) {
+                model.addAttribute("marketPositionText",
+                        String.format("about %.1f%% above the local median", Math.abs(position)));
+            } else {
+                model.addAttribute("marketPositionText",
+                        String.format("about %.1f%% below the local median", Math.abs(position)));
+            }
 
             // Calculate progress bar left position (0-100 range)
             double barLeft = Math.min(100.0, Math.max(0.0, 50.0 + (position / 2.0)));
             model.addAttribute("marketBarLeft", barLeft);
-            model.addAttribute("jobTitle", (jobInfo != null) ? jobInfo.getTitle() : "Professional role");
+            model.addAttribute("jobTitle", (jobInfo != null) ? jobInfo.getTitle() : "all occupations");
         } else {
-            model.addAttribute("jobTitle", "Professional role");
+            model.addAttribute("jobTitle", "all occupations");
         }
 
         // 7f. Relocation ROI (Relational Baseline)
         try {
-            // SF Baseline: $180k
-            ComparisonResult sfBaseline = comparisonService.compare("san-francisco-ca", citySlug, 180000.0,
+            double sfBaselineSalary = appProperties.getRelocationBaselineSalarySf();
+            double nycBaselineSalary = appProperties.getRelocationBaselineSalaryNyc();
+            model.addAttribute("relocationBaselineSalarySf", sfBaselineSalary);
+            model.addAttribute("relocationBaselineSalaryNyc", nycBaselineSalary);
+
+            // SF Baseline
+            ComparisonResult sfBaseline = comparisonService.compare("san-francisco-ca", citySlug, sfBaselineSalary,
                     (double) salaryInt,
                     HouseholdType.SINGLE, HousingType.RENT, false, 0.0, 0.0, 0.0, 0.0, false, true);
             double sfResidual = sfBaseline.getCurrent().getResidual();
             double targetResidual = sfBaseline.getOffer().getResidual();
             double monthlyGainVsSF = targetResidual - sfResidual;
 
-            // NYC Baseline: $170k
-            ComparisonResult nycBaseline = comparisonService.compare("new-york-ny", citySlug, 170000.0,
+            // NYC Baseline
+            ComparisonResult nycBaseline = comparisonService.compare("new-york-ny", citySlug, nycBaselineSalary,
                     (double) salaryInt,
                     HouseholdType.SINGLE, HousingType.RENT, false, 0.0, 0.0, 0.0, 0.0, false, true);
             double nycResidual = nycBaseline.getCurrent().getResidual();
@@ -372,6 +395,18 @@ public class SingleCityController {
         // Legal Shield
         model.addAttribute("contextualDisclaimer",
                 "*Figures are estimates based on public data. Actual costs vary by neighborhood and lifestyle.");
+        String dataSourceSummary = "IRS tax tables, BLS wage benchmarks, and Numbeo cost-of-living inputs";
+        String dataLastUpdated = "See /methodology for source update dates";
+        if (metrics != null && metrics.getMetadata() != null) {
+            if (metrics.getMetadata().source != null && !metrics.getMetadata().source.isBlank()) {
+                dataSourceSummary = metrics.getMetadata().source;
+            }
+            if (metrics.getMetadata().lastUpdated != null && !metrics.getMetadata().lastUpdated.isBlank()) {
+                dataLastUpdated = metrics.getMetadata().lastUpdated;
+            }
+        }
+        model.addAttribute("dataSourceSummary", dataSourceSummary);
+        model.addAttribute("dataLastUpdated", dataLastUpdated);
 
         // --- SMART CROSS-LINKING (SEO Siloing) ---
         // 1. Salary Neighbors (+/- 10k, 20k)

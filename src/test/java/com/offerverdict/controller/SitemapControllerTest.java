@@ -47,7 +47,8 @@ class SitemapControllerTest {
 
         // 75,000 would 301 to 80,000 in SingleCityController; sitemap must never emit it.
         assertFalse(xml.contains("/75000</loc>"));
-        assertTrue(xml.contains("/salary-check/teacher/austin-tx/80000</loc>"));
+        assertTrue(xml.contains("/salary-check/software-engineer/austin-tx/80000</loc>"));
+        assertFalse(xml.contains("/salary-check/teacher/austin-tx/80000</loc>"));
 
         Pattern pattern = Pattern.compile("/salary-check/[^/]+/[^/]+/(\\d+)</loc>");
         Matcher matcher = pattern.matcher(xml);

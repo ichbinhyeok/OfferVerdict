@@ -32,6 +32,7 @@ public class HubController {
         model.addAttribute("jobs", jobs);
         model.addAttribute("title", "OfferVerdict Directory: Cities & Jobs");
         model.addAttribute("metaDescription", "Browse cost of living analyses by city or job title.");
+        model.addAttribute("shouldIndex", false);
         return "cities";
     }
 
@@ -52,6 +53,7 @@ public class HubController {
         model.addAttribute("title", job.getTitle() + " Salary & Cost of Living by City");
         model.addAttribute("metaDescription",
                 "Compare " + job.getTitle() + " salaries and cost of living across major US cities.");
+        model.addAttribute("shouldIndex", false);
 
         return "job-directory";
     }
