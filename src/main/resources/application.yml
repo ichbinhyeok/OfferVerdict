@@ -20,6 +20,7 @@ app:
   relocationBaselineSalaryNyc: ${APP_RELOCATION_BASELINE_SALARY_NYC:170000}
   carAffordabilityTarget: ${APP_CAR_AFFORDABILITY_TARGET:50000}
   commuteCostPerMinute: ${APP_COMMUTE_COST_PER_MINUTE:5}
+  enforceCanonicalHostRedirect: ${APP_ENFORCE_CANONICAL_HOST_REDIRECT:true}
   leads:
     storageDir: ${APP_LEADS_STORAGE_DIR:./data/leads}
     backupDir: ${APP_LEADS_BACKUP_DIR:./data/leads-backup}

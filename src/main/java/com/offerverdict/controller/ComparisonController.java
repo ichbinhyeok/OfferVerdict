@@ -10,6 +10,7 @@ import com.offerverdict.model.HouseholdType;
 import com.offerverdict.model.HousingType;
 import com.offerverdict.model.JobInfo;
 import com.offerverdict.service.ComparisonService;
+import com.offerverdict.seo.SeoUrlPolicy;
 
 import com.offerverdict.util.SlugNormalizer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -202,12 +203,16 @@ public class ComparisonController {
             Model model) {
         ZonedDateTime dataLastModified = resolveDataLastModifiedUtc();
         String dataModifiedDate = dataLastModified.toLocalDate().toString();
+        String analysisDateUtc = LocalDate.now(ZoneOffset.UTC).toString();
         response.setHeader(HttpHeaders.LAST_MODIFIED,
                 DateTimeFormatter.RFC_1123_DATE_TIME.format(dataLastModified));
 
         String normalizedJob = SlugNormalizer.normalize(job);
         String normalizedCityA = SlugNormalizer.normalize(cityA);
         String normalizedCityB = SlugNormalizer.normalize(cityB);
+        boolean hasExplicitCurrentSalary = currentSalary != null;
+        boolean hasExplicitOfferSalary = offerSalary != null;
+        boolean hasExplicitSalaryParams = hasExplicitCurrentSalary || hasExplicitOfferSalary;
 
         JobInfo jobInfo = repository.findJobLoosely(normalizedJob)
                 .orElseGet(() -> {
@@ -287,6 +292,23 @@ public class ComparisonController {
 
         double effectiveCurrentSalary = currentSalary * currentMultiplier;
         double effectiveOfferSalary = offerSalary * offerMultiplier;
+        double seoMinSalary = appProperties.getSeoSalaryBucketMin();
+        double seoMaxSalary = appProperties.getSeoSalaryBucketMax();
+
+        boolean currentOutOfSeoRange = !SeoUrlPolicy.isWithinRange(effectiveCurrentSalary, seoMinSalary, seoMaxSalary);
+        boolean offerOutOfSeoRange = !SeoUrlPolicy.isWithinRange(effectiveOfferSalary, seoMinSalary, seoMaxSalary);
+        if (hasExplicitSalaryParams && (currentOutOfSeoRange || offerOutOfSeoRange)) {
+            double boundedCurrentSalary = Math.round(SeoUrlPolicy.clampSalary(effectiveCurrentSalary, seoMinSalary, seoMaxSalary));
+            double boundedOfferSalary = Math.round(SeoUrlPolicy.clampSalary(effectiveOfferSalary, seoMinSalary, seoMaxSalary));
+
+            RedirectView redirectView = new RedirectView(canonicalPath, true);
+            addRedirectParams(redirectAttributes, boundedCurrentSalary, boundedOfferSalary, "annual",
+                    fourOhOneKRate, monthlyInsurance, equityAnnual, isMarried, signingBonus, equityMultiplier,
+                    commuteTime, sideHustle, otherLeaks, isRemote, isHomeOwner, hasStudentLoan,
+                    isTaxOptimized, isCarOwner);
+            redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
+            return redirectView;
+        }
 
         // SEO Enhancement: Canonicalize salaries to $5K buckets ONLY for the URL
         // generation
@@ -341,7 +363,8 @@ public class ComparisonController {
         // SEO Meta - DECISION GAP FRAMEWORK (Phase 2: Comparison Pages)
         // Principle: "Should You Actually Accept?" - defer judgment to site
         String title = generateComparisonTitle(jobInfo, cityEntryA, cityEntryB);
-        String metaDescription = generateComparisonDescription(result, jobInfo, cityEntryA, cityEntryB);
+        String metaDescription = generateComparisonDescription(jobInfo, cityEntryA, cityEntryB,
+                analysisDateUtc);
 
         String canonicalUrl = comparisonService.buildCanonicalUrl(canonicalPath);
         String ogImageUrl = comparisonService.buildCanonicalUrl("/share/" + jobInfo.getSlug() + "-salary-"
@@ -349,6 +372,8 @@ public class ComparisonController {
 
         model.addAttribute("title", title);
         model.addAttribute("metaDescription", metaDescription);
+        model.addAttribute("analysisDateUtc", analysisDateUtc);
+        model.addAttribute("dataModifiedDate", dataModifiedDate);
         model.addAttribute("canonicalUrl", canonicalUrl);
         model.addAttribute("ogTitle", title);
         model.addAttribute("ogDescription", metaDescription);
@@ -405,7 +430,8 @@ public class ComparisonController {
                 comparisonService.getTaxBreakdown(safeOfferSalary, cityEntryB.getState()));
 
         // SEO Enhancement: Determine if this page should be indexed
-        boolean shouldIndex = shouldIndexThisPage(jobInfo, cityEntryA, cityEntryB, safeCurrentSalary, safeOfferSalary);
+        boolean shouldIndex = shouldIndexThisPage(jobInfo, safeCurrentSalary, safeOfferSalary,
+                hasExplicitSalaryParams);
         model.addAttribute("shouldIndex", shouldIndex);
 
         // SEO Enhancement: Add contextual content
@@ -556,10 +582,13 @@ public class ComparisonController {
      * SEO Enhancement: Determine if this page combination should be indexed.
      * Prevents indexing of low-value combinations to avoid thin content penalties.
      */
-    private boolean shouldIndexThisPage(JobInfo job, CityCostEntry cityA, CityCostEntry cityB,
-            double currentSalary, double offerSalary) {
+    private boolean shouldIndexThisPage(JobInfo job, double currentSalary, double offerSalary,
+            boolean hasExplicitSalaryParams) {
         // PERMANENTLY NOINDEX Custom / User-Generated Jobs to prevent spam
         if ("Custom".equalsIgnoreCase(job.getCategory())) {
+            return false;
+        }
+        if (hasExplicitSalaryParams) {
             return false;
         }
 
@@ -908,12 +937,9 @@ public class ComparisonController {
      */
     private String generateComparisonTitle(JobInfo job, CityCostEntry cityA, CityCostEntry cityB) {
         String currentYear = java.time.Year.now().toString();
-
-        // "Before You Leave" - urgency + loss framing (what you're giving up)
-        // "Actually Worth It" - value judgment deferral
         return String.format(
-                "Before You Leave %s for %s: Is the %s Offer Actually Worth It? (%s)",
-                cityA.getCity(), cityB.getCity(), job.getTitle(), currentYear);
+                "%s Salary: %s vs %s Take-Home Pay & Cost of Living (%s)",
+                job.getTitle(), cityA.getCity(), cityB.getCity(), currentYear);
     }
 
     /**
@@ -921,35 +947,21 @@ public class ComparisonController {
      * Principle: Show risks/tradeoffs without revealing final verdict
      * Format: "What do you trade off?" not "What is the answer?"
      */
-    private String generateComparisonDescription(ComparisonResult result, JobInfo job,
-            CityCostEntry cityA, CityCostEntry cityB) {
-        // Calculate key tradeoff indicators
-        double taxA = result.getCurrent().getTaxResult() != null ? result.getCurrent().getTaxResult().getTotalTax()
-                : 0.0;
-        double taxB = result.getOffer().getTaxResult() != null ? result.getOffer().getTaxResult().getTotalTax() : 0.0;
-        double taxDiff = taxB > 0 ? (taxB - taxA) / taxB : 0.0;
+    private String generateComparisonDescription(JobInfo job,
+            CityCostEntry cityA, CityCostEntry cityB, String analysisDateUtc) {
+        String description = String.format(
+                "Compare after-tax pay, rent burden, and monthly leftover for %s in %s vs %s. Analysis date: %s UTC.",
+                job.getTitle(), cityA.getCity(), cityB.getCity(), analysisDateUtc);
+        return clampMetaDescription(description, 155);
+    }
 
-        double costOfLivingDiff = cityB.getColIndex() - cityA.getColIndex();
-
-        // Generate tradeoff-focused descriptions based on risk profile
-        // No specific numbers, focus on comparison dynamics
-
-        if (taxDiff > 0.15 && costOfLivingDiff > 15) { // High tax + high COL
-            return String.format(
-                    "Moving from %s to %s for that %s offer? Don't ignore the double tax: higher state income tax + %.0f%% costlier living. We calculated if the raise is real.",
-                    cityA.getCity(), cityB.getCity(), job.getTitle(), costOfLivingDiff);
-        } else if (taxDiff < -0.03 && costOfLivingDiff > 20) { // Lower tax but expensive
-            return String.format(
-                    "Is %s's tax advantage worth %s's %.0f%% cost premium? We break down the hidden housing trap and what your wallet actually feels.",
-                    cityB.getState(), cityB.getCity(), Math.abs(costOfLivingDiff));
-        } else if (costOfLivingDiff < -10) { // Cheaper destination
-            return String.format(
-                    "Is %s's lower cost worth leaving %s? Calculate the real tradeoffs: career trajectory, lifestyle, network. Cheap doesn't always mean better.",
-                    cityB.getCity(), cityA.getCity());
-        } else { // Moderate difference
-            return String.format(
-                    "%s vs %s for %s: Which offer is ACTUALLY better? We deduct taxes, rent inflation, and lifestyle costs to show real purchasing power.",
-                    cityA.getCity(), cityB.getCity(), job.getTitle());
+    private String clampMetaDescription(String text, int maxLength) {
+        if (text == null || text.isBlank()) {
+            return "";
         }
+        if (text.length() <= maxLength) {
+            return text;
+        }
+        return text.substring(0, maxLength - 3).trim() + "...";
     }
 }

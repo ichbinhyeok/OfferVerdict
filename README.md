@@ -1,9 +1,15 @@
-# OfferVerdict – Verdict-first relocation math
+# OfferVerdict ??Verdict-first relocation math
 
 ## Live Demo
 This repository powers the OfferVerdict relocation and cost-of-living comparison tool. Live deployment: https://livingcostcheck.com
 
 The service evaluates whether a job offer in a new city is financially sustainable based on salary, housing, and baseline living expenses.
+
+## Session continuity
+- Latest handoff snapshot: `docs/SESSION_HANDOFF_2026-03-05.md`
+- Use this file first when resuming work in a new session.
+- Ongoing tracking log (date / analysis / improvement): `docs/TRACKING_LOG.md`
+- SEO pivot execution guide: `docs/SEO_PIVOT_EXECUTION_2026-03.md`
 
 
 ## How to run locally
@@ -45,18 +51,25 @@ The service evaluates whether a job offer in a new city is financially sustainab
 4. **Residual:** `netMonthly - (rent + livingCost)`.  
 5. **Delta %:** `(residualB - residualA) / abs(residualA) * 100`.  
 6. **Verdict bands:**  
-   - `>= +10%` → **GO**  
-   - `0 ~ +10%` → **CONDITIONAL**  
-   - `-0 ~ -10%` → **WARNING**  
-   - `<= -10%` → **NO_GO**
+   - `>= +10%` ??**GO**  
+   - `0 ~ +10%` ??**CONDITIONAL**  
+   - `-0 ~ -10%` ??**WARNING**  
+   - `<= -10%` ??**NO_GO**
 
 ## SEO & pSEO strategy
 - **Route shape:** `/{job}-salary-{cityA}-vs-{cityB}` with canonical slugs and 301s for non-canonical.  
-- **Programmatic SEO:** sitemap index + chunked sitemaps generate all job/city permutations with deterministic canonical URLs.  
+- **Programmatic SEO:** seed-first sitemap generation (high-intent city/job/salary slices), not full permutation expansion.  
 - **Metadata:** dynamic `<title>`, `<meta description>` (<=155 chars), OpenGraph, and JSON-LD (WebPage + FAQ).  
-- **Engagement levers:** aggressive verdict banner, punchy copy, collapsible details, internal linking to related job/city comparisons, AdSense slots, and affiliate CTA variants per verdict.  
+- **Index hygiene:** canonical host redirect, salary-boundary redirects, and noindex for parameterized comparison URLs.  
+- **Engagement levers:** verdict-focused copy, collapsible details, and internal links to related decision pages.  
 - **Robots & humans:** `/robots.txt` references sitemap, `/humans.txt` highlights the editorial nature.  
 - **Deterministic rendering:** JSON is cached in-memory at startup; reload is opt-in for dev.
 
+## SEO operations (MCP)
+- Generate US KPI dashboard JSON (28d):
+  - `node scripts/gsc_us_kpi_dashboard.js --siteUrl=sc-domain:livingcostcheck.com --country=usa --days=28 > docs/data/gsc_us_kpi_latest.json`
+- Generate cleanup candidate JSON:
+  - `node scripts/gsc_url_cleanup_candidates.js --siteUrl=sc-domain:livingcostcheck.com --days=28 --minSalary=30000 --maxSalary=500000 > docs/data/gsc_url_cleanup_latest.json`
+
 ## Disclaimer
-“Not financial or tax advice.”
+Not financial or tax advice.

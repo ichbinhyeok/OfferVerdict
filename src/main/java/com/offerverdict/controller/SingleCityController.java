@@ -12,6 +12,7 @@ import com.offerverdict.model.Verdict;
 import com.offerverdict.model.JobInfo;
 import com.offerverdict.service.ComparisonService;
 import com.offerverdict.service.DynamicContentService;
+import com.offerverdict.seo.SeoUrlPolicy;
 import com.offerverdict.service.SingleCityAnalysisService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -74,15 +77,28 @@ public class SingleCityController {
             jakarta.servlet.http.HttpServletResponse response,
             Model model) {
         // Response kept for future cache tuning; avoid synthetic Last-Modified headers.
+        String analysisDateUtc = LocalDate.now(ZoneOffset.UTC).toString();
 
-        // 1. SEO Rounding Check (301 Redirect)
+        // 1. SEO salary boundary and rounding checks (301 Redirect)
         int interval = appProperties.getSeoSalaryBucketInterval();
+        int minSalary = appProperties.getSeoSalaryBucketMin();
+        int maxSalary = appProperties.getSeoSalaryBucketMax();
+
+        if (salaryInt < minSalary || salaryInt > maxSalary) {
+            int boundedSalary = SeoUrlPolicy.clampAndAlignSalary(salaryInt, minSalary, maxSalary, interval);
+            String redirectUrl = (jobSlug != null)
+                    ? "/salary-check/" + jobSlug + "/" + citySlug + "/" + boundedSalary
+                    : "/salary-check/" + citySlug + "/" + boundedSalary;
+
+            RedirectView redirectView = new RedirectView(redirectUrl);
+            redirectView.setStatusCode(org.springframework.http.HttpStatus.MOVED_PERMANENTLY);
+            return redirectView;
+        }
+
         boolean isAligned = (salaryInt % interval == 0);
 
         if (!isAligned) {
-            int roundedSalary = (int) (Math.round((double) salaryInt / interval) * interval);
-            if (roundedSalary == 0)
-                roundedSalary = interval; // Avoid 0
+            int roundedSalary = SeoUrlPolicy.alignToInterval(salaryInt, interval);
 
             // Preserve jobSlug in redirect if present
             String redirectUrl;
@@ -215,9 +231,6 @@ public class SingleCityController {
         if (jobSlug != null) {
             urlPrefix += jobSlug + "/";
         }
-
-        int minSalary = appProperties.getSeoSalaryBucketMin();
-        int maxSalary = appProperties.getSeoSalaryBucketMax();
 
         if (salaryInt - interval >= minSalary) {
             prevSalaryUrl = urlPrefix + citySlug + "/" + (salaryInt - interval);
@@ -407,6 +420,7 @@ public class SingleCityController {
         }
         model.addAttribute("dataSourceSummary", dataSourceSummary);
         model.addAttribute("dataLastUpdated", dataLastUpdated);
+        model.addAttribute("analysisDateUtc", analysisDateUtc);
 
         // --- SMART CROSS-LINKING (SEO Siloing) ---
         // 1. Salary Neighbors (+/- 10k, 20k)
@@ -471,7 +485,8 @@ public class SingleCityController {
         // SEO Meta
         model.addAttribute("title",
                 generateRiskBasedTitle(city, salaryInt, jobInfo));
-        model.addAttribute("metaDescription", generateRiskBasedDescription(city, result, salaryInt, jobInfo));
+        model.addAttribute("metaDescription",
+                generateRiskBasedDescription(city, result, salaryInt, jobInfo, analysisDateUtc));
 
         // SEO Structured Data (Breadcrumb)
         String canonicalPath = (jobSlug != null)
@@ -515,25 +530,44 @@ public class SingleCityController {
 
     private String generateRiskBasedTitle(CityCostEntry city, int salaryInt, JobInfo jobInfo) {
         String currentYear = java.time.Year.now().toString();
-        String jobTitle = (jobInfo != null) ? jobInfo.getTitle() : "Salary";
         String formattedSalary = String.format("%,d", salaryInt);
-
-        // SEO CTR Optimized Title: "Is $100K Good in Austin? Software Engineer
-        // Take-Home [2026]"
+        if (jobInfo != null) {
+            return String.format(
+                    "$%s %s Salary in %s: Take-Home Pay & Cost of Living (%s)",
+                    formattedSalary, jobInfo.getTitle(), city.getCity(), currentYear);
+        }
         return String.format(
-                "Is $%s Good in %s? %s Take-Home Pay [%s]",
-                formattedSalary, city.getCity(), jobTitle, currentYear);
+                "$%s Salary in %s: Take-Home Pay & Cost of Living (%s)",
+                formattedSalary, city.getCity(), currentYear);
     }
 
     private String generateRiskBasedDescription(CityCostEntry city, ComparisonBreakdown result, int salaryInt,
-            JobInfo jobInfo) {
+            JobInfo jobInfo, String analysisDateUtc) {
         String formattedSalary = String.format("%,d", salaryInt);
         String formattedResidual = String.format("%,d", Math.round(result.getResidual()));
+        String formattedResidualAbs = String.format("%,d", Math.round(Math.abs(result.getResidual())));
+        String rolePrefix = (jobInfo != null) ? jobInfo.getTitle() + " " : "";
+        String description;
+        if (result.getResidual() >= 0) {
+            description = String.format(
+                    "%s$%s salary in %s leaves about $%s/mo after tax, rent, and living costs. Analysis date: %s UTC.",
+                    rolePrefix, formattedSalary, city.getCity(), formattedResidual, analysisDateUtc);
+        } else {
+            description = String.format(
+                    "%s$%s salary in %s shows about a $%s/mo gap after tax, rent, and living costs. Analysis date: %s UTC.",
+                    rolePrefix, formattedSalary, city.getCity(), formattedResidualAbs, analysisDateUtc);
+        }
+        return clampMetaDescription(description, 155);
+    }
 
-        // SEO CTR Optimized Meta: "$100,000 in Austin = $2,500/mo savings. After taxes
-        // ($14k), rent ($2k). See breakdown →"
-        return String.format(
-                "$%s in %s = $%s/mo savings. After taxes, rent, and living costs. See the full breakdown \u2192",
-                formattedSalary, city.getCity(), formattedResidual);
+    private String clampMetaDescription(String text, int maxLength) {
+        if (text == null || text.isBlank()) {
+            return "";
+        }
+        if (text.length() <= maxLength) {
+            return text;
+        }
+        return text.substring(0, maxLength - 3).trim() + "...";
     }
 }
+
