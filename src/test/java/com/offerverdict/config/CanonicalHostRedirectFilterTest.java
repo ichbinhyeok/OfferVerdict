@@ -56,6 +56,28 @@ class CanonicalHostRedirectFilterTest {
     }
 
     @Test
+    void passesThroughWhenProxyHeadersMatchCanonicalWithoutForwardedPort() throws ServletException, IOException {
+        AppProperties props = new AppProperties();
+        props.setPublicBaseUrl("https://livingcostcheck.com");
+        props.setEnforceCanonicalHostRedirect(true);
+        CanonicalHostRedirectFilter filter = new CanonicalHostRedirectFilter(props);
+
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+        request.setServerName("127.0.0.1");
+        request.setServerPort(8080);
+        request.setScheme("http");
+        request.addHeader("X-Forwarded-Host", "livingcostcheck.com");
+        request.addHeader("X-Forwarded-Proto", "https");
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain chain = new MockFilterChain();
+        filter.doFilter(request, response, chain);
+
+        assertEquals(200, response.getStatus());
+        assertNull(response.getHeader("Location"));
+    }
+
+    @Test
     void skipsLocalhostToAvoidDevRedirects() throws ServletException, IOException {
         AppProperties props = new AppProperties();
         props.setPublicBaseUrl("https://livingcostcheck.com");

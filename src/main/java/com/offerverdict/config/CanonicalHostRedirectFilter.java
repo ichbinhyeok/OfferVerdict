@@ -100,7 +100,10 @@ public class CanonicalHostRedirectFilter extends OncePerRequestFilter {
 
     private String resolveRequestHost(HttpServletRequest request) {
         String forwardedHost = firstHeaderToken(request.getHeader("X-Forwarded-Host"));
-        String candidate = forwardedHost != null ? forwardedHost : request.getServerName();
+        String hostHeader = firstHeaderToken(request.getHeader("Host"));
+        String candidate = forwardedHost != null
+                ? forwardedHost
+                : (hostHeader != null ? hostHeader : request.getServerName());
         if (candidate == null || candidate.isBlank()) {
             return null;
         }
@@ -129,30 +132,53 @@ public class CanonicalHostRedirectFilter extends OncePerRequestFilter {
         }
 
         String forwardedHost = firstHeaderToken(request.getHeader("X-Forwarded-Host"));
-        if (forwardedHost != null) {
-            String host = forwardedHost.trim();
-            if (host.startsWith("[") && host.contains("]")) {
-                int end = host.indexOf(']');
-                if (host.length() > end + 2 && host.charAt(end + 1) == ':') {
-                    try {
-                        return Integer.parseInt(host.substring(end + 2));
-                    } catch (NumberFormatException ignored) {
-                        // Fallback below.
-                    }
-                }
-            } else {
-                int colonIndex = host.lastIndexOf(':');
-                if (colonIndex > 0 && host.indexOf(':') == colonIndex) {
-                    try {
-                        return Integer.parseInt(host.substring(colonIndex + 1));
-                    } catch (NumberFormatException ignored) {
-                        // Fallback below.
-                    }
-                }
-            }
+        Integer explicitForwardedPort = extractExplicitPort(forwardedHost);
+        if (explicitForwardedPort != null) {
+            return explicitForwardedPort;
+        }
+        if (forwardedHost != null && !forwardedHost.isBlank()) {
+            return normalizePort(-1, requestScheme);
+        }
+
+        String hostHeader = firstHeaderToken(request.getHeader("Host"));
+        Integer explicitHostPort = extractExplicitPort(hostHeader);
+        if (explicitHostPort != null) {
+            return explicitHostPort;
+        }
+        if (hostHeader != null && !hostHeader.isBlank()) {
+            return normalizePort(-1, requestScheme);
         }
 
         return normalizePort(request.getServerPort(), requestScheme);
+    }
+
+    private Integer extractExplicitPort(String hostHeader) {
+        if (hostHeader == null || hostHeader.isBlank()) {
+            return null;
+        }
+
+        String host = hostHeader.trim();
+        if (host.startsWith("[") && host.contains("]")) {
+            int end = host.indexOf(']');
+            if (host.length() > end + 2 && host.charAt(end + 1) == ':') {
+                try {
+                    return Integer.parseInt(host.substring(end + 2));
+                } catch (NumberFormatException ignored) {
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        int colonIndex = host.lastIndexOf(':');
+        if (colonIndex > 0 && host.indexOf(':') == colonIndex) {
+            try {
+                return Integer.parseInt(host.substring(colonIndex + 1));
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
+        }
+        return null;
     }
 
     private int normalizePort(int port, String scheme) {
