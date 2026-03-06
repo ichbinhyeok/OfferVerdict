@@ -62,6 +62,11 @@ public class CanonicalHostRedirectFilter extends OncePerRequestFilter {
         boolean sameHost = canonicalHost.equalsIgnoreCase(requestHost);
         boolean samePort = canonicalPort == normalizedRequestPort;
 
+        if (sameHost && !appProperties.isEnforceCanonicalSchemeRedirect()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // Some reverse proxies preserve Host but do not forward the external scheme/port.
         // In that case redirecting to the same canonical URL causes an infinite loop.
         if (sameHost && (!sameScheme || !samePort) && !hasExplicitSchemeSignal(request) && !hasExplicitPortSignal(request)) {

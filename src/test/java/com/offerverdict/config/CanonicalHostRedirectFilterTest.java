@@ -102,6 +102,7 @@ class CanonicalHostRedirectFilterTest {
         AppProperties props = new AppProperties();
         props.setPublicBaseUrl("https://livingcostcheck.com");
         props.setEnforceCanonicalHostRedirect(true);
+        props.setEnforceCanonicalSchemeRedirect(true);
         CanonicalHostRedirectFilter filter = new CanonicalHostRedirectFilter(props);
 
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/robots.txt");
@@ -116,6 +117,28 @@ class CanonicalHostRedirectFilterTest {
 
         assertEquals(301, response.getStatus());
         assertEquals("https://livingcostcheck.com/robots.txt", response.getHeader("Location"));
+    }
+
+    @Test
+    void skipsSchemeOnlyRedirectWhenSchemeEnforcementDisabled() throws ServletException, IOException {
+        AppProperties props = new AppProperties();
+        props.setPublicBaseUrl("https://livingcostcheck.com");
+        props.setEnforceCanonicalHostRedirect(true);
+        props.setEnforceCanonicalSchemeRedirect(false);
+        CanonicalHostRedirectFilter filter = new CanonicalHostRedirectFilter(props);
+
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+        request.setServerName("livingcostcheck.com");
+        request.setServerPort(8080);
+        request.setScheme("http");
+        request.addHeader("X-Forwarded-Proto", "http");
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain chain = new MockFilterChain();
+        filter.doFilter(request, response, chain);
+
+        assertEquals(200, response.getStatus());
+        assertNull(response.getHeader("Location"));
     }
 
     @Test

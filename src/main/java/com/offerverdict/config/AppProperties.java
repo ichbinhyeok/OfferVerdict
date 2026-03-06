@@ -23,6 +23,7 @@ public class AppProperties {
     private double carAffordabilityTarget = 50000;
     private double commuteCostPerMinute = 5;
     private boolean enforceCanonicalHostRedirect = true;
+    private boolean enforceCanonicalSchemeRedirect = false;
 
     public String getPublicBaseUrl() {
         return publicBaseUrl;
@@ -126,5 +127,13 @@ public class AppProperties {
 
     public void setEnforceCanonicalHostRedirect(boolean enforceCanonicalHostRedirect) {
         this.enforceCanonicalHostRedirect = enforceCanonicalHostRedirect;
+    }
+
+    public boolean isEnforceCanonicalSchemeRedirect() {
+        return enforceCanonicalSchemeRedirect;
+    }
+
+    public void setEnforceCanonicalSchemeRedirect(boolean enforceCanonicalSchemeRedirect) {
+        this.enforceCanonicalSchemeRedirect = enforceCanonicalSchemeRedirect;
     }
 }
