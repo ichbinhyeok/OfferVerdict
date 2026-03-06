@@ -48,7 +48,7 @@ public class CanonicalHostRedirectFilter extends OncePerRequestFilter {
         String requestHost = resolveRequestHost(request);
         int requestPort = resolveRequestPort(request, requestScheme);
 
-        if (requestHost == null || isLocalHost(requestHost)) {
+        if (requestHost == null || isInternalHost(requestHost)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -290,8 +290,34 @@ public class CanonicalHostRedirectFilter extends OncePerRequestFilter {
         return value != null && !value.isBlank();
     }
 
-    private boolean isLocalHost(String host) {
+    private boolean isInternalHost(String host) {
         String normalized = host.trim().toLowerCase(Locale.US);
-        return LOCAL_HOSTS.contains(normalized);
+        if (LOCAL_HOSTS.contains(normalized) || normalized.endsWith(".local") || !normalized.contains(".")) {
+            return true;
+        }
+
+        String unwrapped = normalized;
+        if (unwrapped.startsWith("[") && unwrapped.endsWith("]")) {
+            unwrapped = unwrapped.substring(1, unwrapped.length() - 1);
+        }
+
+        return unwrapped.startsWith("10.")
+                || unwrapped.startsWith("192.168.")
+                || unwrapped.startsWith("172.16.")
+                || unwrapped.startsWith("172.17.")
+                || unwrapped.startsWith("172.18.")
+                || unwrapped.startsWith("172.19.")
+                || unwrapped.startsWith("172.20.")
+                || unwrapped.startsWith("172.21.")
+                || unwrapped.startsWith("172.22.")
+                || unwrapped.startsWith("172.23.")
+                || unwrapped.startsWith("172.24.")
+                || unwrapped.startsWith("172.25.")
+                || unwrapped.startsWith("172.26.")
+                || unwrapped.startsWith("172.27.")
+                || unwrapped.startsWith("172.28.")
+                || unwrapped.startsWith("172.29.")
+                || unwrapped.startsWith("172.30.")
+                || unwrapped.startsWith("172.31.");
     }
 }
