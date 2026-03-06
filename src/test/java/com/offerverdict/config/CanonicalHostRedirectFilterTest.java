@@ -78,6 +78,47 @@ class CanonicalHostRedirectFilterTest {
     }
 
     @Test
+    void passesThroughWhenCanonicalHostHasNoExternalSchemeSignal() throws ServletException, IOException {
+        AppProperties props = new AppProperties();
+        props.setPublicBaseUrl("https://livingcostcheck.com");
+        props.setEnforceCanonicalHostRedirect(true);
+        CanonicalHostRedirectFilter filter = new CanonicalHostRedirectFilter(props);
+
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/robots.txt");
+        request.setServerName("livingcostcheck.com");
+        request.setServerPort(8080);
+        request.setScheme("http");
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain chain = new MockFilterChain();
+        filter.doFilter(request, response, chain);
+
+        assertEquals(200, response.getStatus());
+        assertNull(response.getHeader("Location"));
+    }
+
+    @Test
+    void redirectsWhenForwardedHeaderExplicitlySaysHttp() throws ServletException, IOException {
+        AppProperties props = new AppProperties();
+        props.setPublicBaseUrl("https://livingcostcheck.com");
+        props.setEnforceCanonicalHostRedirect(true);
+        CanonicalHostRedirectFilter filter = new CanonicalHostRedirectFilter(props);
+
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/robots.txt");
+        request.setServerName("livingcostcheck.com");
+        request.setServerPort(8080);
+        request.setScheme("http");
+        request.addHeader("Forwarded", "proto=http;host=livingcostcheck.com");
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain chain = new MockFilterChain();
+        filter.doFilter(request, response, chain);
+
+        assertEquals(301, response.getStatus());
+        assertEquals("https://livingcostcheck.com/robots.txt", response.getHeader("Location"));
+    }
+
+    @Test
     void skipsLocalhostToAvoidDevRedirects() throws ServletException, IOException {
         AppProperties props = new AppProperties();
         props.setPublicBaseUrl("https://livingcostcheck.com");
