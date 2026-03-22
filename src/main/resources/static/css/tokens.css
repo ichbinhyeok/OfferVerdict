@@ -1,72 +1,103 @@
-/* 
-   OfferVerdict: Premium Design System (Design Tokens)
-   Aesthetic: Minimalist, Lucid, Apple-inspired.
+/*
+   OfferVerdict design tokens
+   Direction: editorial finance tool, warm neutrals + deep slate + restrained amber.
 */
 
 :root {
-    /* --- Core Colors (HSL for consistency) --- */
-    --h-brand: 220;
-    --s-brand: 100%;
-    --l-brand: 50%;
-
     --white: #ffffff;
-    --black: #000000;
+    --black: #09111f;
 
-    /* Grays (SF Pro-like Scale) */
-    --gray-50: hsl(210, 20%, 98%);
-    --gray-100: hsl(210, 20%, 96%);
-    --gray-200: hsl(210, 16%, 93%);
-    --gray-300: hsl(210, 14%, 89%);
-    --gray-400: hsl(210, 10%, 70%);
-    --gray-500: hsl(210, 8%, 56%);
-    --gray-600: hsl(210, 8%, 45%);
-    --gray-700: hsl(210, 10%, 23%);
-    --gray-800: hsl(210, 12%, 16%);
-    --gray-900: hsl(210, 15%, 9%);
+    --sand-50: #fcfaf5;
+    --sand-100: #f6f1e7;
+    --sand-200: #ebe1d0;
 
-    /* Semantic */
-    --success: hsl(150, 100%, 27%);
-    --danger: hsl(0, 84%, 60%);
-    --warning: hsl(38, 92%, 50%);
-    --brand: hsl(var(--h-brand), 90%, 55%);
+    --slate-50: #f3f6fb;
+    --slate-100: #e7edf6;
+    --slate-200: #d4ddeb;
+    --slate-300: #b3c0d5;
+    --slate-400: #7c8aa3;
+    --slate-500: #56647d;
+    --slate-600: #38465f;
+    --slate-700: #273246;
+    --slate-800: #182233;
+    --slate-900: #0d1523;
 
-    /* Premium Verdict Colors */
-    --premium-gold: hsl(45, 95%, 45%);
-    --harsh-red: hsl(0, 85%, 55%);
-    --neutral-blue: hsl(210, 25%, 50%);
+    --amber-300: #f0bf67;
+    --amber-400: #e6a53a;
+    --amber-500: #cf8120;
 
-    /* Backgrounds */
-    --bg-page: var(--gray-50);
-    --bg-card: var(--white);
-    --bg-glass: rgba(255, 255, 255, 0.7);
+    --teal-400: #299a8c;
+    --teal-500: #1d7f72;
+    --rose-500: #d85a56;
 
-    /* Typography */
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-    --font-mono: 'JetBrains Mono', "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --gray-50: var(--slate-50);
+    --gray-100: var(--slate-100);
+    --gray-200: var(--slate-200);
+    --gray-300: var(--slate-300);
+    --gray-400: var(--slate-400);
+    --gray-500: var(--slate-500);
+    --gray-600: var(--slate-600);
+    --gray-700: var(--slate-700);
+    --gray-800: var(--slate-800);
+    --gray-900: var(--slate-900);
 
-    /* Spacing */
+    --brand: var(--amber-400);
+    --brand-primary: var(--slate-900);
+    --brand-secondary: var(--amber-400);
+
+    --success: var(--teal-500);
+    --danger: var(--rose-500);
+    --warning: var(--amber-500);
+
+    --premium-gold: var(--amber-400);
+    --harsh-red: var(--rose-500);
+    --neutral-blue: var(--slate-500);
+
+    --bg-page: linear-gradient(180deg, #fbfaf6 0%, #f2f5fa 100%);
+    --bg-card: rgba(255, 255, 255, 0.88);
+    --bg-glass: rgba(250, 248, 242, 0.72);
+
+    --surface-1: rgba(255, 255, 255, 0.84);
+    --surface-2: rgba(244, 239, 228, 0.88);
+    --surface-3: rgba(13, 21, 35, 0.92);
+
+    --text-1: var(--slate-900);
+    --text-2: var(--slate-600);
+    --text-3: var(--slate-500);
+    --text-inverse: #f6f1e7;
+    --text-success: var(--teal-500);
+
+    --border-subtle: rgba(39, 50, 70, 0.10);
+    --border-strong: rgba(39, 50, 70, 0.18);
+
+    --font-sans: "Plus Jakarta Sans", "Avenir Next", "Segoe UI", sans-serif;
+    --font-serif: "Fraunces", Georgia, serif;
+    --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+
     --space-xs: 0.25rem;
     --space-sm: 0.5rem;
     --space-md: 1rem;
     --space-lg: 2rem;
     --space-xl: 4rem;
-    --space-2xl: 8rem;
+    --space-2xl: 7rem;
 
-    /* Radius */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
     --radius-xl: 32px;
     --radius-full: 9999px;
 
-    /* Shadows (Subtle, Layered) */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
-    --shadow-premium: 0 30px 60px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 12px 24px rgba(13, 21, 35, 0.04);
+    --shadow-md: 0 20px 40px rgba(13, 21, 35, 0.08);
+    --shadow-lg: 0 28px 60px rgba(13, 21, 35, 0.14);
+    --shadow-premium: 0 30px 80px rgba(13, 21, 35, 0.12);
 
-    /* Transitions */
-    --ease-out: cubic-bezier(0.15, 0, 0.15, 1);
-    --duration-fast: 200ms;
-    --duration-base: 400ms;
+    --success-bg: rgba(29, 127, 114, 0.12);
+    --danger-bg: rgba(216, 90, 86, 0.12);
+    --warning-bg: rgba(207, 129, 32, 0.12);
+
+    --transition-base: all 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --duration-fast: 180ms;
+    --duration-base: 320ms;
 }

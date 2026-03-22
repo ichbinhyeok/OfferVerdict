@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title th:text="${title}">Cities</title>
     <meta name="description" th:attr="content=${metaDescription}" />
+    <link rel="canonical" href="https://livingcostcheck.com/cities">
     <meta name="robots" content="noindex,follow">
     <link rel="stylesheet" href="/css/tokens.css">
     <link rel="stylesheet" href="/css/core.css">
@@ -58,7 +59,7 @@
                             Browse by City</h2>
                         <ul style="list-style: none; padding: 0; columns: 1;">
                             <li th:each="city : ${cities}" style="margin-bottom: 1rem;">
-                                <a th:href="@{'/salary-check/' + ${city.slug} + '/100000'}"
+                                <a th:href="@{'/city/' + ${city.slug}}"
                                     style="text-decoration: none; font-size: 1.1rem; color: var(--text-1); font-weight: 500; display: block; padding: 0.5rem; border-radius: 6px; transition: background 0.1s;"
                                     onmouseover="this.style.background='var(--surface-2)'"
                                     onmouseout="this.style.background='transparent'">

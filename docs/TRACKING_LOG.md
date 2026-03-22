@@ -251,6 +251,68 @@ Purpose: persistent cross-session log for date-based analysis and implemented im
       - `/job/registered-nurse`
       - `/job/product-manager`
 
+- Implementation Batch D - Role Positioning Expansion Beyond Tech:
+  - Adjusted positioning to reduce over-reliance on developer/tech intent:
+    - homepage and decision landings now surface role guides for non-tech users first, including:
+      - `/job/registered-nurse`
+      - `/job/accountant`
+      - `/job/teacher`
+      - `/job/project-manager`
+      - `/job/marketing-manager`
+      - `/job/pharmacist`
+    - tech remains present, but no longer dominates the visible role-entry layer
+  - Expanded crawlable hub coverage:
+    - `SitemapController` now emits additional major-job hubs for non-tech roles so Google can discover and evaluate them directly
+  - Rationale:
+    - the product should not assume developers are the main audience for offer-decision tools
+    - non-tech roles with relocation, credential, or salary-band tradeoffs may fit the decision workflow better than a developer audience that often defaults to general AI chat tools
+
+- Implementation Batch E - Role Guide Refactor:
+  - Refactored role-positioning data into a reusable service layer:
+    - `RoleGuideService` now owns featured-role ordering, summaries, decision angles, and role-specific checklists
+    - homepage, decision landings, and job hubs now consume the same role-guide source instead of duplicating role lists and copy
+  - Increased job-hub usefulness beyond link aggregation:
+    - job hubs now surface role-specific decision framing, a short rationale for why people compare that role across cities, and a checklist of what to validate before accepting an offer
+    - this is intended to make role hubs less template-like and closer to actual offer-decision pages
+  - Product interpretation:
+    - the pivot should not stop at “show different roles”
+    - the site now starts to express that different roles have different decision triggers:
+      - RN => shift premiums, hospital relocation, sign-on distortion
+      - Teacher => district salary schedules vs housing reality
+      - Accountant => title/promotion gains vs city-cost drag
+      - PM / Marketing / Pharmacist => city premium vs real monthly residual
+  - Rationale:
+    - positioning changed faster than the product in earlier batches
+    - this refactor starts to close that gap by making role hubs carry actual role-specific decision value, not just SEO routing value
+
+- Implementation Batch F - City Hub Layer:
+  - Added a crawlable city-hub layer at `/city/{citySlug}`:
+    - city hubs now act as relocation entry pages instead of routing users straight into generic city-only salary URLs
+    - hubs are indexable only for priority cities, mirroring the broader pruning strategy
+  - City hubs now combine:
+    - city context (`job market`, `housing`, `industry focus`, `quality of life`)
+    - role-aware benchmark cards for featured roles
+    - crawlable entry points into role-specific salary checks and cross-city comparisons
+  - Directory cleanup:
+    - `/cities` remains a non-indexed directory, but its city links now point to `/city/{slug}` hubs instead of generic `/salary-check/{city}/100000`
+  - Sitemap expansion:
+    - added seed city hubs such as:
+      - `/city/austin-tx`
+      - `/city/dallas-tx`
+      - `/city/seattle-wa`
+      - `/city/new-york-ny`
+      - `/city/san-francisco-ca`
+      - `/city/miami-fl`
+  - Product interpretation:
+    - job hubs answer “Where should someone in this role compare offers?”
+    - city hubs answer “If I am moving to this city, which role-specific salary checks should I run first?”
+
+- Build Stability Note:
+  - `bootJar` briefly failed because Spring Boot main-class auto-detection was not resolving consistently during local iterative work.
+  - Fixed by explicitly setting:
+    - `springBoot.mainClass = 'com.offerverdict.OfferVerdictApplication'`
+    - in `build.gradle`
+
 - Verification:
   - Test commands run:
     - `./gradlew test --tests com.offerverdict.controller.SeoRegressionIntegrationTest --tests com.offerverdict.controller.SitemapControllerTest --tests com.offerverdict.service.ComparisonServiceTest --no-daemon`
@@ -269,6 +331,10 @@ Purpose: persistent cross-session log for date-based analysis and implemented im
     - single-city page links to crawlable comparison/job-hub destinations
     - major job hub => indexable
     - non-major job hub => `noindex`
+    - homepage and decision landing expose non-tech role-guide links
+    - role-guide refactor compiles and keeps all SEO regression tests green
+    - priority city hub => indexable
+    - low-priority city hub => `noindex`
     - sitemap includes decision landings and selected job hubs while excluding generic single-city URLs
 
 - Next Actions:
@@ -287,3 +353,48 @@ Purpose: persistent cross-session log for date-based analysis and implemented im
     - strengthen job hubs further
     - consider a city relocation hub layer
     - consolidate thin keyword landings if they remain too template-like
+
+## 2026-03-22 - UX Trust Pass (Result + Hub)
+
+- Problem observed in local product review:
+  - result page still showed stale artifact patterns from the old build layer:
+    - `Decision noteAuthority Advice`
+    - duplicated share labels like `X𝕏`, `inin`, `Link🔗`
+    - hidden/pseudo icon text leaking into the accessible tree
+  - job and city hubs looked cleaner after the pivot, but benchmark cards still repeated `$80,000` too often and felt template-generated
+
+- Root cause:
+  - the result page still had a mixed visual stack:
+    - refreshed templates
+    - older generated-resource state
+    - legacy `seo-enhancements.css` overrides that no longer matched the new design system
+  - hub benchmark cards were still using a single SEO-aligned bucket fallback, which collapsed too many role/city pairs into the same salary point
+
+- Changes shipped locally:
+  - Result page cleanup:
+    - removed pseudo-label dependence for the verdict note and share buttons
+    - restored explicit visible labels and `aria-label`s for share controls
+    - switched malformed icon placeholders to real visible emoji in the verdict, simulator, reality, city-context, and job-context sections
+    - replaced the old `seo-enhancements.css` with a simpler neutral version aligned with the current product design system
+    - kept the page structure intact while improving readability and screen-reader output
+  - Hub trust pass:
+    - changed hub card wording from `Suggested benchmark` to `Starting salary check`
+    - replaced the flat benchmark fallback with a localized heuristic:
+      - role baseline
+      - city cost index
+      - city median income
+    - goal: reduce repetitive `$80,000` cards and make hub entry points feel less synthetic
+
+- Local validation:
+  - `./gradlew clean test --tests com.offerverdict.controller.SeoRegressionIntegrationTest --tests com.offerverdict.controller.SitemapControllerTest --tests com.offerverdict.service.ComparisonServiceTest --no-daemon`
+  - `./gradlew bootJar --no-daemon`
+  - Playwright review after rebuild:
+    - result page no longer shows duplicated verdict/share labels
+    - share buttons now expose clean accessible names
+    - job hub benchmarks now vary by city (`$90k`, `$100k`, `$110k`, etc.) instead of collapsing to one repeated value
+    - city hub role cards now feel more believable as entry points
+
+- Interpretation:
+  - this did not change SEO strategy directly
+  - it improved product trust and reduced the `template / generated site` feeling that had become visible after the pivot
+  - this matters because the site now has to win on credibility, not just crawlability

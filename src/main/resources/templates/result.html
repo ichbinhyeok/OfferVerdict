@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
     <!-- SEO -->
@@ -92,8 +92,7 @@
             <div class="container">
                 <div class="verdict-header">
                     <span class="badge-source"
-                        th:text="${result.benchmarkContext != null ? result.benchmarkContext : 'DATA: IRS 2025 • NUMBEO • BLS'}">DATA:
-                        IRS 2025 • NUMBEO • BLS</span>
+                        th:text="${result.benchmarkContext != null ? result.benchmarkContext : 'Based on 2025 public tax, wage, and cost data'}">Based on 2025 public tax, wage, and cost data</span>
                 </div>
 
                 <div class="verdict-display">
@@ -118,9 +117,9 @@
 
                     <!-- Negotiation Leverage -->
                     <div class="leverage-card" th:if="${result.verdict != null}">
-                        <div class="leverage-icon">⚖️</div>
+                        <div class="leverage-icon" aria-hidden="true">⚖️</div>
                         <div class="leverage-content">
-                            <span class="leverage-title">Authority Advice</span>
+                            <span class="leverage-title">Decision note</span>
                             <span class="leverage-msg">
                                 <span th:text="${result.authorityAdvice}">Stay focused on the threshold.</span>
                                 <strong class="mono" th:if="${result.reverseSalaryGoal > offerSalary}"
@@ -161,9 +160,9 @@
                 <div class="share-tools">
                     <span>Share your verdict:</span>
                     <div class="share-buttons">
-                        <button class="btn-share" onclick="shareOnX()">𝕏</button>
-                        <button class="btn-share" onclick="shareOnLinkedIn()">in</button>
-                        <button class="btn-share" onclick="copyLink()">🔗</button>
+                        <button class="btn-share" onclick="shareOnX()" aria-label="Share on X">X</button>
+                        <button class="btn-share" onclick="shareOnLinkedIn()" aria-label="Share on LinkedIn">in</button>
+                        <button class="btn-share" onclick="copyLink()" aria-label="Copy link">Link</button>
                     </div>
                 </div>
             </div>

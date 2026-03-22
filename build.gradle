@@ -44,3 +44,7 @@ tasks.withType(JavaCompile) {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+springBoot {
+    mainClass = 'com.offerverdict.OfferVerdictApplication'
+}

@@ -4,6 +4,7 @@ import com.offerverdict.config.AppProperties;
 import com.offerverdict.data.DataRepository;
 import com.offerverdict.exception.ResourceNotFoundException;
 import com.offerverdict.service.ContentEnrichmentService;
+import com.offerverdict.service.RoleGuideService;
 import com.offerverdict.model.CityCostEntry;
 import com.offerverdict.model.ComparisonResult;
 import com.offerverdict.model.HouseholdType;
@@ -56,23 +57,25 @@ public class ComparisonController {
             "data/city-context.json",
             "data/job-context.json"
     };
-
     private final DataRepository repository;
     private final ComparisonService comparisonService;
     private final AppProperties appProperties;
     private final ObjectMapper objectMapper;
     private final ContentEnrichmentService contentEnrichmentService;
+    private final RoleGuideService roleGuideService;
 
     public ComparisonController(DataRepository repository,
             ComparisonService comparisonService,
             AppProperties appProperties,
             ObjectMapper objectMapper,
-            ContentEnrichmentService contentEnrichmentService) {
+            ContentEnrichmentService contentEnrichmentService,
+            RoleGuideService roleGuideService) {
         this.repository = repository;
         this.comparisonService = comparisonService;
         this.appProperties = appProperties;
         this.objectMapper = objectMapper;
         this.contentEnrichmentService = contentEnrichmentService;
+        this.roleGuideService = roleGuideService;
     }
 
     @GetMapping("/favicon.ico")
@@ -195,6 +198,7 @@ public class ComparisonController {
         model.addAttribute("shouldIndex", shouldIndex);
         model.addAttribute("jobsByCategory", groupJobsByCategory());
         model.addAttribute("citiesByState", groupCitiesByState());
+        model.addAttribute("featuredRoleGuides", roleGuideService.featuredGuides());
 
         return "index";
     }

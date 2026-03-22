@@ -137,6 +137,39 @@ class SeoRegressionIntegrationTest {
     }
 
     @Test
+    void priorityCityHub_isIndexableAndLinksToRoleGuides() throws Exception {
+        HttpResponse<String> response = httpGet("/city/austin-tx");
+
+        assertEquals(200, response.statusCode());
+        assertFalse(response.body().contains("name=\"robots\" content=\"noindex,follow\""));
+        assertTrue(response.body().contains("/salary-check/registered-nurse/austin-tx/"));
+        assertTrue(response.body().contains("/registered-nurse-salary-austin-tx-vs-"));
+    }
+
+    @Test
+    void lowPriorityCityHub_staysNoindex() throws Exception {
+        HttpResponse<String> response = httpGet("/city/minneapolis-mn");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("name=\"robots\" content=\"noindex,follow\""));
+    }
+
+    @Test
+    void home_and_decision_landing_highlight_nonTechRoleGuides() throws Exception {
+        HttpResponse<String> home = httpGet("/");
+        HttpResponse<String> landing = httpGet("/should-i-take-this-offer");
+
+        assertEquals(200, home.statusCode());
+        assertEquals(200, landing.statusCode());
+        assertTrue(home.body().contains("/job/registered-nurse"));
+        assertTrue(home.body().contains("/job/accountant"));
+        assertTrue(home.body().contains("/job/teacher"));
+        assertTrue(landing.body().contains("/job/registered-nurse"));
+        assertTrue(landing.body().contains("/job/project-manager"));
+        assertTrue(landing.body().contains("/job/pharmacist"));
+    }
+
+    @Test
     void nonMajorJobHub_staysNoindex() throws Exception {
         HttpResponse<String> response = httpGet("/job/architect");
 
@@ -151,6 +184,11 @@ class SeoRegressionIntegrationTest {
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("/should-i-take-this-offer</loc>"));
         assertTrue(response.body().contains("/job/software-engineer</loc>"));
+        assertTrue(response.body().contains("/job/registered-nurse</loc>"));
+        assertTrue(response.body().contains("/job/accountant</loc>"));
+        assertTrue(response.body().contains("/job/teacher</loc>"));
+        assertTrue(response.body().contains("/city/austin-tx</loc>"));
+        assertTrue(response.body().contains("/city/seattle-wa</loc>"));
         assertFalse(response.body().contains("/salary-check/miami-fl/"));
     }
 

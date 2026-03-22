@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">City Guide</title>
+    <meta name="description" th:content="${metaDescription}">
+    <link rel="canonical" th:href="${canonicalUrl}">
+    <meta name="robots" content="noindex,follow" th:if="${!shouldIndex}">
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/core.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <div th:replace="~{fragments/analytics :: analytics}"></div>
+</head>
+
+<body>
+    <nav class="top-nav">
+        <div class="container">
+            <a href="/" class="logo">OfferVerdict</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="page-hero">
+            <div class="container page-hero-grid">
+                <div class="hero-panel panel">
+                    <span class="eyebrow">City guide</span>
+                    <h1 class="hero-title" style="max-width: 12ch;"
+                        th:text="${city.city + ' relocation and salary guide'}">City relocation and salary guide</h1>
+                    <p class="hero-copy">
+                        Use this page to check whether moving to <span th:text="${city.city}">Austin</span> makes
+                        sense for the roles most likely to compare offers across cities.
+                    </p>
+                    <div class="stack" th:if="${cityContext != null}">
+                        <div class="info-card">
+                            <strong>Job market signal</strong>
+                            <p th:text="${cityContext.jobMarketSummary}">Job market summary</p>
+                        </div>
+                        <div class="info-card">
+                            <strong>Housing reality</strong>
+                            <p th:text="${cityContext.housingTrends}">Housing trends</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-panel hero-dark panel">
+                    <h2>How to use this city page</h2>
+                    <div class="action-stack">
+                        <a th:href="${decisionGuideUrl}" class="action-card">
+                            <strong>Compare relocation scenarios</strong>
+                            <span>Use the city-level calculator when the main question is whether the move improves your
+                                monthly position.</span>
+                        </a>
+                        <a th:href="${salaryCheckGuideUrl}" class="action-card">
+                            <strong>Check if a salary is enough here</strong>
+                            <span>Use the city salary check when you already know the role and need a quick
+                                affordability read.</span>
+                        </a>
+                    </div>
+                    <div class="stack" th:if="${cityContext != null}" style="margin-top: 1rem;">
+                        <div class="info-card">
+                            <strong>Industry focus</strong>
+                            <p th:text="${cityContext.industryFocus}">Industry focus</p>
+                        </div>
+                        <div class="info-card">
+                            <strong>Quality of life</strong>
+                            <p th:text="${cityContext.qualityOfLife}">Quality of life</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section style="padding: 0 0 2rem;">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Role-specific entry points</h2>
+                    <p>Pick the role first, then open either the salary check or a seeded cross-city comparison.</p>
+                </div>
+
+                <div class="guide-grid">
+                    <div th:each="card : ${roleCards}" class="guide-card panel">
+                        <span class="guide-kicker" th:text="${city.state}">State</span>
+                        <strong th:text="${card.title}">Registered Nurse</strong>
+                        <p th:text="${card.summary}">Role summary</p>
+                        <p>
+                            Starting salary check:
+                            <strong th:text="${card.salaryLabel}">$100,000</strong>
+                        </p>
+                        <div class="action-stack">
+                            <a th:href="${card.analysisUrl}" class="action-card">
+                                <strong>Open salary check</strong>
+                                <span>See whether this role-specific salary really works in <span
+                                        th:text="${city.city}">the city</span>.</span>
+                            </a>
+                            <a th:href="${card.comparisonUrl}" class="action-card">
+                                <strong th:text="${card.comparisonLabel}">Compare Austin vs Dallas</strong>
+                                <span>Jump into a crawlable cross-city comparison for this role.</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+</body>
+
+</html>

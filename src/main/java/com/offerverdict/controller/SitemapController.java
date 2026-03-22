@@ -32,6 +32,22 @@ public class SitemapController {
             "software-engineer",
             "financial-analyst",
             "registered-nurse");
+    private static final List<String> CORE_JOB_HUBS = List.of(
+            "registered-nurse",
+            "accountant",
+            "teacher",
+            "project-manager",
+            "marketing-manager",
+            "pharmacist",
+            "software-engineer",
+            "product-manager");
+    private static final List<String> CORE_CITY_HUBS = List.of(
+            "austin-tx",
+            "dallas-tx",
+            "seattle-wa",
+            "new-york-ny",
+            "san-francisco-ca",
+            "miami-fl");
 
 
     private final DataRepository repository;
@@ -55,9 +71,12 @@ public class SitemapController {
         addUrl(xml, "/job-offer-comparison-calculator", "0.9");
         addUrl(xml, "/relocation-salary-calculator", "0.9");
         addUrl(xml, "/is-this-salary-enough", "0.8");
-        addUrl(xml, "/job/software-engineer", "0.8");
-        addUrl(xml, "/job/registered-nurse", "0.8");
-        addUrl(xml, "/job/product-manager", "0.8");
+        for (String jobHubSlug : CORE_JOB_HUBS) {
+            addUrl(xml, "/job/" + jobHubSlug, "0.8");
+        }
+        for (String cityHubSlug : CORE_CITY_HUBS) {
+            addUrl(xml, "/city/" + cityHubSlug, "0.8");
+        }
         addUrl(xml, "/about", "0.8");
         addUrl(xml, "/methodology", "0.8");
 

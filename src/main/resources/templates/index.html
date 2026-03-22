@@ -9,213 +9,153 @@
         content="Stop guessing. Start knowing. Calculate the real value of your job offer with taxes, rent, and cost of living accounted for.">
     <link rel="canonical" th:href="${canonicalUrl}">
     <meta name="robots" content="noindex,follow" th:if="${!shouldIndex}">
-
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-
-    <!-- Unified Design System -->
     <link rel="stylesheet" href="/css/tokens.css">
     <link rel="stylesheet" href="/css/core.css">
     <link rel="stylesheet" href="/css/index.css">
     <link rel="stylesheet" href="/css/autocomplete.css">
-
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Libre+Baskerville:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-
-    <!-- Analytics -->
     <div th:replace="~{fragments/analytics :: analytics}"></div>
-
 </head>
 
 <body>
     <div class="landing-container">
-        <!-- Global Navigation (Overlay) -->
         <nav class="landing-nav">
             <div class="nav-content">
                 <a href="/" class="nav-logo">
-                    <img src="/favicon.svg" alt="OfferVerdict Logo"
-                        style="height: 24px; width: 24px; margin-right: 8px;">
+                    <img src="/favicon.svg" alt="OfferVerdict Logo" style="height: 20px; width: 20px;">
                     OfferVerdict
                 </a>
                 <div class="nav-links">
                     <a href="/about" class="nav-link">About</a>
-                    <!-- <a href="/blog" class="nav-link">Blog</a> -->
+                    <a href="/methodology" class="nav-link">Methodology</a>
                 </div>
             </div>
         </nav>
 
-        <!-- Left Split: Visual & Story -->
-        <div class="split-left">
+        <section class="split-left">
             <div class="hero-background">
                 <svg width="800" height="500" viewBox="0 0 800 500" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <defs>
-                        <!-- Brighter Data Halftone -->
                         <pattern id="halftone" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
-                            <circle cx="7" cy="7" r="3.5" fill="#c7d2fe" fill-opacity="0.8" />
+                            <circle cx="7" cy="7" r="3.5" fill="#d3a24f" fill-opacity="0.45" />
                         </pattern>
-
-                        <!-- Flow Gradient -->
                         <linearGradient id="flowGrad" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stop-color="#818cf8" stop-opacity="0" />
-                            <stop offset="50%" stop-color="#ffffff" stop-opacity="1" />
-                            <stop offset="100%" stop-color="#6366f1" stop-opacity="0" />
+                            <stop offset="0%" stop-color="#d3a24f" stop-opacity="0" />
+                            <stop offset="50%" stop-color="#f8f4ea" stop-opacity="1" />
+                            <stop offset="100%" stop-color="#8ccfc5" stop-opacity="0" />
                         </linearGradient>
-
-                        <!-- Detailed US Map Silhouette -->
                         <path id="us-shape" d="
-                    M 70,60 
-                    L 350,50 
-                    L 450,110 
-                    L 550,90 
-                    L 650,40 
-                    L 740,30 
-                    L 760,100 
-                    L 720,130 
-                    L 750,180 
-                    L 700,280 
-                    L 680,420 
-                    L 600,400 
-                    L 500,420 
-                    L 450,450 
-                    L 400,420 
-                    L 350,440 
-                    L 250,380 
-                    L 150,370 
-                    L 80,410 
-                    L 40,320 
-                    L 20,150 
-                    L 70,60 
+                    M 70,60
+                    L 350,50
+                    L 450,110
+                    L 550,90
+                    L 650,40
+                    L 740,30
+                    L 760,100
+                    L 720,130
+                    L 750,180
+                    L 700,280
+                    L 680,420
+                    L 600,400
+                    L 500,420
+                    L 450,450
+                    L 400,420
+                    L 350,440
+                    L 250,380
+                    L 150,370
+                    L 80,410
+                    L 40,320
+                    L 20,150
+                    L 70,60
                     Z" />
-
                         <clipPath id="us-clip">
                             <use href="#us-shape" />
                         </clipPath>
                     </defs>
-
-                    <!-- Map Body (Texture) -->
                     <g clip-path="url(#us-clip)">
                         <rect width="800" height="500" fill="url(#halftone)" />
                     </g>
-
-                    <!-- Strong Map Outline -->
-                    <use href="#us-shape" stroke="#a5b4fc" stroke-width="2.5" stroke-opacity="0.9" fill="none"
-                        filter="drop-shadow(0 0 4px #4f46e5)" />
-
-                    <!-- --- Story Elements --- -->
-
-                    <!-- Origin: SF (West) -->
+                    <use href="#us-shape" stroke="#f1d39a" stroke-width="2.2" stroke-opacity="0.75" fill="none" />
                     <g transform="translate(45, 230)">
-                        <!-- Pulse Ring -->
                         <circle r="15" stroke="#ffffff" stroke-width="1" opacity="0">
                             <animate attributeName="r" values="6;20" dur="2.5s" repeatCount="indefinite" />
                             <animate attributeName="opacity" values="0.8;0" dur="2.5s" repeatCount="indefinite" />
                         </circle>
-                        <!-- Solid Node -->
                         <circle r="6" fill="#ffffff">
                             <animate attributeName="r" values="6;8;6" dur="2.5s" repeatCount="indefinite" />
                         </circle>
                     </g>
-
-                    <!-- Destination: Austin (Central/South) -->
                     <g transform="translate(380, 400)">
-                        <circle r="5" fill="#a5b4fc">
-                            <animate attributeName="fill" values="#a5b4fc;#ffffff;#a5b4fc" dur="3s"
-                                repeatCount="indefinite" />
-                        </circle>
+                        <circle r="5" fill="#8ccfc5" />
                     </g>
-
-                    <!-- Destination: NYC (East) -->
                     <g transform="translate(710, 140)">
-                        <circle r="5" fill="#a5b4fc">
-                            <animate attributeName="fill" values="#a5b4fc;#ffffff;#a5b4fc" dur="3s" begin="1s"
-                                repeatCount="indefinite" />
-                        </circle>
+                        <circle r="5" fill="#f1d39a" />
                     </g>
-
-
-                    <!-- Path 1: SF -> Austin -->
                     <path id="pathSF-AUS" d="M45,230 Q200,300 380,400" stroke="url(#flowGrad)" stroke-width="2"
                         fill="none" stroke-linecap="round" stroke-dasharray="8 8" opacity="0.6" />
-
-                    <!-- Moving Particle 1 -->
-                    <circle r="4" fill="#ffffff" filter="drop-shadow(0 0 4px white)">
+                    <circle r="4" fill="#ffffff">
                         <animateMotion dur="4s" repeatCount="indefinite" rotate="auto">
                             <mpath href="#pathSF-AUS" />
                         </animateMotion>
                         <animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite" />
                     </circle>
-
-
-                    <!-- Path 2: SF -> NYC (Cross Country) -->
                     <path id="pathSF-NYC" d="M45,230 Q380,100 710,140" stroke="url(#flowGrad)" stroke-width="2"
                         fill="none" stroke-linecap="round" stroke-dasharray="8 8" opacity="0.6" />
-
-                    <!-- Moving Particle 2 -->
-                    <circle r="4" fill="#ffffff" filter="drop-shadow(0 0 4px white)">
+                    <circle r="4" fill="#ffffff">
                         <animateMotion dur="6s" repeatCount="indefinite" rotate="auto" begin="1s">
                             <mpath href="#pathSF-NYC" />
                         </animateMotion>
                         <animate attributeName="opacity" values="0;1;0" dur="6s" repeatCount="indefinite" begin="1s" />
                     </circle>
-
                 </svg>
             </div>
             <div class="hero-content">
-                <header class="landing-header animate-in">
+                <header class="landing-header">
                     <h1 class="landing-title">
-                        Should you <span class="gradient-text">take this offer</span>?<br>
-                        Run the numbers first.
+                        Should you <span class="gradient-text">take this offer</span>?
                     </h1>
                     <p class="landing-subtitle">
-                        Compare two offers after tax, rent, and cost of living so you can decide whether the move is actually worth it.
+                        Compare two offers after tax, rent, and cost of living so you can decide whether the move is
+                        actually worth it.
                     </p>
-                    <p style="margin-top: 1rem; color: #cbd5e1; max-width: 560px; font-size: 0.96rem; line-height: 1.7;">
-                        Built for relocation and negotiation decisions, not generic salary browsing.
-                        Use the calculator when the real question is whether your monthly cash flow improves.
+                    <p class="hero-note">
+                        Built for relocation and negotiation decisions, not generic salary browsing. Use the calculator
+                        when the real question is whether your monthly cash flow improves.
                     </p>
                 </header>
             </div>
-        </div>
+        </section>
 
-        <!-- Right Split: Action & Form -->
-        <div class="split-right">
-            <main class="journey-card animate-in delay-2">
+        <section class="split-right">
+            <main class="journey-card">
                 <form action="/start" method="get" id="searchForm">
-                    <!-- SEARCH MODE TOGGLE -->
-                    <div class="mode-toggle-container"
-                        style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-                        <div class="toggle-group"
-                            style="background: #f1f5f9; padding: 4px; border-radius: 8px; display: inline-flex;">
+                    <div class="mode-toggle-container" style="margin-bottom: 1.2rem;">
+                        <div class="toggle-group">
                             <button type="button" id="tabSingle" onclick="toggleSearchMode('single')"
-                                style="padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; border:none; background: #4f46e5; color: white; transition: all 0.2s;">
+                                style="background: var(--brand-primary); color: white;">
                                 Salary Reality Check
                             </button>
                             <button type="button" id="tabCompare" onclick="toggleSearchMode('compare')"
-                                style="padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; border:none; background: transparent; color: #64748b; transition: all 0.2s;">
+                                style="background: transparent; color: var(--text-3);">
                                 Compare Job Offers
                             </button>
                         </div>
                     </div>
 
-                    <!-- Shared Occupation Context -->
                     <div class="occupation-header">
                         <div class="form-group" style="text-align: center;">
                             <label class="form-label">Your Occupation</label>
-                            <!-- Custom Autocomplete Wrapper -->
                             <div class="autocomplete-wrapper">
                                 <input type="text" id="jobInput" name="job" class="form-input"
                                     placeholder="e.g. Software Engineer" autocomplete="off" style="text-align: center;"
                                     required>
-                                <div id="jobDropdown" class="autocomplete-dropdown">
-                                    <!-- Items injected by JS -->
-                                </div>
+                                <div id="jobDropdown" class="autocomplete-dropdown"></div>
                             </div>
-
-                            <!-- Data Injection for JS -->
                             <script th:inline="javascript">
                                 /*<![CDATA[*/
                                 window.jobCategories = /*[[${jobsByCategory}]]*/ {};
@@ -224,33 +164,27 @@
                         </div>
                     </div>
 
-                    <!-- Salary Type Toggle (Moved Outside) -->
-                    <div class="salary-type-toggle-container"
-                        style="display: flex; justify-content: center; margin-bottom: 1rem; margin-top: 0.5rem;">
-                        <div class="toggle-group"
-                            style="background: #eef2ff; padding: 3px; border-radius: 6px; display: inline-flex; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);">
+                    <div class="salary-type-toggle-container" style="margin-bottom: 1rem; margin-top: 0.5rem;">
+                        <div class="toggle-group">
                             <input type="radio" name="salaryType" id="typeAnnual" value="annual" checked
                                 style="display:none;" onchange="updateSalaryLabels()">
                             <label for="typeAnnual" class="toggle-btn active"
-                                style="padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #6366f1; transition: all 0.2s;">Annual</label>
+                                style="background: var(--brand-primary); color: white;">Annual</label>
 
                             <input type="radio" name="salaryType" id="typeMonthly" value="monthly" style="display:none;"
                                 onchange="updateSalaryLabels()">
                             <label for="typeMonthly" class="toggle-btn"
-                                style="padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #64748b; transition: all 0.2s;">Monthly</label>
+                                style="background: transparent; color: var(--text-3);">Monthly</label>
                         </div>
                     </div>
 
                     <div class="comparison-grid">
-
-                        <!-- Current Status Section -->
                         <div class="comparison-column current-status">
                             <div class="column-header">
                                 <h3>Current Status</h3>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Location</label>
-                                <!-- Custom City A Autocomplete -->
                                 <div class="autocomplete-wrapper">
                                     <input type="text" id="cityInputA" name="cityA" class="form-input"
                                         placeholder="e.g. San Francisco" autocomplete="off" required>
@@ -264,7 +198,6 @@
                             </div>
                         </div>
 
-                        <!-- Flow Arrow -->
                         <div class="comparison-arrow">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
@@ -272,14 +205,12 @@
                             </svg>
                         </div>
 
-                        <!-- New Offer Section -->
                         <div class="comparison-column new-offer">
                             <div class="column-header">
                                 <h3>New Offer</h3>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Location</label>
-                                <!-- Custom City B Autocomplete -->
                                 <div class="autocomplete-wrapper">
                                     <input type="text" id="cityInputB" name="cityB" class="form-input"
                                         placeholder="e.g. Austin" autocomplete="off" required>
@@ -306,21 +237,20 @@
                             document.querySelector('input[name="currentSalary"]').placeholder = placeholder;
                             document.querySelector('input[name="offerSalary"]').placeholder = placeholder;
 
-                            // Update Toggle Visuals
                             if (isMonthly) {
                                 document.querySelector('label[for="typeMonthly"]').classList.add('active');
-                                document.querySelector('label[for="typeMonthly"]').style.background = '#6366f1'; // Brand Primary
+                                document.querySelector('label[for="typeMonthly"]').style.background = 'var(--brand-primary)';
                                 document.querySelector('label[for="typeMonthly"]').style.color = 'white';
                                 document.querySelector('label[for="typeAnnual"]').classList.remove('active');
                                 document.querySelector('label[for="typeAnnual"]').style.background = 'transparent';
-                                document.querySelector('label[for="typeAnnual"]').style.color = '#64748b'; // Slate 500
+                                document.querySelector('label[for="typeAnnual"]').style.color = 'var(--text-3)';
                             } else {
                                 document.querySelector('label[for="typeAnnual"]').classList.add('active');
-                                document.querySelector('label[for="typeAnnual"]').style.background = '#6366f1';
+                                document.querySelector('label[for="typeAnnual"]').style.background = 'var(--brand-primary)';
                                 document.querySelector('label[for="typeAnnual"]').style.color = 'white';
                                 document.querySelector('label[for="typeMonthly"]').classList.remove('active');
                                 document.querySelector('label[for="typeMonthly"]').style.background = 'transparent';
-                                document.querySelector('label[for="typeMonthly"]').style.color = '#64748b';
+                                document.querySelector('label[for="typeMonthly"]').style.color = 'var(--text-3)';
                             }
                         }
 
@@ -335,44 +265,34 @@
                             const offerSalaryInput = document.querySelector('input[name="offerSalary"]');
 
                             if (mode === 'single') {
-                                // Style
-                                singleBtn.style.background = '#4f46e5';
+                                singleBtn.style.background = 'var(--brand-primary)';
                                 singleBtn.style.color = 'white';
                                 compareBtn.style.background = 'transparent';
-                                compareBtn.style.color = '#64748b';
+                                compareBtn.style.color = 'var(--text-3)';
 
-                                // Visibility
-                                newOfferCol.style.opacity = '0.3';
+                                newOfferCol.style.opacity = '0.34';
                                 newOfferCol.style.pointerEvents = 'none';
-                                arrow.style.opacity = '0.3';
+                                arrow.style.opacity = '0.34';
 
-                                // Logic: Disable inputs to prevent validation
                                 cityBInput.disabled = true;
                                 offerSalaryInput.disabled = true;
-
                                 submitBtn.textContent = 'Run Salary Check';
                             } else {
-                                // Style
-                                compareBtn.style.background = '#4f46e5';
+                                compareBtn.style.background = 'var(--brand-primary)';
                                 compareBtn.style.color = 'white';
                                 singleBtn.style.background = 'transparent';
-                                singleBtn.style.color = '#64748b';
+                                singleBtn.style.color = 'var(--text-3)';
 
-                                // Visibility
                                 newOfferCol.style.opacity = '1';
                                 newOfferCol.style.pointerEvents = 'all';
                                 arrow.style.opacity = '1';
 
-                                // Logic
                                 cityBInput.disabled = false;
                                 offerSalaryInput.disabled = false;
-
                                 submitBtn.textContent = 'Compare Offers';
                             }
                         }
 
-                        // Init Default Mode
-                        // Init Default Mode & Prefill
                         window.addEventListener('DOMContentLoaded', () => {
                             const hashParams = new URLSearchParams(window.location.hash.startsWith('#')
                                 ? window.location.hash.slice(1)
@@ -384,25 +304,19 @@
                             toggleSearchMode(mode === 'compare' ? 'compare' : 'single');
                             updateSalaryLabels();
 
-                            // Prefill Logic
                             if (mode === 'compare') {
-                                // Job
                                 if (params.get('job')) {
                                     const jobSlug = params.get('job');
-                                    // Simple slug-to-title
                                     const jobTitle = jobSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                                     document.getElementById('jobInput').value = jobTitle;
                                 }
 
-                                // Salary (Set as Offer Salary)
                                 if (params.get('salary')) {
                                     document.querySelector('input[name="offerSalary"]').value = params.get('salary');
                                 }
 
-                                // City (Set as New Offer - City B)
                                 if (params.get('city1')) {
                                     const citySlug = params.get('city1');
-                                    // Slug to Title (e.g. austin-tx -> Austin, TX)
                                     const parts = citySlug.split('-');
                                     let cityTitle = "";
                                     if (parts.length > 1) {
@@ -418,15 +332,13 @@
                         });
                     </script>
 
-                    <!-- Submit -->
                     <div class="submit-container">
                         <button type="submit" class="btn btn-premium btn-large">Compare Offers</button>
                         <p style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--gray-400);">
-                            Instant Verdict • No account required • Real IRS data
+                            Instant verdict · No account required · Real IRS-based estimate
                         </p>
                     </div>
 
-                    <!-- Unified Data Injection -->
                     <script th:inline="javascript">
                         /*<![CDATA[*/
                         window.jobCategories = /*[[${jobsByCategory}]]*/ {};
@@ -436,43 +348,45 @@
                 </form>
             </main>
 
-            <section style="margin-top: 1.4rem; border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 18px; padding: 1.25rem 1.15rem; background: rgba(15, 23, 42, 0.32); color: #e2e8f0;">
+            <section class="support-panel">
                 <h2 style="font-size: 1.05rem; margin-bottom: 0.65rem;">What OfferVerdict is for</h2>
-                <p style="margin-bottom: 0.9rem; color: #cbd5e1; line-height: 1.65;">
+                <p style="margin-bottom: 0.9rem; line-height: 1.65;">
                     Use this when you are choosing between cities, testing a raise, or trying to decide whether a relocation offer improves your real monthly position.
                 </p>
-                <div style="display: grid; gap: 0.6rem;">
-                    <a href="/should-i-take-this-offer" style="display: block; text-decoration: none; color: inherit; padding: 0.9rem 1rem; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(148,163,184,0.18);">
-                        <strong style="display:block; margin-bottom: 0.2rem;">Should I take this offer?</strong>
-                        <span style="color: #94a3b8; font-size: 0.92rem;">Decision-focused overview for relocation and negotiation.</span>
+                <div class="support-grid">
+                    <a href="/should-i-take-this-offer" class="support-link">
+                        <strong>Should I take this offer?</strong>
+                        <span>Decision-focused overview for relocation and negotiation.</span>
                     </a>
-                    <a href="/job-offer-comparison-calculator" style="display: block; text-decoration: none; color: inherit; padding: 0.9rem 1rem; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(148,163,184,0.18);">
-                        <strong style="display:block; margin-bottom: 0.2rem;">Compare two offers</strong>
-                        <span style="color: #94a3b8; font-size: 0.92rem;">Start from the crawlable comparison guide, then jump into the calculator.</span>
+                    <a href="/job-offer-comparison-calculator" class="support-link">
+                        <strong>Compare two offers</strong>
+                        <span>Start from the crawlable comparison guide, then jump into the calculator.</span>
                     </a>
-                    <a href="/methodology" style="display: block; text-decoration: none; color: inherit; padding: 0.9rem 1rem; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(148,163,184,0.18);">
-                        <strong style="display:block; margin-bottom: 0.2rem;">See the assumptions</strong>
-                        <span style="color: #94a3b8; font-size: 0.92rem;">Tax dates, housing assumptions, and cost inputs.</span>
+                    <a href="/methodology" class="support-link">
+                        <strong>See the assumptions</strong>
+                        <span>Tax dates, housing assumptions, and cost inputs.</span>
                     </a>
+                </div>
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08);">
+                    <strong style="display:block; margin-bottom: 0.6rem; color: #fff;">Popular role guides</strong>
+                    <div class="support-grid">
+                        <a th:each="role : ${featuredRoleGuides}" th:href="${'/job/' + role.slug}" class="support-link">
+                            <strong th:text="${role.title}">Registered Nurse</strong>
+                            <span th:text="${role.summary}">Open the job-specific relocation and salary guide.</span>
+                        </a>
+                    </div>
                 </div>
             </section>
 
-            <footer class="footer animate-in delay-3">
-                <div style="margin-bottom: 0.8rem; display: flex; justify-content: center; gap: 1.5rem;">
-                    <a href="/job/software-engineer"
-                        style="color: var(--gray-500); text-decoration: none; font-size: 0.85rem; font-weight: 600;">Software engineer guide</a>
-                    <a href="/job/registered-nurse"
-                        style="color: var(--gray-500); text-decoration: none; font-size: 0.85rem; font-weight: 600;">Registered nurse guide</a>
-                    <a href="/about"
-                        style="color: var(--gray-500); text-decoration: none; font-size: 0.85rem; font-weight: 600;">About</a>
-                    <a href="/terms"
-                        style="color: var(--gray-500); text-decoration: none; font-size: 0.85rem; font-weight: 600;">Terms</a>
-                    <a href="/privacy"
-                        style="color: var(--gray-500); text-decoration: none; font-size: 0.85rem; font-weight: 600;">Privacy</a>
-                </div>
-                <p style="color: var(--gray-400); font-size: 0.8rem;">© 2026 OfferVerdict. Know your worth.</p>
+            <footer class="landing-footer">
+                <a href="/job/software-engineer">Software engineer guide</a>
+                <a href="/job/registered-nurse">Registered nurse guide</a>
+                <a href="/about">About</a>
+                <a href="/terms">Terms</a>
+                <a href="/privacy">Privacy</a>
+                <p>© 2026 OfferVerdict</p>
             </footer>
-        </div>
+        </section>
     </div>
     <script src="/js/autocomplete.js"></script>
 </body>

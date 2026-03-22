@@ -10,13 +10,15 @@
     <meta name="robots" content="noindex,follow" th:if="${!shouldIndex}">
     <link rel="stylesheet" href="/css/tokens.css">
     <link rel="stylesheet" href="/css/core.css">
-    <!-- Reusing result.css for link grids if needed, or inline -->
-    <!-- Analytics -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <div th:replace="~{fragments/analytics :: analytics}"></div>
 </head>
 
-<body class="theme-lucid">
-
+<body>
     <nav class="top-nav">
         <div class="container">
             <a href="/" class="logo">OfferVerdict</a>
@@ -24,68 +26,90 @@
     </nav>
 
     <main class="main-content">
-        <section style="padding: 4rem 0; background: var(--surface-1); border-bottom: 1px solid var(--border-subtle);">
-            <div class="container">
-                <span class="badge"
-                    style="background: var(--brand-primary); color: white; padding: 4px 12px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Role guide</span>
-                <h1 style="font-size: 2.5rem; margin-top: 1rem;" th:text="${job.title} + ' salary and relocation guide'">Job Title
-                </h1>
-                <p style="color: var(--text-2); font-size: 1.2rem; max-width: 600px; margin-top: 1rem;">
-                    Use this page to jump into the strongest city benchmarks and relocation comparisons for <span th:text="${job.title}">Job</span> across major US cities.
-                </p>
-                <div th:if="${jobContext != null}"
-                    style="margin-top: 1.5rem; display: grid; gap: 0.9rem; max-width: 860px;">
-                    <div style="padding: 1rem 1.1rem; border-radius: 14px; background: #fff; border: 1px solid var(--border-subtle);">
-                        <strong style="display:block; margin-bottom: 0.3rem;">National outlook</strong>
-                        <span style="color: var(--text-2);" th:text="${jobContext.nationalOutlook}">Outlook</span>
+        <section class="page-hero">
+            <div class="container page-hero-grid">
+                <div class="hero-panel panel">
+                    <span class="eyebrow">Role guide</span>
+                    <h1 class="hero-title" style="max-width: 13ch;"
+                        th:text="${job.title} + ' salary and relocation guide'">Job Title salary and relocation guide</h1>
+                    <p class="hero-copy">
+                        Use this page to jump into the strongest city benchmarks and relocation comparisons for
+                        <span th:text="${job.title}">Job</span> across major US cities.
+                    </p>
+
+                    <div class="stack" th:if="${roleGuide != null}">
+                        <div class="info-card">
+                            <strong th:text="${roleGuide.eyebrow}">Role guide</strong>
+                            <p th:text="${roleGuide.decisionAngle}">Role-specific decision angle.</p>
+                        </div>
+                        <div class="info-card">
+                            <strong>Why people use this guide</strong>
+                            <p th:text="${roleGuide.summary}">Role summary</p>
+                        </div>
+                        <div class="info-card">
+                            <strong>What to check before you accept</strong>
+                            <ul style="margin: 0; padding-left: 1.15rem; color: var(--text-2);">
+                                <li th:each="point : ${roleGuide.checkList}" th:text="${point}">Checklist item</li>
+                            </ul>
+                        </div>
                     </div>
-                    <div style="padding: 1rem 1.1rem; border-radius: 14px; background: #fff; border: 1px solid var(--border-subtle);">
-                        <strong style="display:block; margin-bottom: 0.3rem;">Career signal</strong>
-                        <span style="color: var(--text-2);" th:text="${jobContext.careerGrowth}">Growth</span>
+                </div>
+
+                <div class="hero-panel hero-dark panel">
+                    <h2>Role context</h2>
+                    <div class="stack" th:if="${jobContext != null}">
+                        <div class="info-card">
+                            <strong>National outlook</strong>
+                            <p th:text="${jobContext.nationalOutlook}">Outlook</p>
+                        </div>
+                        <div class="info-card">
+                            <strong>Career signal</strong>
+                            <p th:text="${jobContext.careerGrowth}">Growth</p>
+                        </div>
+                    </div>
+                    <div class="action-stack" style="margin-top: 1rem;">
+                        <a th:href="${decisionGuideUrl}" class="action-card">
+                            <strong>Compare two offers for this role</strong>
+                            <span>Use the richer offer-vs-offer template when the city and salary both change.</span>
+                        </a>
+                        <a th:href="${salaryCheckGuideUrl}" class="action-card">
+                            <strong>Check if a salary is enough</strong>
+                            <span>Use the city salary check when the role stays fixed and affordability is the main
+                                question.</span>
+                        </a>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section style="padding: 3rem 0;">
+        <section style="padding: 0 0 2rem;">
             <div class="container">
-                <div style="display: grid; gap: 0.8rem; margin-bottom: 2rem; max-width: 760px;">
-                    <a th:href="${decisionGuideUrl}" style="display: block; text-decoration: none; color: inherit; padding: 1rem 1.1rem; border-radius: 14px; background: #eff6ff; border: 1px solid #bfdbfe;">
-                        <strong style="display:block; margin-bottom: 0.25rem;">Compare two offers for this role</strong>
-                        <span style="color: var(--text-2);">Use the richer offer-vs-offer template when the city and salary both change.</span>
-                    </a>
-                    <a th:href="${salaryCheckGuideUrl}" style="display: block; text-decoration: none; color: inherit; padding: 1rem 1.1rem; border-radius: 14px; background: #fff; border: 1px solid var(--border-subtle);">
-                        <strong style="display:block; margin-bottom: 0.25rem;">Check if a salary is enough</strong>
-                        <span style="color: var(--text-2);">Use the city salary check when the role stays fixed and the main question is affordability.</span>
-                    </a>
+                <div class="section-title">
+                    <h2>Priority city paths</h2>
+                    <p>Start from a benchmark salary check or jump straight into a comparison seed.</p>
                 </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
-                    <div th:each="card : ${cityCards}" class="card"
-                        style="padding: 1.5rem; border: 1px solid var(--border-subtle); border-radius: 8px; background: white;">
-                        <span
-                            style="font-size: 0.9rem; color: var(--text-3); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 0.5rem;"
-                            th:text="${card.state}">State</span>
-                        <h3 style="font-size: 1.1rem; color: var(--brand-primary); margin: 0;" th:text="${card.cityName}">
-                            City</h3>
-                        <div style="margin-top: 0.65rem; font-size: 0.95rem; color: var(--text-2);">
-                            Suggested benchmark:
+                <div class="guide-grid">
+                    <div th:each="card : ${cityCards}" class="guide-card panel">
+                        <span class="guide-kicker" th:text="${card.state}">State</span>
+                        <strong th:text="${card.cityName}">City</strong>
+                        <p>
+                            Starting salary check:
                             <strong th:text="${card.salaryLabel}">$100,000</strong>
-                        </div>
-                        <div style="margin-top: 1rem; display: grid; gap: 0.7rem;">
-                            <a th:href="${card.analysisUrl}" style="text-decoration: none; color: inherit; padding: 0.8rem 0.9rem; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0;">
-                                <strong style="display:block; margin-bottom: 0.2rem;">Open salary check</strong>
-                                <span style="color: var(--text-2);">See the role-specific affordability breakdown.</span>
+                        </p>
+                        <div class="action-stack">
+                            <a th:href="${card.analysisUrl}" class="action-card">
+                                <strong>Open salary check</strong>
+                                <span>See the role-specific affordability breakdown.</span>
                             </a>
-                            <a th:href="${card.comparisonUrl}" style="text-decoration: none; color: inherit; padding: 0.8rem 0.9rem; border-radius: 10px; background: #eef2ff; border: 1px solid #c7d2fe;">
-                                <strong style="display:block; margin-bottom: 0.2rem;" th:text="${card.comparisonLabel}">Compare Austin vs Dallas</strong>
-                                <span style="color: var(--text-2);">Jump into a crawlable relocation comparison.</span>
+                            <a th:href="${card.comparisonUrl}" class="action-card">
+                                <strong th:text="${card.comparisonLabel}">Compare Austin vs Dallas</strong>
+                                <span>Jump into a crawlable relocation comparison.</span>
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <div style="margin-top: 4rem; text-align: center;">
+                <div style="margin-top: 2rem;">
                     <a href="/job-offer-comparison-calculator" class="btn btn-primary">Open the comparison calculator</a>
                 </div>
             </div>

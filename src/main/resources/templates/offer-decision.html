@@ -11,66 +11,92 @@
     <link rel="stylesheet" href="/css/tokens.css">
     <link rel="stylesheet" href="/css/core.css">
     <link rel="stylesheet" href="/css/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <div th:replace="~{fragments/analytics :: analytics}"></div>
 </head>
 
 <body>
-    <div class="landing-container" style="min-height: 100vh;">
-        <div class="split-left" style="padding: 4rem 2rem;">
-            <div class="hero-content" style="max-width: 760px;">
-                <p th:text="${landingEyebrow != null ? landingEyebrow : 'Offer decision guide'}" style="text-transform: uppercase; letter-spacing: 0.16em; color: #94a3b8; font-size: 0.8rem; margin-bottom: 1rem;">
-                    Offer decision guide
-                </p>
-                <h1 class="landing-title" th:text="${landingTitle != null ? landingTitle : 'Should you take the offer, negotiate, or walk away?'}" style="max-width: 14ch;">
-                    Should you take the offer, negotiate, or walk away?
-                </h1>
-                <p class="landing-subtitle" th:text="${landingLead != null ? landingLead : 'OfferVerdict compares after-tax pay, rent burden, and living costs so you can judge whether a relocation or raise actually improves your monthly position.'}" style="max-width: 52ch;">
-                    OfferVerdict compares after-tax pay, rent burden, and living costs so you can judge whether a relocation or raise actually improves your monthly position.
-                </p>
-                <div style="display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.6rem;">
-                    <a href="/start#mode=compare" class="btn btn-premium" style="text-decoration: none;">Compare two offers</a>
-                    <a href="/start" class="btn" style="text-decoration: none; border: 1px solid rgba(148,163,184,0.35); color: white;">Run a salary reality check</a>
+    <nav class="top-nav">
+        <div class="container">
+            <a href="/" class="logo">OfferVerdict</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="page-hero">
+            <div class="container page-hero-grid">
+                <div class="hero-panel hero-dark panel">
+                    <span class="eyebrow" th:text="${landingEyebrow != null ? landingEyebrow : 'Offer decision guide'}">Offer decision guide</span>
+                    <h1 class="hero-title"
+                        th:text="${landingTitle != null ? landingTitle : 'Should you take the offer, negotiate, or walk away?'}">
+                        Should you take the offer, negotiate, or walk away?
+                    </h1>
+                    <p class="hero-copy"
+                        th:text="${landingLead != null ? landingLead : 'OfferVerdict compares after-tax pay, rent burden, and living costs so you can judge whether a relocation or raise actually improves your monthly position.'}">
+                        OfferVerdict compares after-tax pay, rent burden, and living costs so you can judge whether a
+                        relocation or raise actually improves your monthly position.
+                    </p>
+                    <div class="hero-split-actions">
+                        <a href="/start#mode=compare" class="btn btn-premium">Compare two offers</a>
+                        <a href="/start" class="btn btn-ghost">Run a salary reality check</a>
+                    </div>
+                    <div class="stack" style="margin-top: 1.4rem;">
+                        <div class="info-card">
+                            <strong>What it answers</strong>
+                            <p th:text="${landingBullets != null ? landingBullets[0] : 'Will the new city leave you with more monthly cash flow after taxes, rent, and baseline living costs?'}"></p>
+                        </div>
+                        <div class="info-card">
+                            <strong>Best for</strong>
+                            <p th:text="${landingBullets != null ? landingBullets[1] : 'Relocation decisions, competing offers, and compensation conversations where headline salary hides the real answer.'}"></p>
+                        </div>
+                        <div class="info-card">
+                            <strong>What makes it different</strong>
+                            <p th:text="${landingBullets != null ? landingBullets[2] : 'It is not a salary encyclopedia. It is a practical verdict tool built around a decision.'}"></p>
+                        </div>
+                    </div>
                 </div>
-                <div style="margin-top: 2rem; display: grid; gap: 0.9rem;">
-                    <div style="padding: 1rem 1.1rem; border-radius: 16px; background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(148,163,184,0.22);">
-                        <strong style="display:block; margin-bottom: 0.3rem;">What it answers</strong>
-                        <span style="color: #cbd5e1;" th:text="${landingBullets != null ? landingBullets[0] : 'Will the new city leave you with more monthly cash flow after taxes, rent, and baseline living costs?'}">Will the new city leave you with more monthly cash flow after taxes, rent, and baseline living costs?</span>
+
+                <div class="hero-panel panel">
+                    <h2>How to use it</h2>
+                    <div class="stack">
+                        <div class="metric-card">
+                            <strong>1. Set the baseline</strong>
+                            <p>Enter your current city and salary so the model knows what you are giving up.</p>
+                        </div>
+                        <div class="metric-card">
+                            <strong>2. Add the new offer</strong>
+                            <p>Change the city, salary, and scenario until the real tradeoff is visible.</p>
+                        </div>
+                        <div class="metric-card">
+                            <strong>3. Read the verdict</strong>
+                            <p>Use monthly cash flow, threshold guidance, and simulation inputs to decide whether to
+                                accept, negotiate, or walk away.</p>
+                        </div>
+                        <a href="/methodology" class="action-card">
+                            <strong>Check the assumptions</strong>
+                            <span>Review the tax tables, rent logic, and cost inputs behind the model.</span>
+                        </a>
                     </div>
-                    <div style="padding: 1rem 1.1rem; border-radius: 16px; background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(148,163,184,0.22);">
-                        <strong style="display:block; margin-bottom: 0.3rem;">Best for</strong>
-                        <span style="color: #cbd5e1;" th:text="${landingBullets != null ? landingBullets[1] : 'Relocation decisions, competing offers, and compensation conversations where headline salary hides the real answer.'}">Relocation decisions, competing offers, and compensation conversations where headline salary hides the real answer.</span>
-                    </div>
-                    <div style="padding: 1rem 1.1rem; border-radius: 16px; background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(148,163,184,0.22);">
-                        <strong style="display:block; margin-bottom: 0.3rem;">What makes it different</strong>
-                        <span style="color: #cbd5e1;" th:text="${landingBullets != null ? landingBullets[2] : 'It is not a salary encyclopedia. It is a practical verdict tool built around a decision.'}">It is not a salary encyclopedia. It is a practical verdict tool built around a decision.</span>
+                    <div style="margin-top: 1.1rem; padding-top: 1.1rem; border-top: 1px solid var(--border-subtle);">
+                        <h3 style="font-size: 1rem; margin-bottom: 0.8rem;">Popular role guides</h3>
+                        <div class="guide-grid">
+                            <a th:each="role : ${featuredRoleGuides}" th:href="${'/job/' + role.slug}" class="guide-card">
+                                <span class="guide-kicker">Role guide</span>
+                                <strong th:text="${role.title}">Registered Nurse</strong>
+                                <p th:text="${role.summary}">Open a role-specific decision guide.</p>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="split-right" style="padding: 4rem 2rem;">
-            <div class="journey-card" style="max-width: 620px;">
-                <h2 style="margin-bottom: 0.8rem;">How to use it</h2>
-                <ol style="margin: 0; padding-left: 1.2rem; color: #334155; line-height: 1.8;">
-                    <li>Enter your current city and salary.</li>
-                    <li>Add the offer city and proposed salary.</li>
-                    <li>Review the verdict, monthly gain or loss, and negotiation threshold.</li>
-                </ol>
-                <div style="margin-top: 1.4rem; padding: 1rem; border-radius: 14px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a;">
-                    A better offer is not just a bigger number. It has to survive tax, rent, and cost-of-living reality.
-                </div>
-                <div style="margin-top: 1.4rem; display: grid; gap: 0.75rem;">
-                    <a href="/start#mode=compare" style="text-decoration: none; color: inherit; padding: 1rem; border-radius: 14px; border: 1px solid #e2e8f0; background: white;">
-                        <strong style="display:block; margin-bottom: 0.25rem;">Open the comparison calculator</strong>
-                        <span style="color: #64748b;">Jump straight into offer vs offer mode.</span>
-                    </a>
-                    <a href="/methodology" style="text-decoration: none; color: inherit; padding: 1rem; border-radius: 14px; border: 1px solid #e2e8f0; background: white;">
-                        <strong style="display:block; margin-bottom: 0.25rem;">Check the assumptions</strong>
-                        <span style="color: #64748b;">Review the tax and cost inputs behind the model.</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+        </section>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
 </body>
 
 </html>

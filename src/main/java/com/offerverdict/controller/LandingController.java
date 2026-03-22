@@ -1,27 +1,33 @@
 package com.offerverdict.controller;
 
+import com.offerverdict.service.RoleGuideService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class LandingController {
+    private final RoleGuideService roleGuideService;
+
+    public LandingController(RoleGuideService roleGuideService) {
+        this.roleGuideService = roleGuideService;
+    }
 
     @GetMapping("/should-i-take-this-offer")
     public String shouldITakeThisOffer(Model model) {
-        model.addAttribute("title", "Should I Take This Job Offer? | OfferVerdict");
-        model.addAttribute("metaDescription",
-                "Use OfferVerdict to compare two job offers after tax, rent, and cost of living. Get a practical verdict before you relocate or negotiate.");
-        model.addAttribute("canonicalUrl", "https://livingcostcheck.com/should-i-take-this-offer");
+        addSharedLandingModel(model,
+                "Should I Take This Job Offer? | OfferVerdict",
+                "Use OfferVerdict to compare two job offers after tax, rent, and cost of living. Get a practical verdict before you relocate or negotiate.",
+                "https://livingcostcheck.com/should-i-take-this-offer");
         return "offer-decision";
     }
 
     @GetMapping("/job-offer-comparison-calculator")
     public String jobOfferComparisonCalculator(Model model) {
-        model.addAttribute("title", "Job Offer Comparison Calculator | OfferVerdict");
-        model.addAttribute("metaDescription",
-                "Compare two job offers with taxes, rent, and cost of living included. See which offer leaves you with more real monthly cash flow.");
-        model.addAttribute("canonicalUrl", "https://livingcostcheck.com/job-offer-comparison-calculator");
+        addSharedLandingModel(model,
+                "Job Offer Comparison Calculator | OfferVerdict",
+                "Compare two job offers with taxes, rent, and cost of living included. See which offer leaves you with more real monthly cash flow.",
+                "https://livingcostcheck.com/job-offer-comparison-calculator");
         model.addAttribute("landingTitle", "Job offer comparison calculator");
         model.addAttribute("landingEyebrow", "Calculator");
         model.addAttribute("landingLead",
@@ -35,10 +41,10 @@ public class LandingController {
 
     @GetMapping("/relocation-salary-calculator")
     public String relocationSalaryCalculator(Model model) {
-        model.addAttribute("title", "Relocation Salary Calculator | OfferVerdict");
-        model.addAttribute("metaDescription",
-                "Calculate whether moving for a job actually improves your finances after tax, rent, and cost of living.");
-        model.addAttribute("canonicalUrl", "https://livingcostcheck.com/relocation-salary-calculator");
+        addSharedLandingModel(model,
+                "Relocation Salary Calculator | OfferVerdict",
+                "Calculate whether moving for a job actually improves your finances after tax, rent, and cost of living.",
+                "https://livingcostcheck.com/relocation-salary-calculator");
         model.addAttribute("landingTitle", "Relocation salary calculator");
         model.addAttribute("landingEyebrow", "Relocation");
         model.addAttribute("landingLead",
@@ -52,10 +58,10 @@ public class LandingController {
 
     @GetMapping("/is-this-salary-enough")
     public String isThisSalaryEnough(Model model) {
-        model.addAttribute("title", "Is This Salary Enough? | OfferVerdict");
-        model.addAttribute("metaDescription",
-                "Check whether a salary is enough in a specific city after tax, rent, and baseline living costs.");
-        model.addAttribute("canonicalUrl", "https://livingcostcheck.com/is-this-salary-enough");
+        addSharedLandingModel(model,
+                "Is This Salary Enough? | OfferVerdict",
+                "Check whether a salary is enough in a specific city after tax, rent, and baseline living costs.",
+                "https://livingcostcheck.com/is-this-salary-enough");
         model.addAttribute("landingTitle", "Is this salary enough?");
         model.addAttribute("landingEyebrow", "Salary check");
         model.addAttribute("landingLead",
@@ -65,5 +71,12 @@ public class LandingController {
                 "Compare salary to housing costs",
                 "Understand monthly residual, not just headline pay"));
         return "offer-decision";
+    }
+
+    private void addSharedLandingModel(Model model, String title, String metaDescription, String canonicalUrl) {
+        model.addAttribute("title", title);
+        model.addAttribute("metaDescription", metaDescription);
+        model.addAttribute("canonicalUrl", canonicalUrl);
+        model.addAttribute("featuredRoleGuides", roleGuideService.featuredGuides());
     }
 }
