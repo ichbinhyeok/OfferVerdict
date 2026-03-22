@@ -47,18 +47,193 @@
         "nurse": {
             "austin-tx": {
                 "p10": 65000,
-                "p50": 88000,
+                "p50": 93475,
                 "p90": 120000
+            },
+            "dallas-tx": {
+                "p50": 94240
+            },
+            "boston-ma": {
+                "p50": 111930
+            },
+            "chicago-il": {
+                "p50": 90810
+            },
+            "los-angeles-ca": {
+                "p50": 121440
+            },
+            "san-francisco-ca": {
+                "p50": 181251
+            },
+            "seattle-wa": {
+                "p50": 108285
             },
             "new-york-ny": {
                 "p10": 85000,
-                "p50": 115000,
+                "p50": 108534,
                 "p90": 160000
             },
             "default": {
                 "p10": 60000,
                 "p50": 82000,
                 "p90": 110000
+            }
+        },
+        "accountant": {
+            "austin-tx": {
+                "p50": 80205
+            },
+            "dallas-tx": {
+                "p50": 90130
+            },
+            "boston-ma": {
+                "p50": 101120
+            },
+            "chicago-il": {
+                "p50": 89490
+            },
+            "los-angeles-ca": {
+                "p50": 96620
+            },
+            "san-francisco-ca": {
+                "p50": 104000
+            },
+            "seattle-wa": {
+                "p50": 83158
+            },
+            "new-york-ny": {
+                "p50": 103896
+            },
+            "default": {
+                "p10": 50440,
+                "p50": 79880,
+                "p90": 137280
+            }
+        },
+        "project-manager": {
+            "austin-tx": {
+                "p50": 96075
+            },
+            "dallas-tx": {
+                "p50": 99690
+            },
+            "boston-ma": {
+                "p50": 113150
+            },
+            "chicago-il": {
+                "p50": 104220
+            },
+            "los-angeles-ca": {
+                "p50": 109690
+            },
+            "san-francisco-ca": {
+                "p50": 128981
+            },
+            "seattle-wa": {
+                "p10": 67620,
+                "p50": 107860,
+                "p90": 167340
+            },
+            "new-york-ny": {
+                "p50": 116979
+            },
+            "default": {
+                "p10": 57500,
+                "p50": 98580,
+                "p90": 163040
+            }
+        },
+        "marketing-manager": {
+            "austin-tx": {
+                "p50": 154024
+            },
+            "dallas-tx": {
+                "p50": 153230
+            },
+            "boston-ma": {
+                "p50": 183450
+            },
+            "chicago-il": {
+                "p50": 161280
+            },
+            "los-angeles-ca": {
+                "p50": 174910
+            },
+            "san-francisco-ca": {
+                "p50": 209165
+            },
+            "seattle-wa": {
+                "p50": 157435
+            },
+            "new-york-ny": {
+                "p50": 176530
+            },
+            "default": {
+                "p10": 79600,
+                "p50": 157620,
+                "p90": 239200
+            }
+        },
+        "pharmacist": {
+            "austin-tx": {
+                "p50": 137363
+            },
+            "dallas-tx": {
+                "p50": 136230
+            },
+            "boston-ma": {
+                "p50": 131220
+            },
+            "chicago-il": {
+                "p50": 134350
+            },
+            "los-angeles-ca": {
+                "p50": 148600
+            },
+            "san-francisco-ca": {
+                "p50": 180419
+            },
+            "seattle-wa": {
+                "p50": 143062
+            },
+            "new-york-ny": {
+                "p50": 133682
+            },
+            "default": {
+                "p10": 89980,
+                "p50": 136030,
+                "p90": 168650
+            }
+        },
+        "physical-therapist": {
+            "austin-tx": {
+                "p50": 102710
+            },
+            "dallas-tx": {
+                "p50": 109560
+            },
+            "boston-ma": {
+                "p50": 100700
+            },
+            "chicago-il": {
+                "p50": 105620
+            },
+            "los-angeles-ca": {
+                "p50": 106930
+            },
+            "san-francisco-ca": {
+                "p50": 131061
+            },
+            "seattle-wa": {
+                "p50": 102835
+            },
+            "new-york-ny": {
+                "p50": 104000
+            },
+            "default": {
+                "p10": 72260,
+                "p50": 99710,
+                "p90": 130870
             }
         },
         "default": {

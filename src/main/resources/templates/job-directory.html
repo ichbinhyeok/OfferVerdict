@@ -93,9 +93,10 @@
                         <span class="guide-kicker" th:text="${card.state}">State</span>
                         <strong th:text="${card.cityName}">City</strong>
                         <p>
-                            Starting salary check:
+                            <span th:text="${card.salaryHeading}">Model starting point:</span>
                             <strong th:text="${card.salaryLabel}">$100,000</strong>
                         </p>
+                        <p class="guide-note" th:text="${card.salaryNote}">Guide note</p>
                         <div class="action-stack">
                             <a th:href="${card.analysisUrl}" class="action-card">
                                 <strong>Open salary check</strong>
@@ -111,6 +112,7 @@
 
                 <div style="margin-top: 2rem;">
                     <a href="/job-offer-comparison-calculator" class="btn btn-primary">Open the comparison calculator</a>
+                    <a href="/methodology" class="btn btn-secondary" style="margin-left: 0.75rem;">Review methodology</a>
                 </div>
             </div>
         </section>

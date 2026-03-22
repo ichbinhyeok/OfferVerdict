@@ -24,6 +24,10 @@ import java.util.stream.Collectors;
 
 @Component
 public class DataRepository {
+    private static final Map<String, List<String>> MARKET_JOB_ALIASES = Map.of(
+            "registered-nurse", List.of("registered-nurse", "nurse"),
+            "nurse", List.of("nurse", "registered-nurse"));
+
     private final ObjectMapper objectMapper;
     private TaxData taxData;
     private List<CityCostEntry> cities = Collections.emptyList();
@@ -78,22 +82,70 @@ public class DataRepository {
         }
     }
 
+    public record MarketBenchmarkSelection(Map<String, Double> values,
+                                           boolean roleSpecific,
+                                           boolean citySpecific,
+                                           boolean cityRangeComplete) {
+    }
+
     /**
      * Finds market benchmark (p10, p50, p90) for a job and city with fallbacks.
      */
     public Map<String, Double> getMarketBenchmark(String jobSlug, String citySlug) {
+        return selectMarketBenchmark(jobSlug, citySlug).values();
+    }
+
+    public MarketBenchmarkSelection selectMarketBenchmark(String jobSlug, String citySlug) {
         String jSlug = SlugNormalizer.normalize(jobSlug);
         String cSlug = SlugNormalizer.normalize(citySlug);
+        List<String> candidates = MARKET_JOB_ALIASES.getOrDefault(jSlug, List.of(jSlug));
+        Map<String, Double> globalDefaultValues = Optional.ofNullable(jobMarketData.get("default"))
+                .map(entry -> entry.get("default"))
+                .orElse(Collections.emptyMap());
 
-        Map<String, Map<String, Double>> jobEntry = jobMarketData.getOrDefault(jSlug, jobMarketData.get("default"));
-        if (jobEntry == null)
-            return Collections.emptyMap();
+        for (String candidate : candidates) {
+            Map<String, Map<String, Double>> jobEntry = jobMarketData.get(candidate);
+            if (jobEntry == null) {
+                continue;
+            }
 
-        Map<String, Double> cityEntry = jobEntry.getOrDefault(cSlug, jobEntry.get("default"));
-        if (cityEntry == null)
-            return Collections.emptyMap();
+            Map<String, Double> cityEntry = jobEntry.get(cSlug);
+            if (cityEntry != null) {
+                Map<String, Double> merged = mergeBenchmarks(globalDefaultValues, jobEntry.get("default"), cityEntry);
+                boolean cityRangeComplete = cityEntry.containsKey("p10")
+                        && cityEntry.containsKey("p50")
+                        && cityEntry.containsKey("p90");
+                return new MarketBenchmarkSelection(merged, true, true, cityRangeComplete);
+            }
 
-        return cityEntry;
+            Map<String, Double> roleDefault = jobEntry.get("default");
+            if (roleDefault != null) {
+                Map<String, Double> merged = mergeBenchmarks(globalDefaultValues, roleDefault, Collections.emptyMap());
+                return new MarketBenchmarkSelection(merged, true, false, false);
+            }
+        }
+
+        if (globalDefaultValues.isEmpty()) {
+            return new MarketBenchmarkSelection(Collections.emptyMap(), false, false, false);
+        }
+
+        return new MarketBenchmarkSelection(globalDefaultValues, false, false, false);
+    }
+
+    private Map<String, Double> mergeBenchmarks(Map<String, Double> globalDefault,
+                                                Map<String, Double> roleDefault,
+                                                Map<String, Double> cityEntry) {
+        java.util.LinkedHashMap<String, Double> merged = new java.util.LinkedHashMap<>();
+        if (globalDefault != null) {
+            merged.putAll(globalDefault);
+        }
+        if (roleDefault != null) {
+            merged.putAll(roleDefault);
+        }
+        if (cityEntry != null) {
+            merged.putAll(cityEntry);
+        }
+        return merged;
     }
 
     // Inner classes for JSON wrappers

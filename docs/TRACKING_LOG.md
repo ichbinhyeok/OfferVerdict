@@ -398,3 +398,222 @@ Purpose: persistent cross-session log for date-based analysis and implemented im
   - this did not change SEO strategy directly
   - it improved product trust and reduced the `template / generated site` feeling that had become visible after the pivot
   - this matters because the site now has to win on credibility, not just crawlability
+
+## 2026-03-22 - Market Anchor Expansion (Hub Defaults)
+
+- Problem observed after the trust pass:
+  - job and city hubs had honest labels, but too many important non-tech roles still fell back to the modeled salary heuristic
+  - that meant `teacher`, `accountant`, `pharmacist`, `project-manager`, etc. did not all have the same trust level as software-engineer or nurse pages
+
+- Root cause:
+  - `JobMarketData.json` only had explicit role benchmark coverage for:
+    - software-engineer
+    - data-scientist
+    - nurse
+  - hub pages were already capable of using repository benchmark data, but the dataset itself was too sparse
+
+- Changes shipped locally:
+  - expanded `JobMarketData.json` role defaults for:
+    - `accountant`
+    - `project-manager`
+    - `marketing-manager`
+    - `pharmacist`
+    - `physical-therapist`
+  - data source direction:
+    - BLS OEWS / OOH national percentile wage data
+    - exact city-specific metro coverage was not added in this pass
+    - these are role-level anchors, not full metro benchmarks
+  - repository / hub behavior already supports this distinction:
+    - city-specific benchmark available => `Local median pay anchor`
+    - role benchmark only => `Role pay anchor`
+    - no benchmark available => `Model starting point`
+
+- Local validation:
+  - added regression coverage that `/job/accountant` now renders the `Role pay anchor` path
+  - kept the `teacher` fallback test to ensure uncovered roles still use the modeled path explicitly
+  - `./gradlew test --tests com.offerverdict.controller.SeoRegressionIntegrationTest --tests com.offerverdict.controller.SitemapControllerTest --tests com.offerverdict.service.ComparisonServiceTest --no-daemon`
+  - `./gradlew bootJar --no-daemon`
+
+- Interpretation:
+  - this raises hub credibility without pretending all roles have metro-specific wage coverage yet
+  - it is a practical middle layer between:
+    - sparse exact metro benchmarks
+    - fully heuristic placeholders
+  - the next quality jump would be adding metro-specific BLS coverage for the top job x city combinations rather than more role defaults
+
+## 2026-03-22 - Metro-Adjusted Role Anchors
+
+- Problem observed after role-default expansion:
+  - role-level BLS anchors improved trust, but city hubs still had a weak middle layer:
+    - exact city benchmark available => good
+    - no exact city benchmark => role default only
+  - for hub entry points, a national role median by itself is not city-aware enough
+
+- Change shipped locally:
+  - added a middle path in hub starting-point logic:
+    - exact city role benchmark => `Local median pay anchor`
+    - role default only => `Metro-adjusted role anchor`
+    - no role benchmark => `Model starting point`
+  - `Metro-adjusted role anchor` logic:
+    - starts from the public role median
+    - adjusts with city cost index
+    - adjusts with city median income
+    - aligns to existing SEO salary buckets
+  - goal:
+    - make city entry points more locally plausible
+    - keep wording honest about what is exact vs adjusted vs modeled
+
+- Validation:
+  - regression updated so `/job/accountant` now asserts `Metro-adjusted role anchor`
+  - teacher still asserts the pure fallback modeled path
+  - build and regression suite passed
+
+- Interpretation:
+  - this is a better user-facing bridge while metro-specific BLS coverage is still sparse
+  - it should make hubs feel more useful without overstating the precision of the number
+
+## 2026-03-22 - Exact Metro Seed + Anchor Language Unification
+
+- Problem observed after metro-adjusted anchors:
+  - hub pages had the new anchor system, but:
+    - comparison defaults still used older hardcoded salary guesses
+    - single-city market language still read like a generic local median claim
+    - exact metro benchmark support was not yet expanded beyond the older tech / nurse cases
+
+- Changes shipped locally:
+  - exact metro seeds added where sparse public metro wage coverage was available:
+    - `accountant` -> `austin-tx` (`p50`)
+    - `pharmacist` -> `austin-tx` (`p50`)
+    - `project-manager` -> `seattle-wa` (`p10/p50/p90`)
+    - `physical-therapist` -> `seattle-wa` (`p10/p50/p90`)
+  - repository benchmark selection now merges:
+    - city entry
+    - role default
+    - global default
+    so partial metro entries can still produce stable range output
+  - comparison-page default salary seeds now use the same benchmark-selection logic before falling back to legacy heuristics
+  - single-city market section now explicitly names the anchor tier:
+    - `Local median pay anchor`
+    - `Metro-adjusted role anchor`
+    - `Model starting point`
+  - comparison page source badge now mirrors the same tiered benchmark language
+
+- Local validation:
+  - regression coverage now includes:
+    - exact-city accountant single-city page => `Local median pay anchor`
+    - non-exact accountant single-city page => `Metro-adjusted role anchor`
+    - accountant job hub => metro-adjusted anchor path
+    - teacher job hub => modeled fallback path
+  - `./gradlew test --tests com.offerverdict.controller.SeoRegressionIntegrationTest --tests com.offerverdict.controller.SitemapControllerTest --tests com.offerverdict.service.ComparisonServiceTest --no-daemon`
+  - `./gradlew bootJar --no-daemon`
+
+- Interpretation:
+  - the project now speaks one benchmark language across:
+    - hubs
+    - single-city salary pages
+    - comparison defaults
+  - this is materially better for product trust because the user can now tell whether a number is:
+    - exact local
+    - city-adjusted
+    - purely modeled
+
+## 2026-03-22 - Seattle Exact Metro Coverage Expansion
+
+- Problem observed after anchor-language unification:
+  - the tier system was in place, but exact metro coverage was still thin for several non-tech role x Seattle combinations
+  - that meant some important pages still fell back to metro-adjusted or modeled anchors even when public metro wage data was available
+
+- Changes shipped locally:
+  - expanded exact Seattle `p50` coverage in `JobMarketData.json` for:
+    - `nurse`
+    - `accountant`
+    - `marketing-manager`
+    - `pharmacist`
+    - `physical-therapist`
+  - repository merge behavior continues to fill missing percentile slots from role/global defaults, so sparse metro data can still surface as a stable public-data-backed anchor
+
+- Local validation:
+  - added regression for Seattle pharmacist single-city page to assert `Local median pay anchor`
+  - regression suite passed:
+    - `./gradlew test --tests com.offerverdict.controller.SeoRegressionIntegrationTest --tests com.offerverdict.controller.SitemapControllerTest --tests com.offerverdict.service.ComparisonServiceTest --no-daemon`
+  - build passed:
+    - `./gradlew bootJar --no-daemon`
+
+- Interpretation:
+  - the benchmark system now covers a more credible Seattle relocation surface for both tech and non-tech roles
+  - this improves trust on city-entry pages without pretending all roles now have full metro datasets
+
+## 2026-03-22 - Austin / NYC / SF Exact Metro Expansion
+
+- Problem observed after Seattle expansion:
+  - the public-data-backed anchor system was strongest in Seattle, but the other priority relocation metros still had uneven non-tech coverage
+  - that meant important pages for Austin, New York, and San Francisco could still fall back to adjusted/model language even when official metro wage estimates existed
+
+- Changes shipped locally:
+  - expanded exact metro `p50` coverage in `JobMarketData.json` for:
+    - `nurse`
+    - `accountant`
+    - `project-manager`
+    - `marketing-manager`
+    - `pharmacist`
+    - `physical-therapist`
+  - metros expanded:
+    - `austin-tx`
+    - `new-york-ny`
+    - `san-francisco-ca`
+  - existing rough `p10/p90` ranges were left in place where useful, while exact metro `p50` now overrides the center anchor with public metro data
+
+- Local validation:
+  - added exact-anchor regressions for:
+    - New York `project-manager`
+    - San Francisco `registered-nurse`
+    - Austin `marketing-manager`
+  - regression suite passed:
+    - `./gradlew test --tests com.offerverdict.controller.SeoRegressionIntegrationTest --tests com.offerverdict.controller.SitemapControllerTest --tests com.offerverdict.service.ComparisonServiceTest --no-daemon`
+  - build passed:
+    - `./gradlew bootJar --no-daemon`
+
+- Interpretation:
+  - the priority relocation metros now have a much more consistent trust layer for non-tech role entry points
+  - this does not mean full metro wage coverage is complete, but it materially reduces the number of important pages that still look purely modeled
+
+## 2026-03-22 - Dallas / Boston / LA / Chicago Metro Coverage Pass
+
+- Problem observed after the first priority-metro pass:
+  - Austin, Seattle, New York, and San Francisco were becoming trustable public-data entry points
+  - but other important relocation metros still looked uneven, especially for non-tech roles
+  - that risked making hub quality feel arbitrary city-by-city
+
+- Changes shipped locally:
+  - added exact metro `p50` coverage in `JobMarketData.json` for these metros:
+    - `dallas-tx`
+    - `boston-ma`
+    - `los-angeles-ca`
+    - `chicago-il`
+  - roles covered:
+    - `nurse`
+    - `accountant`
+    - `project-manager`
+    - `marketing-manager`
+    - `pharmacist`
+    - `physical-therapist`
+  - expanded sitemap core city hubs to surface:
+    - `/city/los-angeles-ca`
+    - `/city/chicago-il`
+    - `/city/boston-ma`
+
+- Local validation:
+  - exact-anchor regressions added for:
+    - Dallas accountant
+    - Boston project manager
+    - Los Angeles physical therapist
+    - Chicago pharmacist
+  - sitemap regression updated to assert the new city hubs are emitted
+  - regression suite passed:
+    - `./gradlew test --tests com.offerverdict.controller.SeoRegressionIntegrationTest --tests com.offerverdict.controller.SitemapControllerTest --tests com.offerverdict.service.ComparisonServiceTest --no-daemon`
+  - build passed:
+    - `./gradlew bootJar --no-daemon`
+
+- Interpretation:
+  - public-data-backed anchor coverage is now much more consistent across the site's most important relocation metros
+  - city hubs and single-city pages should now feel less random and less purely modeled for both tech and non-tech audiences

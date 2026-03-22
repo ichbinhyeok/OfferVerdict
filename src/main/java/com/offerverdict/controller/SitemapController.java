@@ -47,6 +47,9 @@ public class SitemapController {
             "seattle-wa",
             "new-york-ny",
             "san-francisco-ca",
+            "los-angeles-ca",
+            "chicago-il",
+            "boston-ma",
             "miami-fl");
 
 

@@ -89,9 +89,10 @@
                         <strong th:text="${card.title}">Registered Nurse</strong>
                         <p th:text="${card.summary}">Role summary</p>
                         <p>
-                            Starting salary check:
+                            <span th:text="${card.salaryHeading}">Model starting point:</span>
                             <strong th:text="${card.salaryLabel}">$100,000</strong>
                         </p>
+                        <p class="guide-note" th:text="${card.salaryNote}">Guide note</p>
                         <div class="action-stack">
                             <a th:href="${card.analysisUrl}" class="action-card">
                                 <strong>Open salary check</strong>

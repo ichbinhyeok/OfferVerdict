@@ -105,6 +105,7 @@ class SeoRegressionIntegrationTest {
 
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("name=\"robots\" content=\"index, follow\""));
+        assertTrue(response.body().contains("Uses metro-adjusted role pay anchors, plus public tax and cost data"));
     }
 
     @Test
@@ -170,6 +171,140 @@ class SeoRegressionIntegrationTest {
     }
 
     @Test
+    void home_highlights_methodology_and_doesNotRenderLegacySplitHeroCopy() throws Exception {
+        HttpResponse<String> response = httpGet("/");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Review the methodology"));
+        assertTrue(response.body().contains("Transparent limits"));
+        assertFalse(response.body().contains("The left side sets the context. The right side gets you to a verdict fast."));
+        assertFalse(response.body().contains("class=\"split-left\""));
+    }
+
+    @Test
+    void hubPages_labelSalaryAsModelStartingPoint() throws Exception {
+        HttpResponse<String> jobHub = httpGet("/job/software-engineer");
+        HttpResponse<String> cityHub = httpGet("/city/austin-tx");
+
+        assertEquals(200, jobHub.statusCode());
+        assertEquals(200, cityHub.statusCode());
+        assertTrue(jobHub.body().contains("public wage median"));
+        assertTrue(cityHub.body().contains("public wage median"));
+        assertFalse(jobHub.body().contains("Starting salary check:"));
+        assertFalse(cityHub.body().contains("Estimated from role baselines, city costs, and local income levels. Review the full assumptions before using it as a negotiation anchor."));
+        assertTrue(jobHub.body().contains("/methodology"));
+    }
+
+    @Test
+    void teacherHub_fallsBackToModeledStartingPointWhenRoleBenchmarkIsMissing() throws Exception {
+        HttpResponse<String> response = httpGet("/job/teacher");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Model starting point:"));
+        assertTrue(response.body().contains("Estimated from role baselines, city costs, and local income levels."));
+    }
+
+    @Test
+    void accountantHub_usesRolePayAnchorWhenNationalBenchmarkExists() throws Exception {
+        HttpResponse<String> response = httpGet("/job/accountant");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Metro-adjusted role anchor:"));
+        assertTrue(response.body().contains("Starts from a public wage median for this role"));
+        assertFalse(response.body().contains("Model starting point:"));
+    }
+
+    @Test
+    void accountantSingleCity_withExactMetroBenchmark_usesLocalMedianAnchorLanguage() throws Exception {
+        HttpResponse<String> response = httpGet("/salary-check/accountant/austin-tx/80000");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Local median pay anchor"));
+        assertTrue(response.body().contains("local public wage median"));
+    }
+
+    @Test
+    void accountantSingleCity_withoutExactMetroBenchmark_usesMetroAdjustedAnchorLanguage() throws Exception {
+        HttpResponse<String> response = httpGet("/salary-check/accountant/phoenix-az/80000");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Metro-adjusted role anchor"));
+        assertTrue(response.body().contains("starts from a public role median"));
+    }
+
+    @Test
+    void seattlePharmacistSingleCity_usesLocalAnchorLanguageFromExactMetroData() throws Exception {
+        HttpResponse<String> response = httpGet("/salary-check/pharmacist/seattle-wa/140000");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Local median pay anchor"));
+        assertTrue(response.body().contains("local public wage median"));
+    }
+
+    @Test
+    void newYorkProjectManagerSingleCity_usesLocalAnchorLanguageFromExactMetroData() throws Exception {
+        HttpResponse<String> response = httpGet("/salary-check/project-manager/new-york-ny/120000");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Local median pay anchor"));
+        assertTrue(response.body().contains("local public wage median"));
+    }
+
+    @Test
+    void sanFranciscoNurseSingleCity_usesLocalAnchorLanguageFromExactMetroData() throws Exception {
+        HttpResponse<String> response = httpGet("/salary-check/registered-nurse/san-francisco-ca/180000");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Local median pay anchor"));
+        assertTrue(response.body().contains("local public wage median"));
+    }
+
+    @Test
+    void austinMarketingManagerSingleCity_usesLocalAnchorLanguageFromExactMetroData() throws Exception {
+        HttpResponse<String> response = httpGet("/salary-check/marketing-manager/austin-tx/150000");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Local median pay anchor"));
+        assertTrue(response.body().contains("local public wage median"));
+    }
+
+    @Test
+    void dallasAccountantSingleCity_usesLocalAnchorLanguageFromExactMetroData() throws Exception {
+        HttpResponse<String> response = httpGet("/salary-check/accountant/dallas-tx/90000");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Local median pay anchor"));
+        assertTrue(response.body().contains("local public wage median"));
+    }
+
+    @Test
+    void bostonProjectManagerSingleCity_usesLocalAnchorLanguageFromExactMetroData() throws Exception {
+        HttpResponse<String> response = httpGet("/salary-check/project-manager/boston-ma/115000");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Local median pay anchor"));
+        assertTrue(response.body().contains("local public wage median"));
+    }
+
+    @Test
+    void losAngelesPhysicalTherapistSingleCity_usesLocalAnchorLanguageFromExactMetroData() throws Exception {
+        HttpResponse<String> response = httpGet("/salary-check/physical-therapist/los-angeles-ca/110000");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Local median pay anchor"));
+        assertTrue(response.body().contains("local public wage median"));
+    }
+
+    @Test
+    void chicagoPharmacistSingleCity_usesLocalAnchorLanguageFromExactMetroData() throws Exception {
+        HttpResponse<String> response = httpGet("/salary-check/pharmacist/chicago-il/135000");
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Local median pay anchor"));
+        assertTrue(response.body().contains("local public wage median"));
+    }
+
+    @Test
     void nonMajorJobHub_staysNoindex() throws Exception {
         HttpResponse<String> response = httpGet("/job/architect");
 
@@ -189,6 +324,9 @@ class SeoRegressionIntegrationTest {
         assertTrue(response.body().contains("/job/teacher</loc>"));
         assertTrue(response.body().contains("/city/austin-tx</loc>"));
         assertTrue(response.body().contains("/city/seattle-wa</loc>"));
+        assertTrue(response.body().contains("/city/los-angeles-ca</loc>"));
+        assertTrue(response.body().contains("/city/chicago-il</loc>"));
+        assertTrue(response.body().contains("/city/boston-ma</loc>"));
         assertFalse(response.body().contains("/salary-check/miami-fl/"));
     }
 

@@ -322,7 +322,8 @@ public class SingleCityController {
 
         // 7e. Market Benchmarking Analysis
         String jSlugForMarket = (jobInfo != null) ? jobInfo.getSlug() : "default";
-        Map<String, Double> benchmark = repository.getMarketBenchmark(jSlugForMarket, citySlug);
+        DataRepository.MarketBenchmarkSelection benchmarkSelection = repository.selectMarketBenchmark(jSlugForMarket, citySlug);
+        Map<String, Double> benchmark = benchmarkSelection.values();
 
         if (!benchmark.isEmpty()) {
             double p10 = benchmark.getOrDefault("p10", 0.0);
@@ -345,14 +346,35 @@ public class SingleCityController {
             double position = (salary / p50) * 100 - 100;
             model.addAttribute("marketPosition", position);
             model.addAttribute("marketPositionAbs", Math.abs(position));
+            if (benchmarkSelection.citySpecific()) {
+                model.addAttribute("marketAnchorHeading", "Local median pay anchor");
+                model.addAttribute("marketAnchorNote",
+                        benchmarkSelection.cityRangeComplete()
+                                ? "This anchor uses a public wage median for this role in this city."
+                                : "This anchor uses a local public wage median for this role. Where city percentile detail is sparse, outer range markers may blend broader role benchmark data.");
+            } else if (benchmarkSelection.roleSpecific()) {
+                model.addAttribute("marketAnchorHeading", "Metro-adjusted role anchor");
+                model.addAttribute("marketAnchorNote",
+                        "This anchor starts from a public role median, then adjusts for local city costs and income levels.");
+            } else {
+                model.addAttribute("marketAnchorHeading", "Model starting point");
+                model.addAttribute("marketAnchorNote",
+                        "This anchor is modeled from broader public cost and income inputs because direct role benchmark coverage is limited.");
+            }
+
             if (Math.abs(position) < 0.5) {
-                model.addAttribute("marketPositionText", "in line with the local median");
+                model.addAttribute("marketPositionText",
+                        benchmarkSelection.citySpecific() ? "in line with the local median" : "in line with this anchor");
             } else if (position > 0) {
                 model.addAttribute("marketPositionText",
-                        String.format("about %.1f%% above the local median", Math.abs(position)));
+                        String.format("about %.1f%% above %s",
+                                Math.abs(position),
+                                benchmarkSelection.citySpecific() ? "the local median" : "this anchor"));
             } else {
                 model.addAttribute("marketPositionText",
-                        String.format("about %.1f%% below the local median", Math.abs(position)));
+                        String.format("about %.1f%% below %s",
+                                Math.abs(position),
+                                benchmarkSelection.citySpecific() ? "the local median" : "this anchor"));
             }
 
             // Calculate progress bar left position (0-100 range)

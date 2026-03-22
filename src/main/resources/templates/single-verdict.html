@@ -502,11 +502,15 @@
                     </div>
 
                     <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6;">
-                        In <span th:text="${city.city}">Austin</span>, the median salary for a
+                        In <span th:text="${city.city}">Austin</span>, the
+                        <strong th:text="${marketAnchorHeading != null ? marketAnchorHeading : 'Market anchor'}">Local median pay anchor</strong>
+                        for
                         <span th:text="${jobTitle}">all occupations</span> is approximately
                         <strong th:text="${'$' + #numbers.formatInteger(marketMedian, 0, 'COMMA')}">$135,000</strong>.
                         Your offer is <strong th:text="${marketPositionText}">in line with the local median</strong>.
                     </p>
+                    <p th:if="${marketAnchorNote != null}" style="color: #94a3b8; font-size: 0.84rem; line-height: 1.55; margin-top: -0.2rem;"
+                        th:text="${marketAnchorNote}">Anchor note</p>
 
                     <div class="market-bar-wrapper" style="margin-top: 2rem;">
                         <div

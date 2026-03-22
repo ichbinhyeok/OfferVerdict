@@ -390,6 +390,8 @@ public class ComparisonController {
                 equityMultiplier,
                 commuteTime);
 
+        result.setBenchmarkContext(buildComparisonBenchmarkContext(jobInfo, cityEntryA, cityEntryB));
+
         if (result == null)
             throw new IllegalStateException("ComparisonResult cannot be null");
 
@@ -510,6 +512,18 @@ public class ComparisonController {
     }
 
     private double getMedianSalary(String jobSlug, String citySlug) {
+        DataRepository.MarketBenchmarkSelection benchmarkSelection = repository.selectMarketBenchmark(jobSlug, citySlug);
+        double p50 = benchmarkSelection.values().getOrDefault("p50", 0.0);
+        if (p50 > 0) {
+            if (benchmarkSelection.citySpecific()) {
+                return p50;
+            }
+            if (benchmarkSelection.roleSpecific()) {
+                return metroAdjustedSalary(p50, repository.getCity(citySlug));
+            }
+            return p50;
+        }
+
         // --- REALISTIC SALARY ESTIMATES (2025/2026 Baseline) ---
         // These are national medians used when specific city data is missing
 
@@ -603,6 +617,27 @@ public class ComparisonController {
 
         return 75000; // Fallback National Median
 
+    }
+
+    private String buildComparisonBenchmarkContext(JobInfo jobInfo, CityCostEntry cityEntryA, CityCostEntry cityEntryB) {
+        DataRepository.MarketBenchmarkSelection anchorA = repository.selectMarketBenchmark(jobInfo.getSlug(), cityEntryA.getSlug());
+        DataRepository.MarketBenchmarkSelection anchorB = repository.selectMarketBenchmark(jobInfo.getSlug(), cityEntryB.getSlug());
+
+        if (anchorA.citySpecific() && anchorB.citySpecific()) {
+            return "Uses local pay anchors for both cities, plus public tax and cost data";
+        }
+        if (anchorA.roleSpecific() || anchorB.roleSpecific()) {
+            return "Uses metro-adjusted role pay anchors, plus public tax and cost data";
+        }
+        return "Uses modeled salary anchors, plus public tax and cost data";
+    }
+
+    private double metroAdjustedSalary(double roleMedian, CityCostEntry city) {
+        double defaultMedianIncome = 75000.0;
+        double cityMedianIncome = city.getMedianIncome() > 0 ? city.getMedianIncome() : defaultMedianIncome;
+        double costIndexFactor = Math.max(0.9, Math.min(1.3, city.getColIndex() / 100.0));
+        double incomeFactor = Math.max(0.9, Math.min(1.28, cityMedianIncome / defaultMedianIncome));
+        return roleMedian * (0.58 * costIndexFactor + 0.42 * incomeFactor);
     }
 
     /**

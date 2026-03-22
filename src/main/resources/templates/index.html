@@ -23,115 +23,50 @@
 </head>
 
 <body>
+    <nav class="top-nav">
+        <div class="container hero-nav">
+            <a href="/" class="logo">OfferVerdict</a>
+            <div class="hero-nav-links">
+                <a href="/about">About</a>
+                <a href="/methodology">Methodology</a>
+            </div>
+        </div>
+    </nav>
+
     <div class="landing-container">
-        <nav class="landing-nav">
-            <div class="nav-content">
-                <a href="/" class="nav-logo">
-                    <img src="/favicon.svg" alt="OfferVerdict Logo" style="height: 20px; width: 20px;">
-                    OfferVerdict
-                </a>
-                <div class="nav-links">
-                    <a href="/about" class="nav-link">About</a>
-                    <a href="/methodology" class="nav-link">Methodology</a>
-                </div>
-            </div>
-        </nav>
-
-        <section class="split-left">
-            <div class="hero-background">
-                <svg width="800" height="500" viewBox="0 0 800 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <pattern id="halftone" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
-                            <circle cx="7" cy="7" r="3.5" fill="#d3a24f" fill-opacity="0.45" />
-                        </pattern>
-                        <linearGradient id="flowGrad" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stop-color="#d3a24f" stop-opacity="0" />
-                            <stop offset="50%" stop-color="#f8f4ea" stop-opacity="1" />
-                            <stop offset="100%" stop-color="#8ccfc5" stop-opacity="0" />
-                        </linearGradient>
-                        <path id="us-shape" d="
-                    M 70,60
-                    L 350,50
-                    L 450,110
-                    L 550,90
-                    L 650,40
-                    L 740,30
-                    L 760,100
-                    L 720,130
-                    L 750,180
-                    L 700,280
-                    L 680,420
-                    L 600,400
-                    L 500,420
-                    L 450,450
-                    L 400,420
-                    L 350,440
-                    L 250,380
-                    L 150,370
-                    L 80,410
-                    L 40,320
-                    L 20,150
-                    L 70,60
-                    Z" />
-                        <clipPath id="us-clip">
-                            <use href="#us-shape" />
-                        </clipPath>
-                    </defs>
-                    <g clip-path="url(#us-clip)">
-                        <rect width="800" height="500" fill="url(#halftone)" />
-                    </g>
-                    <use href="#us-shape" stroke="#f1d39a" stroke-width="2.2" stroke-opacity="0.75" fill="none" />
-                    <g transform="translate(45, 230)">
-                        <circle r="15" stroke="#ffffff" stroke-width="1" opacity="0">
-                            <animate attributeName="r" values="6;20" dur="2.5s" repeatCount="indefinite" />
-                            <animate attributeName="opacity" values="0.8;0" dur="2.5s" repeatCount="indefinite" />
-                        </circle>
-                        <circle r="6" fill="#ffffff">
-                            <animate attributeName="r" values="6;8;6" dur="2.5s" repeatCount="indefinite" />
-                        </circle>
-                    </g>
-                    <g transform="translate(380, 400)">
-                        <circle r="5" fill="#8ccfc5" />
-                    </g>
-                    <g transform="translate(710, 140)">
-                        <circle r="5" fill="#f1d39a" />
-                    </g>
-                    <path id="pathSF-AUS" d="M45,230 Q200,300 380,400" stroke="url(#flowGrad)" stroke-width="2"
-                        fill="none" stroke-linecap="round" stroke-dasharray="8 8" opacity="0.6" />
-                    <circle r="4" fill="#ffffff">
-                        <animateMotion dur="4s" repeatCount="indefinite" rotate="auto">
-                            <mpath href="#pathSF-AUS" />
-                        </animateMotion>
-                        <animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite" />
-                    </circle>
-                    <path id="pathSF-NYC" d="M45,230 Q380,100 710,140" stroke="url(#flowGrad)" stroke-width="2"
-                        fill="none" stroke-linecap="round" stroke-dasharray="8 8" opacity="0.6" />
-                    <circle r="4" fill="#ffffff">
-                        <animateMotion dur="6s" repeatCount="indefinite" rotate="auto" begin="1s">
-                            <mpath href="#pathSF-NYC" />
-                        </animateMotion>
-                        <animate attributeName="opacity" values="0;1;0" dur="6s" repeatCount="indefinite" begin="1s" />
-                    </circle>
-                </svg>
-            </div>
-            <div class="hero-content">
-                <header class="landing-header">
-                    <h1 class="landing-title">
-                        Should you <span class="gradient-text">take this offer</span>?
-                    </h1>
-                    <p class="landing-subtitle">
-                        Compare two offers after tax, rent, and cost of living so you can decide whether the move is
-                        actually worth it.
-                    </p>
-                    <p class="hero-note">
-                        Built for relocation and negotiation decisions, not generic salary browsing. Use the calculator
-                        when the real question is whether your monthly cash flow improves.
-                    </p>
-                </header>
-            </div>
-        </section>
-
         <section class="split-right">
+            <header class="hero-inline panel">
+                <span class="eyebrow">Job offer comparison</span>
+                <h1 class="landing-title">
+                    Should this offer move you forward?
+                </h1>
+                <p class="landing-subtitle">
+                    Compare two offers after tax, rent, and cost of living so you can decide whether the move is
+                    actually worth it.
+                </p>
+                <p class="hero-note">
+                    Built for relocation and negotiation decisions, not generic salary browsing. Use the calculator
+                    when the real question is whether your monthly cash flow improves.
+                </p>
+                <section class="trust-strip" aria-label="Why trust this model">
+                    <div class="trust-card">
+                        <strong>Public-data model</strong>
+                        <span>We combine public tax, rent, and cost-of-living inputs into one relocation view.</span>
+                    </div>
+                    <div class="trust-card">
+                        <strong>Decision-first output</strong>
+                        <span>The goal is a usable yes-or-no tradeoff, not just a headline salary comparison.</span>
+                    </div>
+                    <div class="trust-card">
+                        <strong>Transparent limits</strong>
+                        <span>Use the estimate as a starting point, then review assumptions and source coverage.</span>
+                    </div>
+                </section>
+                <div class="trust-links">
+                    <a href="/methodology" class="support-link">Review the methodology</a>
+                    <a href="/about" class="support-link">See what OfferVerdict covers</a>
+                </div>
+            </header>
             <main class="journey-card">
                 <form action="/start" method="get" id="searchForm">
                     <div class="mode-toggle-container" style="margin-bottom: 1.2rem;">
@@ -369,7 +304,7 @@
                 </div>
                 <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08);">
                     <strong style="display:block; margin-bottom: 0.6rem; color: #fff;">Popular role guides</strong>
-                    <div class="support-grid">
+                    <div class="support-grid role-guide-grid">
                         <a th:each="role : ${featuredRoleGuides}" th:href="${'/job/' + role.slug}" class="support-link">
                             <strong th:text="${role.title}">Registered Nurse</strong>
                             <span th:text="${role.summary}">Open the job-specific relocation and salary guide.</span>

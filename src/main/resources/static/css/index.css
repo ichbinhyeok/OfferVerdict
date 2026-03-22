@@ -3,84 +3,32 @@
 */
 
 .landing-container {
-    display: grid;
-    grid-template-columns: minmax(0, 1.18fr) minmax(360px, 0.92fr);
+    display: block;
     min-height: 100vh;
+    overflow-x: clip;
 }
 
-.landing-nav {
-    position: fixed;
-    inset: 0 0 auto 0;
-    z-index: 60;
-    padding: 1rem 1.25rem;
-    pointer-events: none;
-}
-
-.nav-content {
-    width: min(1240px, 100%);
-    margin: 0 auto;
+.hero-nav {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    pointer-events: auto;
+    gap: 1rem;
 }
 
-.nav-logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    color: rgba(255, 255, 255, 0.92);
-    text-decoration: none;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-}
-
-.nav-links {
+.hero-nav-links {
     display: flex;
     gap: 1rem;
 }
 
-.nav-link {
-    color: rgba(255, 255, 255, 0.74);
+.hero-nav-links a {
+    color: var(--text-2);
     text-decoration: none;
     font-size: 0.88rem;
     font-weight: 700;
 }
 
-.nav-link:hover {
-    color: #fff;
-}
-
-.split-left {
-    position: relative;
-    overflow: hidden;
-    padding: 7rem 3rem 3rem;
-    display: flex;
-    align-items: center;
-    background:
-        radial-gradient(circle at 14% 18%, rgba(230, 165, 58, 0.16), transparent 28%),
-        radial-gradient(circle at 74% 78%, rgba(29, 127, 114, 0.14), transparent 30%),
-        linear-gradient(160deg, #0f1725 0%, #172132 58%, #1e2c43 100%);
-    color: var(--text-inverse);
-}
-
-.hero-background {
-    position: absolute;
-    inset: 8% -4% auto auto;
-    width: min(880px, 92%);
-    opacity: 0.28;
-    pointer-events: none;
-}
-
-.hero-background svg {
-    width: 100%;
-    height: auto;
-}
-
-.hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 620px;
+.hero-nav-links a:hover {
+    color: var(--text-1);
 }
 
 .landing-header {
@@ -90,15 +38,16 @@
 
 .landing-title {
     font-size: clamp(3rem, 5vw, 5rem);
-    color: #fff;
+    color: var(--text-1);
     line-height: 0.98;
     max-width: 12ch;
+    text-wrap: balance;
 }
 
 .landing-subtitle {
     font-size: 1.08rem;
     line-height: 1.8;
-    color: rgba(246, 241, 231, 0.86);
+    color: var(--text-2);
     max-width: 56ch;
 }
 
@@ -111,16 +60,76 @@
 
 .split-right {
     position: relative;
-    padding: 7rem 2rem 3rem;
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(244, 239, 228, 0.76));
+    padding: 6.5rem 1rem 3rem;
     display: grid;
-    align-content: center;
+    align-content: start;
     gap: 1.15rem;
 }
 
+.hero-inline {
+    width: min(760px, 100%);
+    margin: 0 auto;
+    padding: 1.75rem;
+    background:
+        radial-gradient(circle at top right, rgba(230, 165, 58, 0.16), transparent 34%),
+        radial-gradient(circle at bottom left, rgba(29, 127, 114, 0.08), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 241, 231, 0.92));
+    border: 1px solid var(--border-subtle);
+    border-radius: 28px;
+    box-shadow: var(--shadow-sm);
+}
+
+.hero-inline .landing-title {
+    max-width: 11ch;
+    margin-top: 0.7rem;
+    color: var(--text-1);
+}
+
+.hero-inline .landing-subtitle {
+    max-width: 38ch;
+    color: var(--text-2);
+}
+
+.hero-inline .hero-note {
+    max-width: 48ch;
+    color: var(--text-3);
+}
+
+.trust-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-top: 1.35rem;
+}
+
+.trust-card {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.76);
+    border: 1px solid rgba(13, 21, 35, 0.08);
+}
+
+.trust-card strong {
+    font-size: 0.92rem;
+}
+
+.trust-card span {
+    color: var(--text-2);
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+.trust-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
 .journey-card {
-    width: min(560px, 100%);
+    width: min(760px, 100%);
     margin: 0 auto;
     padding: 1.5rem;
     background: rgba(255, 255, 255, 0.92);
@@ -265,7 +274,7 @@
 }
 
 .support-panel {
-    width: min(560px, 100%);
+    width: min(760px, 100%);
     margin: 0 auto;
     padding: 1.2rem;
     border-radius: 24px;
@@ -305,13 +314,31 @@
     background: rgba(255, 255, 255, 0.08);
 }
 
+.support-link strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    line-height: 1.25;
+}
+
+.support-link span {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    line-height: 1.45;
+}
+
+.role-guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .hero-note {
     font-size: 0.9rem;
     color: rgba(246, 241, 231, 0.68);
 }
 
 .landing-footer {
-    width: min(560px, 100%);
+    width: min(760px, 100%);
     margin: 0 auto;
     display: flex;
     flex-wrap: wrap;
@@ -328,11 +355,10 @@
 }
 
 @media (max-width: 1080px) {
-    .landing-container {
-        grid-template-columns: 1fr;
+    .split-right {
+        padding-top: 6rem;
     }
 
-    .split-left,
     .split-right {
         padding-left: 1rem;
         padding-right: 1rem;
@@ -340,28 +366,17 @@
 }
 
 @media (max-width: 720px) {
-    .landing-nav {
-        padding: 0.85rem 0.8rem;
-    }
-
-    .nav-links {
-        gap: 0.75rem;
-    }
-
     .landing-title {
         max-width: none;
         font-size: clamp(2.5rem, 10vw, 3.8rem);
     }
 
-    .split-left {
-        padding-top: 6rem;
-        padding-bottom: 2rem;
-    }
-
     .split-right {
-        padding-top: 1rem;
+        padding-top: 5.4rem;
+        gap: 0.85rem;
     }
 
+    .hero-inline,
     .journey-card,
     .support-panel {
         padding: 1rem;
@@ -384,5 +399,73 @@
     .toggle-group button,
     .toggle-group label {
         min-width: 0;
+    }
+
+    .role-guide-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .trust-strip {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 420px) {
+    .hero-nav {
+        gap: 0.75rem;
+    }
+
+    .hero-nav-links {
+        gap: 0.75rem;
+    }
+
+    .hero-nav-links a {
+        font-size: 0.8rem;
+    }
+
+    .hero-inline,
+    .journey-card,
+    .support-panel {
+        padding: 0.9rem;
+        border-radius: 20px;
+    }
+
+    .landing-title {
+        font-size: clamp(2.2rem, 11vw, 3rem);
+        line-height: 1.02;
+    }
+
+    .landing-subtitle {
+        font-size: 0.98rem;
+        line-height: 1.65;
+    }
+
+    .hero-note {
+        font-size: 0.84rem;
+        line-height: 1.55;
+    }
+
+    .trust-card {
+        padding: 0.85rem 0.9rem;
+    }
+
+    .toggle-group {
+        width: 100%;
+        grid-auto-flow: row;
+    }
+
+    .toggle-group button,
+    .toggle-group label {
+        width: 100%;
+        padding-inline: 0.8rem;
+    }
+
+    .support-link {
+        padding: 0.8rem 0.85rem;
+    }
+
+    .support-link span {
+        -webkit-line-clamp: 2;
+        font-size: 0.84rem;
     }
 }

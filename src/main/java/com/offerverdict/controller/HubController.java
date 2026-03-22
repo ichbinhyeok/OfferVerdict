@@ -87,12 +87,14 @@ public class HubController {
                 .limit(MAX_CITY_ROLE_CARDS)
                 .toList()) {
             JobInfo job = repository.getJob(roleGuide.slug());
-            int benchmarkSalary = benchmarkSalary(job, city);
+            SalaryStartingPoint startingPoint = salaryStartingPoint(job, city);
             Map<String, String> roleCard = new LinkedHashMap<>();
             roleCard.put("title", roleGuide.title());
             roleCard.put("summary", roleGuide.summary());
-            roleCard.put("salaryLabel", String.format("$%,d", benchmarkSalary));
-            roleCard.put("analysisUrl", "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + benchmarkSalary);
+            roleCard.put("salaryLabel", String.format("$%,d", startingPoint.salary()));
+            roleCard.put("salaryHeading", startingPoint.heading());
+            roleCard.put("salaryNote", startingPoint.note());
+            roleCard.put("analysisUrl", "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + startingPoint.salary());
             roleCard.put("comparisonUrl", buildComparisonUrl(job, city));
             roleCard.put("comparisonLabel", buildComparisonLabel(city));
             roleCards.add(roleCard);
@@ -129,12 +131,14 @@ public class HubController {
 
         List<Map<String, String>> cityCards = new ArrayList<>();
         for (CityCostEntry city : cities) {
-            int benchmarkSalary = benchmarkSalary(job, city);
+            SalaryStartingPoint startingPoint = salaryStartingPoint(job, city);
             Map<String, String> cityCard = new LinkedHashMap<>();
             cityCard.put("cityName", city.getCity() + ", " + city.getState());
             cityCard.put("state", city.getState());
-            cityCard.put("salaryLabel", String.format("$%,d", benchmarkSalary));
-            cityCard.put("analysisUrl", "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + benchmarkSalary);
+            cityCard.put("salaryLabel", String.format("$%,d", startingPoint.salary()));
+            cityCard.put("salaryHeading", startingPoint.heading());
+            cityCard.put("salaryNote", startingPoint.note());
+            cityCard.put("analysisUrl", "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + startingPoint.salary());
             cityCard.put("comparisonUrl", buildComparisonUrl(job, city));
             cityCard.put("comparisonLabel", buildComparisonLabel(city));
             cityCards.add(cityCard);
@@ -154,6 +158,46 @@ public class HubController {
         model.addAttribute("salaryCheckGuideUrl", "/is-this-salary-enough");
 
         return "job-directory";
+    }
+
+    private SalaryStartingPoint salaryStartingPoint(JobInfo job, CityCostEntry city) {
+        DataRepository.MarketBenchmarkSelection selection = repository.selectMarketBenchmark(job.getSlug(), city.getSlug());
+        double p50 = selection.values().getOrDefault("p50", 0.0);
+
+        if (selection.roleSpecific() && p50 > 0) {
+            if (selection.citySpecific()) {
+                int salary = SeoUrlPolicy.clampAndAlignSalary((int) Math.round(p50),
+                        appProperties.getSeoSalaryBucketMin(),
+                        appProperties.getSeoSalaryBucketMax(),
+                        appProperties.getSeoSalaryBucketInterval());
+                return new SalaryStartingPoint(
+                        salary,
+                        "Local median pay anchor:",
+                        "Based on a public wage median for this role in this city. Review methodology before using it as a negotiation anchor.");
+            }
+            int salary = metroAdjustedRoleAnchor(p50, city);
+            return new SalaryStartingPoint(
+                    salary,
+                    "Metro-adjusted role anchor:",
+                    "Starts from a public wage median for this role, then adjusts for local city costs and income levels. Use it as a directional city-specific anchor, not a guarantee.");
+        }
+
+        int salary = benchmarkSalary(job, city);
+        return new SalaryStartingPoint(
+                salary,
+                "Model starting point:",
+                "Estimated from role baselines, city costs, and local income levels. Validate assumptions before using it as a target salary.");
+    }
+
+    private int metroAdjustedRoleAnchor(double roleMedian, CityCostEntry city) {
+        double cityMedianIncome = city.getMedianIncome() > 0 ? city.getMedianIncome() : DEFAULT_CITY_MEDIAN_INCOME;
+        double costIndexFactor = clamp(city.getColIndex() / 100.0, 0.9, 1.3);
+        double incomeFactor = clamp(cityMedianIncome / DEFAULT_CITY_MEDIAN_INCOME, 0.9, 1.28);
+        double adjusted = roleMedian * (0.58 * costIndexFactor + 0.42 * incomeFactor);
+        return SeoUrlPolicy.clampAndAlignSalary((int) Math.round(adjusted),
+                appProperties.getSeoSalaryBucketMin(),
+                appProperties.getSeoSalaryBucketMax(),
+                appProperties.getSeoSalaryBucketInterval());
     }
 
     private int benchmarkSalary(JobInfo job, CityCostEntry city) {
@@ -231,5 +275,8 @@ public class HubController {
             return "Compare offers";
         }
         return "Compare " + currentCity.getCity() + " vs " + peerCity.getCity();
+    }
+
+    private record SalaryStartingPoint(int salary, String heading, String note) {
     }
 }
