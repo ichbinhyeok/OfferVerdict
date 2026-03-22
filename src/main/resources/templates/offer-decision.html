@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Should I Take This Job Offer?</title>
+    <meta name="description" th:content="${metaDescription}">
+    <link rel="canonical" th:href="${canonicalUrl}">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/core.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <div th:replace="~{fragments/analytics :: analytics}"></div>
+</head>
+
+<body>
+    <div class="landing-container" style="min-height: 100vh;">
+        <div class="split-left" style="padding: 4rem 2rem;">
+            <div class="hero-content" style="max-width: 760px;">
+                <p th:text="${landingEyebrow != null ? landingEyebrow : 'Offer decision guide'}" style="text-transform: uppercase; letter-spacing: 0.16em; color: #94a3b8; font-size: 0.8rem; margin-bottom: 1rem;">
+                    Offer decision guide
+                </p>
+                <h1 class="landing-title" th:text="${landingTitle != null ? landingTitle : 'Should you take the offer, negotiate, or walk away?'}" style="max-width: 14ch;">
+                    Should you take the offer, negotiate, or walk away?
+                </h1>
+                <p class="landing-subtitle" th:text="${landingLead != null ? landingLead : 'OfferVerdict compares after-tax pay, rent burden, and living costs so you can judge whether a relocation or raise actually improves your monthly position.'}" style="max-width: 52ch;">
+                    OfferVerdict compares after-tax pay, rent burden, and living costs so you can judge whether a relocation or raise actually improves your monthly position.
+                </p>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.6rem;">
+                    <a href="/start#mode=compare" class="btn btn-premium" style="text-decoration: none;">Compare two offers</a>
+                    <a href="/start" class="btn" style="text-decoration: none; border: 1px solid rgba(148,163,184,0.35); color: white;">Run a salary reality check</a>
+                </div>
+                <div style="margin-top: 2rem; display: grid; gap: 0.9rem;">
+                    <div style="padding: 1rem 1.1rem; border-radius: 16px; background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(148,163,184,0.22);">
+                        <strong style="display:block; margin-bottom: 0.3rem;">What it answers</strong>
+                        <span style="color: #cbd5e1;" th:text="${landingBullets != null ? landingBullets[0] : 'Will the new city leave you with more monthly cash flow after taxes, rent, and baseline living costs?'}">Will the new city leave you with more monthly cash flow after taxes, rent, and baseline living costs?</span>
+                    </div>
+                    <div style="padding: 1rem 1.1rem; border-radius: 16px; background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(148,163,184,0.22);">
+                        <strong style="display:block; margin-bottom: 0.3rem;">Best for</strong>
+                        <span style="color: #cbd5e1;" th:text="${landingBullets != null ? landingBullets[1] : 'Relocation decisions, competing offers, and compensation conversations where headline salary hides the real answer.'}">Relocation decisions, competing offers, and compensation conversations where headline salary hides the real answer.</span>
+                    </div>
+                    <div style="padding: 1rem 1.1rem; border-radius: 16px; background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(148,163,184,0.22);">
+                        <strong style="display:block; margin-bottom: 0.3rem;">What makes it different</strong>
+                        <span style="color: #cbd5e1;" th:text="${landingBullets != null ? landingBullets[2] : 'It is not a salary encyclopedia. It is a practical verdict tool built around a decision.'}">It is not a salary encyclopedia. It is a practical verdict tool built around a decision.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="split-right" style="padding: 4rem 2rem;">
+            <div class="journey-card" style="max-width: 620px;">
+                <h2 style="margin-bottom: 0.8rem;">How to use it</h2>
+                <ol style="margin: 0; padding-left: 1.2rem; color: #334155; line-height: 1.8;">
+                    <li>Enter your current city and salary.</li>
+                    <li>Add the offer city and proposed salary.</li>
+                    <li>Review the verdict, monthly gain or loss, and negotiation threshold.</li>
+                </ol>
+                <div style="margin-top: 1.4rem; padding: 1rem; border-radius: 14px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a;">
+                    A better offer is not just a bigger number. It has to survive tax, rent, and cost-of-living reality.
+                </div>
+                <div style="margin-top: 1.4rem; display: grid; gap: 0.75rem;">
+                    <a href="/start#mode=compare" style="text-decoration: none; color: inherit; padding: 1rem; border-radius: 14px; border: 1px solid #e2e8f0; background: white;">
+                        <strong style="display:block; margin-bottom: 0.25rem;">Open the comparison calculator</strong>
+                        <span style="color: #64748b;">Jump straight into offer vs offer mode.</span>
+                    </a>
+                    <a href="/methodology" style="text-decoration: none; color: inherit; padding: 1rem; border-radius: 14px; border: 1px solid #e2e8f0; background: white;">
+                        <strong style="display:block; margin-bottom: 0.25rem;">Check the assumptions</strong>
+                        <span style="color: #64748b;">Review the tax and cost inputs behind the model.</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

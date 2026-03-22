@@ -51,6 +51,13 @@ public class SitemapController {
 
         // Static Pages
         addUrl(xml, "/", "1.0");
+        addUrl(xml, "/should-i-take-this-offer", "0.9");
+        addUrl(xml, "/job-offer-comparison-calculator", "0.9");
+        addUrl(xml, "/relocation-salary-calculator", "0.9");
+        addUrl(xml, "/is-this-salary-enough", "0.8");
+        addUrl(xml, "/job/software-engineer", "0.8");
+        addUrl(xml, "/job/registered-nurse", "0.8");
+        addUrl(xml, "/job/product-manager", "0.8");
         addUrl(xml, "/about", "0.8");
         addUrl(xml, "/methodology", "0.8");
 
@@ -70,19 +77,12 @@ public class SitemapController {
         int salaryInterval = Math.max(1, appProperties.getSeoSalaryBucketInterval());
         int[] primarySalaryPoints = alignToSeoInterval(new int[] { 60000, 80000, 100000, 120000, 150000 },
                 salaryInterval);
-        int[] genericSalaryPoints = alignToSeoInterval(new int[] { 70000, 100000, 130000 }, salaryInterval);
 
         for (CityCostEntry city : seedCities) {
             for (JobInfo job : coreJobs) {
                 for (int s : primarySalaryPoints) {
                     addUrl(xml, "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + s, "0.9");
                 }
-            }
-        }
-
-        for (CityCostEntry city : seedCities) {
-            for (int s : genericSalaryPoints) {
-                addUrl(xml, "/salary-check/" + city.getSlug() + "/" + s, "0.7");
             }
         }
 

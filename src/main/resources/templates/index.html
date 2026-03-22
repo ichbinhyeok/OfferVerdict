@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OfferVerdict - Should I Take The Job?</title>
-    <meta name="description"
+    <title th:text="${title}">OfferVerdict - Should I Take The Job?</title>
+    <meta name="description" th:content="${metaDescription}"
         content="Stop guessing. Start knowing. Calculate the real value of your job offer with taxes, rent, and cost of living accounted for.">
+    <link rel="canonical" th:href="${canonicalUrl}">
+    <meta name="robots" content="noindex,follow" th:if="${!shouldIndex}">
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -165,11 +167,15 @@
             <div class="hero-content">
                 <header class="landing-header animate-in">
                     <h1 class="landing-title">
-                        Should you <span class="gradient-text">move</span>?<br>
-                        Find the truth.
+                        Should you <span class="gradient-text">take this offer</span>?<br>
+                        Run the numbers first.
                     </h1>
                     <p class="landing-subtitle">
-                        The reality-first comparison engine for your next career step.
+                        Compare two offers after tax, rent, and cost of living so you can decide whether the move is actually worth it.
+                    </p>
+                    <p style="margin-top: 1rem; color: #cbd5e1; max-width: 560px; font-size: 0.96rem; line-height: 1.7;">
+                        Built for relocation and negotiation decisions, not generic salary browsing.
+                        Use the calculator when the real question is whether your monthly cash flow improves.
                     </p>
                 </header>
             </div>
@@ -186,11 +192,11 @@
                             style="background: #f1f5f9; padding: 4px; border-radius: 8px; display: inline-flex;">
                             <button type="button" id="tabSingle" onclick="toggleSearchMode('single')"
                                 style="padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; border:none; background: #4f46e5; color: white; transition: all 0.2s;">
-                                Check Sufficiency
+                                Salary Reality Check
                             </button>
                             <button type="button" id="tabCompare" onclick="toggleSearchMode('compare')"
                                 style="padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; border:none; background: transparent; color: #64748b; transition: all 0.2s;">
-                                Compare Offers
+                                Compare Job Offers
                             </button>
                         </div>
                     </div>
@@ -344,7 +350,7 @@
                                 cityBInput.disabled = true;
                                 offerSalaryInput.disabled = true;
 
-                                submitBtn.textContent = 'Check My Salary';
+                                submitBtn.textContent = 'Run Salary Check';
                             } else {
                                 // Style
                                 compareBtn.style.background = '#4f46e5';
@@ -361,14 +367,18 @@
                                 cityBInput.disabled = false;
                                 offerSalaryInput.disabled = false;
 
-                                submitBtn.textContent = 'Compare Reality';
+                                submitBtn.textContent = 'Compare Offers';
                             }
                         }
 
                         // Init Default Mode
                         // Init Default Mode & Prefill
                         window.addEventListener('DOMContentLoaded', () => {
-                            const params = new URLSearchParams(window.location.search);
+                            const hashParams = new URLSearchParams(window.location.hash.startsWith('#')
+                                ? window.location.hash.slice(1)
+                                : window.location.hash);
+                            const queryParams = new URLSearchParams(window.location.search);
+                            const params = hashParams.size > 0 ? hashParams : queryParams;
                             const mode = params.get('mode');
 
                             toggleSearchMode(mode === 'compare' ? 'compare' : 'single');
@@ -410,7 +420,7 @@
 
                     <!-- Submit -->
                     <div class="submit-container">
-                        <button type="submit" class="btn btn-premium btn-large">Compare Reality</button>
+                        <button type="submit" class="btn btn-premium btn-large">Compare Offers</button>
                         <p style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--gray-400);">
                             Instant Verdict • No account required • Real IRS data
                         </p>
@@ -426,10 +436,33 @@
                 </form>
             </main>
 
+            <section style="margin-top: 1.4rem; border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 18px; padding: 1.25rem 1.15rem; background: rgba(15, 23, 42, 0.32); color: #e2e8f0;">
+                <h2 style="font-size: 1.05rem; margin-bottom: 0.65rem;">What OfferVerdict is for</h2>
+                <p style="margin-bottom: 0.9rem; color: #cbd5e1; line-height: 1.65;">
+                    Use this when you are choosing between cities, testing a raise, or trying to decide whether a relocation offer improves your real monthly position.
+                </p>
+                <div style="display: grid; gap: 0.6rem;">
+                    <a href="/should-i-take-this-offer" style="display: block; text-decoration: none; color: inherit; padding: 0.9rem 1rem; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(148,163,184,0.18);">
+                        <strong style="display:block; margin-bottom: 0.2rem;">Should I take this offer?</strong>
+                        <span style="color: #94a3b8; font-size: 0.92rem;">Decision-focused overview for relocation and negotiation.</span>
+                    </a>
+                    <a href="/job-offer-comparison-calculator" style="display: block; text-decoration: none; color: inherit; padding: 0.9rem 1rem; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(148,163,184,0.18);">
+                        <strong style="display:block; margin-bottom: 0.2rem;">Compare two offers</strong>
+                        <span style="color: #94a3b8; font-size: 0.92rem;">Start from the crawlable comparison guide, then jump into the calculator.</span>
+                    </a>
+                    <a href="/methodology" style="display: block; text-decoration: none; color: inherit; padding: 0.9rem 1rem; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(148,163,184,0.18);">
+                        <strong style="display:block; margin-bottom: 0.2rem;">See the assumptions</strong>
+                        <span style="color: #94a3b8; font-size: 0.92rem;">Tax dates, housing assumptions, and cost inputs.</span>
+                    </a>
+                </div>
+            </section>
+
             <footer class="footer animate-in delay-3">
                 <div style="margin-bottom: 0.8rem; display: flex; justify-content: center; gap: 1.5rem;">
-                    <a href="/cities"
-                        style="color: var(--gray-500); text-decoration: none; font-size: 0.85rem; font-weight: 600;">Directory</a>
+                    <a href="/job/software-engineer"
+                        style="color: var(--gray-500); text-decoration: none; font-size: 0.85rem; font-weight: 600;">Software engineer guide</a>
+                    <a href="/job/registered-nurse"
+                        style="color: var(--gray-500); text-decoration: none; font-size: 0.85rem; font-weight: 600;">Registered nurse guide</a>
                     <a href="/about"
                         style="color: var(--gray-500); text-decoration: none; font-size: 0.85rem; font-weight: 600;">About</a>
                     <a href="/terms"

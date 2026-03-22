@@ -14,12 +14,15 @@ import com.offerverdict.service.ComparisonService;
 import com.offerverdict.service.DynamicContentService;
 import com.offerverdict.seo.SeoUrlPolicy;
 import com.offerverdict.service.SingleCityAnalysisService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -28,6 +31,7 @@ import java.util.Map;
 
 @Controller
 public class SingleCityController {
+    private static final int MAX_INDEXABLE_CITY_PRIORITY = 2;
 
     private final DataRepository repository;
     private final SingleCityAnalysisService analysisService;
@@ -35,19 +39,22 @@ public class SingleCityController {
     private final DynamicContentService dynamicContentService;
     private final AppProperties appProperties;
     private final com.offerverdict.service.ContentEnrichmentService enrichmentService;
+    private final ObjectMapper objectMapper;
 
     public SingleCityController(DataRepository repository,
             SingleCityAnalysisService analysisService,
             ComparisonService comparisonService,
             DynamicContentService dynamicContentService,
             AppProperties appProperties,
-            com.offerverdict.service.ContentEnrichmentService enrichmentService) {
+            com.offerverdict.service.ContentEnrichmentService enrichmentService,
+            ObjectMapper objectMapper) {
         this.repository = repository;
         this.analysisService = analysisService;
         this.comparisonService = comparisonService;
         this.dynamicContentService = dynamicContentService;
         this.appProperties = appProperties;
         this.enrichmentService = enrichmentService;
+        this.objectMapper = objectMapper;
     }
 
     // --- ENDPOINTS ---
@@ -290,7 +297,16 @@ public class SingleCityController {
 
         // SEO FIX: Add index gating to avoid indexing outlier salaries
         boolean shouldIndex = (salaryInt >= minSalary && salaryInt <= maxSalary);
+        if (jobInfo == null) {
+            shouldIndex = false;
+        }
         if (jobInfo != null && "Custom".equalsIgnoreCase(jobInfo.getCategory())) {
+            shouldIndex = false;
+        }
+        if (jobInfo != null && !jobInfo.isMajor()) {
+            shouldIndex = false;
+        }
+        if (city.getPriority() > MAX_INDEXABLE_CITY_PRIORITY) {
             shouldIndex = false;
         }
         model.addAttribute("shouldIndex", shouldIndex);
@@ -396,13 +412,15 @@ public class SingleCityController {
         if (jobInfo != null) {
             model.addAttribute("jobInfo", jobInfo);
             enrichmentService.getJobContext(jobInfo.getSlug()).ifPresent(ctx -> model.addAttribute("jobContext", ctx));
-            // CTA Update: Link to Index with Prefill (Component 2)
-            model.addAttribute("compareUrl",
-                    "/?mode=compare&city1=" + citySlug + "&job=" + jobInfo.getSlug() + "&salary=" + salaryInt);
+            model.addAttribute("compareUrl", buildComparisonDestination(jobInfo, city));
+            model.addAttribute("compareLabel", buildComparisonLabel(jobInfo, city));
+            model.addAttribute("breadcrumbUrl", "/job/" + jobInfo.getSlug());
+            model.addAttribute("breadcrumbLabel", jobInfo.getTitle() + " guide");
         } else {
-            // Default CTA fallback
-            model.addAttribute("compareUrl",
-                    "/?mode=compare&city1=" + citySlug + "&job=general-professional&salary=" + salaryInt);
+            model.addAttribute("compareUrl", "/relocation-salary-calculator");
+            model.addAttribute("compareLabel", "Compare relocation scenarios");
+            model.addAttribute("breadcrumbUrl", "/relocation-salary-calculator");
+            model.addAttribute("breadcrumbLabel", "Relocation guide");
         }
 
         // Legal Shield
@@ -440,6 +458,9 @@ public class SingleCityController {
         // 2. City Neighbors (Same State or Popular)
         Map<String, String> cityLinks = new java.util.LinkedHashMap<>();
         for (CityCostEntry c : relatedCities) {
+            if (c.getPriority() > MAX_INDEXABLE_CITY_PRIORITY) {
+                continue;
+            }
             cityLinks.put(c.getCity() + ", " + c.getState(),
                     "/salary-check/" + jobSegment + c.getSlug() + "/" + salaryInt);
             if (cityLinks.size() >= 4)
@@ -464,6 +485,9 @@ public class SingleCityController {
         if (jobInfo != null) {
             List<JobInfo> relatedJobs = repository.getRelatedJobs(jobInfo.getCategory(), jobInfo.getSlug(), 4);
             for (JobInfo j : relatedJobs) {
+                if (!j.isMajor()) {
+                    continue;
+                }
                 jobLinks.put(j.getTitle(), "/salary-check/" + j.getSlug() + "/" + citySlug + "/" + salaryInt);
             }
             // Fallback if category results are empty
@@ -498,34 +522,104 @@ public class SingleCityController {
         // Build Breadcrumb JSON-LD
         String jobName = (jobInfo != null) ? jobInfo.getTitle() : "Salary";
         String breadcrumbName = String.format("$%d %s in %s", salaryInt, jobName, city.getCity());
-
-        String structuredData = String.format("""
-                {
-                  "@context": "https://schema.org",
-                  "@type": "BreadcrumbList",
-                  "itemListElement": [{
-                    "@type": "ListItem",
-                    "position": 1,
-                    "name": "Home",
-                    "item": "%s"
-                  },{
-                    "@type": "ListItem",
-                    "position": 2,
-                    "name": "Salary Check",
-                    "item": "%s/cities"
-                  },{
-                    "@type": "ListItem",
-                    "position": 3,
-                    "name": "%s",
-                    "item": "%s"
-                  }]
-                }
-                """, appProperties.getPublicBaseUrl(), appProperties.getPublicBaseUrl(), breadcrumbName, canonicalUrl);
-
-        model.addAttribute("structuredDataJson", structuredData);
+        List<Map<String, String>> faqItems = List.of(
+                Map.of("question", faqQ1, "answer", faqA1),
+                Map.of("question", faqQ2, "answer", faqA2),
+                Map.of("question", faqQ3, "answer", faqA3));
+        model.addAttribute("structuredDataJson", toJson(buildStructuredData(canonicalUrl, breadcrumbName, faqItems)));
         model.addAttribute("canonicalUrl", canonicalUrl);
 
         return "single-verdict";
+    }
+
+    private String buildComparisonDestination(JobInfo jobInfo, CityCostEntry city) {
+        if (jobInfo == null || !jobInfo.isMajor()) {
+            return "/job-offer-comparison-calculator";
+        }
+
+        CityCostEntry peerCity = findPeerCity(city);
+        if (peerCity == null) {
+            return "/job/" + jobInfo.getSlug();
+        }
+        return "/" + jobInfo.getSlug() + "-salary-" + city.getSlug() + "-vs-" + peerCity.getSlug();
+    }
+
+    private String buildComparisonLabel(JobInfo jobInfo, CityCostEntry city) {
+        if (jobInfo == null || !jobInfo.isMajor()) {
+            return "Compare job offers";
+        }
+
+        CityCostEntry peerCity = findPeerCity(city);
+        if (peerCity == null) {
+            return "See more " + jobInfo.getTitle() + " scenarios";
+        }
+        return "Compare " + city.getCity() + " vs " + peerCity.getCity();
+    }
+
+    private CityCostEntry findPeerCity(CityCostEntry city) {
+        return repository.getCities().stream()
+                .filter(candidate -> candidate.getPriority() <= MAX_INDEXABLE_CITY_PRIORITY)
+                .filter(candidate -> !candidate.getSlug().equals(city.getSlug()))
+                .sorted(java.util.Comparator
+                        .<CityCostEntry, Boolean>comparing(candidate -> !candidate.getState().equals(city.getState()))
+                        .thenComparingInt(CityCostEntry::getPriority)
+                        .thenComparing(CityCostEntry::getCity))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Map<String, Object> buildStructuredData(String canonicalUrl, String breadcrumbName,
+            List<Map<String, String>> faqItems) {
+        List<Map<String, Object>> graph = new ArrayList<>();
+
+        Map<String, Object> breadcrumb = new LinkedHashMap<>();
+        breadcrumb.put("@context", "https://schema.org");
+        breadcrumb.put("@type", "BreadcrumbList");
+        breadcrumb.put("itemListElement", List.of(
+                Map.of(
+                        "@type", "ListItem",
+                        "position", 1,
+                        "name", "Home",
+                        "item", comparisonService.buildCanonicalUrl("/")),
+                Map.of(
+                        "@type", "ListItem",
+                        "position", 2,
+                        "name", "Salary Check",
+                        "item", comparisonService.buildCanonicalUrl("/")),
+                Map.of(
+                        "@type", "ListItem",
+                        "position", 3,
+                        "name", breadcrumbName,
+                        "item", canonicalUrl)));
+        graph.add(breadcrumb);
+
+        List<Map<String, Object>> questions = new ArrayList<>();
+        for (Map<String, String> faqItem : faqItems) {
+            questions.add(Map.of(
+                    "@type", "Question",
+                    "name", faqItem.getOrDefault("question", ""),
+                    "acceptedAnswer", Map.of(
+                            "@type", "Answer",
+                            "text", faqItem.getOrDefault("answer", ""))));
+        }
+
+        Map<String, Object> faq = new LinkedHashMap<>();
+        faq.put("@context", "https://schema.org");
+        faq.put("@type", "FAQPage");
+        faq.put("mainEntity", questions);
+        graph.add(faq);
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("@graph", graph);
+        return data;
+    }
+
+    private String toJson(Object obj) {
+        try {
+            return objectMapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            return "{}";
+        }
     }
 
     private String generateRiskBasedTitle(CityCostEntry city, int salaryInt, JobInfo jobInfo) {

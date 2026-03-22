@@ -46,6 +46,7 @@ public class ComparisonController {
     // Flexible validation: 1,000 ~ 10,000,000 allowed
     private static final double MIN_SALARY = 1_000;
     private static final double MAX_SALARY = 10_000_000;
+    private static final int MAX_INDEXABLE_CITY_PRIORITY = 2;
     private static final String[] DATA_RESOURCE_PATHS = new String[] {
             "data/AuthoritativeData.json",
             "data/StateTax.json",
@@ -83,11 +84,35 @@ public class ComparisonController {
     public Object home(@RequestParam(name = "job", required = false) String job,
             @RequestParam(name = "cityA", required = false) String cityA,
             @RequestParam(name = "cityB", required = false) String cityB,
+            @RequestParam(name = "city1", required = false) String city1,
             @RequestParam(name = "currentSalary", required = false) Double currentSalary,
             @RequestParam(name = "offerSalary", required = false) Double offerSalary,
+            @RequestParam(name = "salary", required = false) Double salary,
+            @RequestParam(name = "mode", required = false) String mode,
             @RequestParam(name = "salaryType", required = false, defaultValue = "annual") String salaryType,
+            jakarta.servlet.http.HttpServletRequest request,
             RedirectAttributes redirectAttributes,
             Model model) {
+
+        if ("compare".equalsIgnoreCase(mode)
+                && city1 != null && !city1.isBlank()
+                && job != null && !job.isBlank()
+                && salary != null
+                && cityA == null
+                && cityB == null
+                && currentSalary == null
+                && offerSalary == null) {
+            String normalizedJob = SlugNormalizer.normalize(job);
+            String normalizedCity1 = SlugNormalizer.normalize(city1);
+            int roundedSalary = (int) Math.round(salary);
+
+            RedirectView redirectView = new RedirectView(
+                    "/start#mode=compare&city1=" + normalizedCity1 + "&job=" + normalizedJob + "&salary="
+                            + roundedSalary,
+                    true);
+            redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
+            return redirectView;
+        }
 
         // Check for sufficient inputs (Either Comparison OR Single City)
         boolean isComparison = (cityB != null && !cityB.isBlank() && offerSalary != null);
@@ -162,8 +187,12 @@ public class ComparisonController {
 
         model.addAttribute("jobs", repository.getJobs());
         model.addAttribute("cities", repository.getCities());
-        model.addAttribute("title", "OfferVerdict | Reality-check your job move");
-        model.addAttribute("metaDescription", "Compare your actual buying power with taxes and cost of living.");
+        model.addAttribute("title", "Job Offer Comparison Calculator | After-Tax Relocation Verdict");
+        model.addAttribute("metaDescription",
+                "Compare two job offers after tax, rent, and living costs. Use OfferVerdict to decide whether a move or raise actually improves your monthly cash flow.");
+        model.addAttribute("canonicalUrl", comparisonService.buildCanonicalUrl("/"));
+        boolean shouldIndex = request.getQueryString() == null || request.getQueryString().isBlank();
+        model.addAttribute("shouldIndex", shouldIndex);
         model.addAttribute("jobsByCategory", groupJobsByCategory());
         model.addAttribute("citiesByState", groupCitiesByState());
 
@@ -416,6 +445,8 @@ public class ComparisonController {
                 comparisonService.relatedJobComparisons(cityEntryA.getSlug(), cityEntryB.getSlug(), queryString));
         model.addAttribute("otherCityLinks", relatedCityComparisons(jobInfo.getSlug(),
                 cityEntryA.getSlug(), cityEntryB.getSlug(), queryString));
+        model.addAttribute("currentSingleUrl", buildSinglePageDestination(jobInfo, cityEntryA, safeCurrentSalary));
+        model.addAttribute("offerSingleUrl", buildSinglePageDestination(jobInfo, cityEntryB, safeOfferSalary));
 
         List<Map<String, String>> faqItems = buildFaqItems(result, cityEntryA, cityEntryB, effectiveOfferSalary);
         // Build robust Structured Data (WebPage + FAQ + Breadcrumbs + Dataset)
@@ -430,7 +461,7 @@ public class ComparisonController {
                 comparisonService.getTaxBreakdown(safeOfferSalary, cityEntryB.getState()));
 
         // SEO Enhancement: Determine if this page should be indexed
-        boolean shouldIndex = shouldIndexThisPage(jobInfo, safeCurrentSalary, safeOfferSalary,
+        boolean shouldIndex = shouldIndexThisPage(jobInfo, cityEntryA, cityEntryB, safeCurrentSalary, safeOfferSalary,
                 hasExplicitSalaryParams);
         model.addAttribute("shouldIndex", shouldIndex);
 
@@ -457,6 +488,7 @@ public class ComparisonController {
                 .filter(c -> !c.getSlug().equals(origin.getSlug()))
                 .filter(c -> !c.getSlug().equals(offerCitySlug))
                 .filter(c -> SlugNormalizer.isCanonicalCitySlug(c.getSlug()))
+                .filter(this::isIndexableCity)
                 // SILO LOGIC: Sort by (Same State?) -> (Tier Priority) -> (Name)
                 .sorted(java.util.Comparator
                         .<CityCostEntry, Boolean>comparing(c -> !c.getState().equals(origin.getState())) // True
@@ -582,13 +614,20 @@ public class ComparisonController {
      * SEO Enhancement: Determine if this page combination should be indexed.
      * Prevents indexing of low-value combinations to avoid thin content penalties.
      */
-    private boolean shouldIndexThisPage(JobInfo job, double currentSalary, double offerSalary,
+    private boolean shouldIndexThisPage(JobInfo job, CityCostEntry cityEntryA, CityCostEntry cityEntryB,
+            double currentSalary, double offerSalary,
             boolean hasExplicitSalaryParams) {
         // PERMANENTLY NOINDEX Custom / User-Generated Jobs to prevent spam
         if ("Custom".equalsIgnoreCase(job.getCategory())) {
             return false;
         }
+        if (!job.isMajor()) {
+            return false;
+        }
         if (hasExplicitSalaryParams) {
+            return false;
+        }
+        if (!isIndexableCity(cityEntryA) || !isIndexableCity(cityEntryB)) {
             return false;
         }
 
@@ -602,6 +641,24 @@ public class ComparisonController {
             return false;
         }
         return true;
+    }
+
+    private boolean isIndexableCity(CityCostEntry city) {
+        return city != null && city.getPriority() <= MAX_INDEXABLE_CITY_PRIORITY;
+    }
+
+    private String buildSinglePageDestination(JobInfo job, CityCostEntry city, double salary) {
+        if (job != null && job.isMajor() && isIndexableCity(city)) {
+            int alignedSalary = SeoUrlPolicy.clampAndAlignSalary((int) Math.round(salary),
+                    appProperties.getSeoSalaryBucketMin(),
+                    appProperties.getSeoSalaryBucketMax(),
+                    appProperties.getSeoSalaryBucketInterval());
+            return "/salary-check/" + job.getSlug() + "/" + city.getSlug() + "/" + alignedSalary;
+        }
+        if (job != null && job.isMajor()) {
+            return "/job/" + job.getSlug();
+        }
+        return "/is-this-salary-enough";
     }
 
     private double clampSalary(double salary) {

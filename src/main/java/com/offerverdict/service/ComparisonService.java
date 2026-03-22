@@ -328,6 +328,7 @@ public class ComparisonService {
         CityCostEntry cityB = repository.getCity(cityBSlug);
 
         return repository.getJobs().stream()
+                .filter(JobInfo::isMajor)
                 .limit(5)
                 .map(job -> {
                     String url = "/" + job.getSlug() + "-salary-" + cityASlug + "-vs-" + cityBSlug + queryString;

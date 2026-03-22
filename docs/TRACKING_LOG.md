@@ -152,3 +152,138 @@ Purpose: persistent cross-session log for date-based analysis and implemented im
   1. Run targeted tests and full regression.
   2. Deploy and monitor US-only KPI dashboard weekly.
   3. If parameter URL impressions remain high for 2+ weeks, harden query-param normalization rules.
+
+---
+
+## 2026-03-22 (UTC)
+
+- Analysis Window:
+  - 2026-02-21 to 2026-03-20
+- Baseline Window:
+  - 2026-01-24 to 2026-02-20
+
+- Analysis:
+  - Search Console property: `sc-domain:livingcostcheck.com`
+  - Clicks: `0` (prev `5`, `-100%`)
+  - Impressions: `347` (prev `1437`, `-75.85%`)
+  - CTR: `0%` (prev `0.3479%`)
+  - Avg position: `1.68` (prev `11.11`, improved while traffic worsened)
+  - Country split (last 28d):
+    - KOR: `330` impressions, `0` clicks, avg position `1.22`
+    - USA: `14` impressions, `0` clicks, avg position `9.71`
+  - Operator note:
+    - KOR impressions were later confirmed to be diagnostic/self-check noise and should not be treated as target-market demand.
+    - The decision signal for this session is the US slice, which is still effectively zero-demand.
+  - Technical findings:
+    - Home-prefill query URLs such as `/?mode=compare&city1=...&job=...&salary=...` were indexable because they rendered the homepage without canonical/noindex controls.
+    - This query surface was being generated internally from single-city CTA links.
+    - Search Console inspection confirmed canonical comparison pages are indexable, while parameterized comparison pages remain mixed (`alternate canonical`, `blocked by robots`, or `unknown`) depending on the path.
+    - Search Console reported an older `Unparsable structured data` error on at least one single-city page crawl; current source now renders JSON-LD via server-side serialization to avoid inline-template drift.
+    - Sitemap remains healthy and downloadable, but Search Console sitemap coverage numbers still look inconsistent with inspected URL state.
+    - Internal-link equity was being wasted in multiple places:
+      - comparison pages linked to generic single-city URLs that are intentionally `noindex`
+      - single-city pages linked back to hash-based compare URLs or `/cities` routes that are not suitable crawl targets
+      - footer/home links still pointed at `noindex` directory surfaces
+    - The site had no real crawlable hub layer between the homepage and deep salary/comparison URLs, so internal authority had few stable mid-level destinations.
+  - Interpretation:
+    - This is not a healthy recovery state. US-target organic demand is effectively absent in the current window.
+    - Ranking improvements are still dominated by low-value or non-target traffic, not by meaningful US search demand.
+    - The remaining technical leakage was materially contributing noise to indexing and should be closed before any further content expansion.
+    - Strategy conclusion for this session:
+      - keep the calculation engine
+      - prune broad permutation SEO
+      - concentrate crawl/index signals around decision-intent pages, high-value comparison URLs, and a small number of major-job hubs
+
+- Implementation Batch A - Cleanup And Canonical Control:
+  - Closed the root compare-prefill indexing leak:
+    - `SingleCityController`: compare CTA no longer emits crawlable `/?mode=compare...` URLs.
+    - `ComparisonController`: legacy `/?mode=compare&city1=...&job=...&salary=...` now `301` redirects to `/start#...`.
+    - `index.html`: compare prefill reads `window.location.hash` first, with query fallback retained for UX.
+  - Hardened homepage SEO controls:
+    - `ComparisonController`: homepage now sets explicit `canonicalUrl` and `shouldIndex`.
+    - `index.html`: canonical tag plus conditional `noindex` added for non-root query variants.
+  - Hardened single-city structured data output:
+    - `SingleCityController`: JSON-LD now assembled server-side and serialized with Jackson.
+    - `single-verdict.html`: JSON-LD script now uses `structuredDataJson` directly.
+  - Regression coverage added:
+    - `src/test/java/com/offerverdict/controller/SeoRegressionIntegrationTest.java`
+
+- Implementation Batch B - Decision-Intent Pivot Surface:
+  - Reframed the root experience around offer evaluation rather than generic salary browsing:
+    - homepage title/meta updated in `ComparisonController`
+    - hero copy and supporting navigation updated in `index.html`
+  - Added decision-intent landing layer:
+    - `/should-i-take-this-offer`
+    - `/job-offer-comparison-calculator`
+    - `/relocation-salary-calculator`
+    - `/is-this-salary-enough`
+  - Template strategy:
+    - route handling in `LandingController`
+    - shared landing template in `offer-decision.html`
+  - Sitemap strategy:
+    - generic single-city salary URLs removed from sitemap
+    - decision-intent landings added to sitemap
+
+- Implementation Batch C - Pruning Rules And Link-Graph Repair:
+  - Tightened index eligibility:
+    - `ComparisonController`: comparison pages are now indexable only when:
+      - job is `major`
+      - both cities have `priority <= 2`
+      - URL is canonical and not an explicit salary-param variant
+    - `SingleCityController`: job-specific salary pages are now indexable only when:
+      - job is `major`
+      - city has `priority <= 2`
+      - salary stays inside SEO salary boundaries
+  - Tightened related-link generation:
+    - `ComparisonService`: related comparison links now only surface `major` jobs
+    - `SingleCityController`: related city/job blocks now skip low-priority cities and non-major jobs
+  - Re-routed internal authority toward crawlable, indexable destinations:
+    - `result.html` now links "Analyze city alone" to job-specific salary pages when indexable; otherwise it falls back to crawlable hubs/landings instead of generic city-only `noindex` URLs
+    - `single-verdict.html` now links its main relocation CTA to a real canonical comparison URL when possible, instead of `#mode=compare` hash targets
+    - `single-verdict.html` breadcrumb no longer points to `/cities`; it now points to a crawlable job guide or relocation guide destination
+    - homepage/footer high-visibility links to `noindex` directory pages were replaced with crawlable decision or job-guide URLs
+  - Introduced first crawlable hub layer:
+    - `HubController` + `job-directory.html` now expose canonical major-job hubs
+    - hubs use benchmark-driven salary entry points rather than hardcoded `$100,000` links
+    - hubs include role context plus salary-check and comparison seed links
+    - `SitemapController` now includes core job hubs:
+      - `/job/software-engineer`
+      - `/job/registered-nurse`
+      - `/job/product-manager`
+
+- Verification:
+  - Test commands run:
+    - `./gradlew test --tests com.offerverdict.controller.SeoRegressionIntegrationTest --tests com.offerverdict.controller.SitemapControllerTest --tests com.offerverdict.service.ComparisonServiceTest --no-daemon`
+    - `./gradlew bootJar --no-daemon`
+  - Result:
+    - PASS
+  - Regression assertions now cover:
+    - legacy compare-prefill redirect behavior
+    - valid JSON-LD render on single-city pages
+    - generic single-city page => `noindex`
+    - low-value single-city page => `noindex`
+    - core single-city page => indexable
+    - low-value comparison page => `noindex`
+    - core comparison page => indexable
+    - comparison page links do not leak to generic `/salary-check/{city}/{salary}` URLs
+    - single-city page links to crawlable comparison/job-hub destinations
+    - major job hub => indexable
+    - non-major job hub => `noindex`
+    - sitemap includes decision landings and selected job hubs while excluding generic single-city URLs
+
+- Next Actions:
+  1. Deploy this 2026-03-22 batch before evaluating strategy health again.
+  2. After deploy, request inspection/re-crawl for:
+    - `/job/software-engineer`
+    - `/job/registered-nurse`
+    - one core comparison URL
+    - one core job-specific single-city URL
+  3. Re-run a US-only Search Console snapshot 7-14 days after deploy and ignore non-target-country noise.
+  4. Watch for the first positive signals:
+    - impressions on job hubs
+    - impressions on core comparison URLs
+    - US impressions rising above the current near-zero baseline
+  5. If those signals do not improve, next pivot should be content/positioning rather than more index-hygiene work:
+    - strengthen job hubs further
+    - consider a city relocation hub layer
+    - consolidate thin keyword landings if they remain too template-like

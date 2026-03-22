@@ -235,7 +235,7 @@
                                 th:text="${'$' + #numbers.formatInteger(result.current.residual * 12, 0, 'COMMA') + '/yr'}">$40,000/yr</span>
                         </div>
                         <div style="margin-top: 1rem; text-align: center;">
-                            <a th:href="${'/salary-check/' + cityA.slug + '/' + #numbers.formatInteger(currentSalary,0,'NONE')}"
+                            <a th:href="${currentSingleUrl}"
                                 class="link-subtle" style="font-size: 0.85rem; color: var(--text-2);">Analyze <span
                                     th:text="${cityA.city}">City</span> Alone &rarr;</a>
                         </div>
@@ -298,7 +298,7 @@
                                 th:text="${'$' + #numbers.formatInteger(result.offer.residual * 12, 0, 'COMMA') + '/yr'}">$40,000/yr</span>
                         </div>
                         <div style="margin-top: 1rem; text-align: center;">
-                            <a th:href="${'/salary-check/' + cityB.slug + '/' + #numbers.formatInteger(offerSalary,0,'NONE')}"
+                            <a th:href="${offerSingleUrl}"
                                 class="link-subtle" style="font-size: 0.85rem; color: var(--text-2);">Analyze <span
                                     th:text="${cityB.city}">City</span> Alone &rarr;</a>
                         </div>
@@ -665,7 +665,34 @@
                 </div>
 
                 <div class="linking-grid"
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2rem;">
+                    <div class="link-column">
+                        <h4
+                            style="margin-bottom: 1rem; color: var(--text-2); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Decision guides
+                        </h4>
+                        <ul class="link-list" style="list-style: none; padding: 0;">
+                            <li style="margin-bottom: 0.75rem;">
+                                <a href="/should-i-take-this-offer" class="link-subtle"
+                                    style="color: var(--brand-primary); text-decoration: none; font-weight: 500;">
+                                    Should I take this offer?
+                                </a>
+                            </li>
+                            <li style="margin-bottom: 0.75rem;">
+                                <a href="/job-offer-comparison-calculator" class="link-subtle"
+                                    style="color: var(--brand-primary); text-decoration: none; font-weight: 500;">
+                                    Job offer comparison calculator
+                                </a>
+                            </li>
+                            <li style="margin-bottom: 0.75rem;">
+                                <a href="/relocation-salary-calculator" class="link-subtle"
+                                    style="color: var(--brand-primary); text-decoration: none; font-weight: 500;">
+                                    Relocation salary calculator
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
                     <!-- Same City, Different Jobs -->
                     <div class="link-column">
                         <h4
