@@ -64,7 +64,14 @@ public class SingleCityController {
             @PathVariable("salaryInt") int salaryInt,
             jakarta.servlet.http.HttpServletResponse response,
             Model model) {
-        return processAnalysis(null, citySlug, salaryInt, response, model);
+        CityCostEntry city = repository.getCity(citySlug);
+        if (city == null) {
+            return "error/404";
+        }
+
+        RedirectView redirectView = new RedirectView("/city/" + citySlug);
+        redirectView.setStatusCode(org.springframework.http.HttpStatus.MOVED_PERMANENTLY);
+        return redirectView;
     }
 
     @GetMapping("/salary-check/{jobSlug}/{citySlug}/{salaryInt}")
@@ -310,6 +317,9 @@ public class SingleCityController {
             shouldIndex = false;
         }
         model.addAttribute("shouldIndex", shouldIndex);
+        if (!shouldIndex) {
+            response.setHeader("X-Robots-Tag", "noindex, follow");
+        }
 
         // 7c. Verdict CSS Class
         String verdictCssClass = "neutral-blue";

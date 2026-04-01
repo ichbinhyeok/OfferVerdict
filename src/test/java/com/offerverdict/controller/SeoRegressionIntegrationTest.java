@@ -68,11 +68,11 @@ class SeoRegressionIntegrationTest {
     }
 
     @Test
-    void genericSingleCityPage_isNoindexAfterPruning() throws Exception {
-        HttpResponse<String> response = httpGet("/salary-check/miami-fl/180000");
+    void genericSingleCityPage_redirectsToCityHubForCleanup() throws Exception {
+        HttpResponse<String> response = httpGetWithoutRedirect("/salary-check/miami-fl/180000");
 
-        assertEquals(200, response.statusCode());
-        assertTrue(response.body().contains("name=\"robots\" content=\"noindex,follow\""));
+        assertEquals(301, response.statusCode());
+        assertEquals("/city/miami-fl", response.headers().firstValue("location").orElse(null));
     }
 
     @Test
@@ -81,6 +81,7 @@ class SeoRegressionIntegrationTest {
 
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("name=\"robots\" content=\"noindex,follow\""));
+        assertEquals("noindex, follow", response.headers().firstValue("x-robots-tag").orElse(null));
     }
 
     @Test

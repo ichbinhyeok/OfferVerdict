@@ -617,3 +617,86 @@ Purpose: persistent cross-session log for date-based analysis and implemented im
 - Interpretation:
   - public-data-backed anchor coverage is now much more consistent across the site's most important relocation metros
   - city hubs and single-city pages should now feel less random and less purely modeled for both tech and non-tech audiences
+
+## 2026-04-01 - Production Checkpoint
+
+- What was checked:
+  - Search Console summary for the latest 14-day and 28-day windows
+  - period-over-period comparison after the 2026-03-22 product / SEO refactor batch
+  - representative URL inspection for:
+    - `/`
+    - `/job/registered-nurse`
+    - `/city/austin-tx`
+    - `/registered-nurse-salary-austin-tx-vs-seattle-wa`
+    - `/salary-check/corpus-christi-tx/90000`
+
+- Current production signal:
+  - 14 days (`2026-03-15` to `2026-03-29`):
+    - `0 clicks / 72 impressions / avg position 41.4`
+  - 28 days (`2026-03-01` to `2026-03-29`):
+    - `0 clicks / 79 impressions / avg position 39.1`
+  - short post-refactor comparison:
+    - `2026-03-23` to `2026-03-31`: `55 impressions`
+    - `2026-03-14` to `2026-03-22`: `30 impressions`
+    - interpretation: impressions have started to reappear, but at very weak positions
+  - country mix for the latest 28 days:
+    - `usa`: `47 impressions`, avg position `59.7`
+    - `kor`: `26 impressions`, avg position `1.0`
+    - KOR is still treated as noise / self-check traffic, not business signal
+
+- Representative URL inspection:
+  - home, registered-nurse job hub, Austin city hub, and the RN Austin vs Seattle comparison page are all:
+    - `Submitted and indexed`
+    - canonicalized correctly
+    - crawled by Googlebot mobile between `2026-03-24` and `2026-03-29`
+  - this confirms the new hub / decision structure is visible to Google
+
+- Problem discovered in production:
+  - legacy generic single-city URLs are still materially present in Search Console and live search data
+  - example:
+    - `/salary-check/corpus-christi-tx/90000`
+    - still `Submitted and indexed`
+    - still receiving impressions
+    - live page output did not show a visible `robots` meta noindex tag during manual fetch review
+  - this means cleanup of generic single-city inventory is not complete on production yet, regardless of local code intent
+
+- Interpretation:
+  - good news:
+    - new hubs and comparison pages are indexable and starting to get weak early impressions
+    - the refactor is not invisible to Google
+  - bad news:
+    - recovery has not happened yet
+    - average positions are much worse than the noisy early period
+    - legacy generic pages still appear to be diluting crawl / index focus
+
+- Next actions implied by this checkpoint:
+  - verify live production template behavior for generic `/salary-check/{city}/{salary}` pages
+  - confirm whether the intended noindex logic is actually deployed and rendering on production
+  - once verified, re-request indexing for:
+    - `/`
+    - `/job/registered-nurse`
+    - `/city/austin-tx`
+    - `/registered-nurse-salary-austin-tx-vs-seattle-wa`
+  - if legacy generic pages remain indexable after deployment confirmation, plan a harder cleanup step
+
+## 2026-04-01 - Generic Single-City Hard Cleanup
+
+- Reason for follow-up:
+  - the production checkpoint showed that legacy generic URLs like `/salary-check/corpus-christi-tx/90000` were still indexed and still drawing impressions
+  - local intent had been to de-emphasize them with noindex, but production evidence showed that was not strong enough or not fully reflected live
+
+- Change shipped locally:
+  - generic single-city endpoint `/salary-check/{citySlug}/{salaryInt}` now 301 redirects to `/city/{citySlug}`
+  - this turns the old inventory into a consolidation path instead of leaving it as low-value searchable content
+  - non-indexable job-specific pages now also emit an `X-Robots-Tag: noindex, follow` header in addition to the existing meta robots tag
+
+- Local validation:
+  - regression updated so generic `/salary-check/miami-fl/180000` now asserts a permanent redirect to `/city/miami-fl`
+  - low-value job-specific page regression now asserts the `X-Robots-Tag` header as well as page-level noindex markup
+  - passed:
+    - `./gradlew test --tests com.offerverdict.controller.SeoRegressionIntegrationTest --tests com.offerverdict.controller.SitemapControllerTest --tests com.offerverdict.service.ComparisonServiceTest --no-daemon`
+    - `./gradlew bootJar --no-daemon`
+
+- Interpretation:
+  - this is the cleanest next step before any second pivot
+  - if old generic URLs were still stealing crawl/index attention, this should reduce that dilution after deployment and recrawl
