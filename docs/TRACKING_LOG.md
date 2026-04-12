@@ -700,3 +700,46 @@ Purpose: persistent cross-session log for date-based analysis and implemented im
 - Interpretation:
   - this is the cleanest next step before any second pivot
   - if old generic URLs were still stealing crawl/index attention, this should reduce that dilution after deployment and recrawl
+
+## 2026-04-12 - GSC Checkpoint (Manual Indexing Quota Exhausted)
+
+- What was checked:
+  - GSC performance summary for the latest 14/28-day windows
+  - representative URL inspections for:
+    - `/`
+    - `/job/registered-nurse`
+    - `/city/austin-tx`
+    - `/registered-nurse-salary-austin-tx-vs-seattle-wa`
+    - `/salary-check/corpus-christi-tx/90000`
+    - `/city/corpus-christi-tx`
+    - `/city/miami-fl`
+
+- Current signal (as of 2026-04-12):
+  - 28 days (`2026-03-12` to `2026-04-09`):
+    - `0 clicks / 140 impressions / avg position 51.37`
+  - 14 days (`2026-03-26` to `2026-04-09`):
+    - `0 clicks / 99 impressions / avg position 63.90`
+  - period comparison (`2026-03-15` to `2026-04-11` vs `2026-02-15` to `2026-03-14`):
+    - `clicks: 0 -> 1` (very small positive movement)
+    - `impressions: 320 -> 149` (still down)
+    - `avg position: 1.6 -> 49.8` (ranking still far from page 1)
+
+- Inspection results:
+  - `/`, `/job/registered-nurse`, `/city/austin-tx`, `/registered-nurse-salary-austin-tx-vs-seattle-wa`, `/city/miami-fl`:
+    - all `Submitted and indexed`
+    - recent crawls between `2026-03-24` and `2026-04-12`
+  - `/salary-check/corpus-christi-tx/90000`:
+    - still `Submitted and indexed`
+    - last crawl `2026-03-08`
+    - still points to the legacy URL as canonical
+  - `/city/corpus-christi-tx`:
+    - `Excluded by noindex`
+    - last crawl `2026-04-11`
+
+- Constraint:
+  - manual URL inspection quota is exhausted, so forced reindex requests cannot be made right now
+
+- Interpretation:
+  - new hub / comparison structure is visible to Google
+  - generic legacy URLs are still lingering because the 301 change has not been re-crawled
+  - immediate action is blocked by reindex quota; next step is to wait for natural crawl or regain quota
