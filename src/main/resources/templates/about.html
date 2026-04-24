@@ -4,146 +4,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title}">About Us - OfferVerdict</title>
+    <title th:text="${title}">About OfferVerdict</title>
     <meta name="description" th:content="${metaDescription}">
-
-    <link rel="stylesheet" href="/css/tokens.css">
-    <!-- Favicon -->
+    <link rel="canonical" href="https://livingcostcheck.com/about">
+    <meta name="robots" content="index, follow">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/css/tokens.css">
     <link rel="stylesheet" href="/css/core.css">
-    <link rel="stylesheet" href="/css/result.css">
-
-    <!-- Fonts -->
+    <link rel="stylesheet" href="/css/offer-risk.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Sora:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <!-- Analytics -->
     <div th:replace="~{fragments/analytics :: analytics}"></div>
-
-    <!-- Author Schema for EEAT -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "AboutPage",
-        "mainEntity": {
-            "@type": "Organization",
-            "name": "OfferVerdict",
-            "url": "https://livingcostcheck.com",
-            "description": "Data-driven salary and cost of living comparison tool helping job seekers make informed relocation decisions.",
-            "foundingDate": "2026",
-            "founder": {
-                "@type": "Person",
-                "name": "Hyeok Shin",
-                "jobTitle": "Founder & Lead Developer",
-                "description": "Financial technology professional with expertise in data analysis and software development. Built OfferVerdict to solve the real-world problem of understanding true salary value across different cities."
-            },
-            "contactPoint": {
-                "@type": "ContactPoint",
-                "email": "pshinhyeok@gmail.com",
-                "contactType": "customer support"
-            },
-            "sameAs": []
-        }
-    }
-    </script>
 </head>
 
-<body class="theme-lucid">
-
+<body class="offer-risk-page">
     <nav class="top-nav">
         <div class="container">
             <a href="/" class="logo">OfferVerdict</a>
+            <div class="risk-nav-links">
+                <a href="/nurse-relocation-offer-checker">Tool</a>
+                <a href="/methodology">Methodology</a>
+            </div>
         </div>
     </nav>
 
-    <main class="main-content">
-        <!-- Hero -->
-        <section class="section-hero" style="background: var(--surface-1); padding: 4rem 0 2rem 0; text-align: center;">
-            <div class="container" style="max-width: 800px;">
-                <span class="badge"
-                    style="background: var(--brand-primary); color: white; padding: 4px 12px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">About
-                    OfferVerdict</span>
-                <h1 style="font-size: 2.5rem; margin-top: 1.5rem; letter-spacing: -0.03em;">Why We Built This</h1>
-                <p style="font-size: 1.25rem; color: var(--text-2); margin-top: 1rem;">A tool born from real
-                    experience.</p>
+    <main class="content-shell container">
+        <section class="content-hero">
+            <span class="eyebrow">About the pivot</span>
+            <h1>OfferVerdict is a healthcare offer-risk tool.</h1>
+            <p>
+                It is a decision tool for healthcare workers who need to know whether a relocation offer is safe
+                after taxes, rent, moving costs, shift assumptions, and bonus repayment clauses.
+            </p>
+        </section>
+
+        <section class="content-ledger">
+            <div class="ledger-mark">01</div>
+            <div>
+                <h2>The old question was too broad</h2>
+                <p>
+                    "Is this salary enough in this city?" sounds useful, but it is too broad. The harder decision is
+                    whether the written offer is safe once bonus repayment, relocation gaps, and shift-dependent upside
+                    are separated from base pay.
+                </p>
             </div>
         </section>
 
-        <!-- Story Content -->
-        <section class="section-story" style="padding: 3rem 0; background: var(--bg-page);">
-            <div class="container" style="max-width: 720px;">
-                <div class="content-block" style="font-size: 1.125rem; line-height: 1.8; color: var(--gray-800);">
-
-                    <h3>The Problem We Solve</h3>
-                    <p>Every year, millions of professionals face a critical decision: <strong>Should I take this job
-                            offer in a new city?</strong></p>
-
-                    <p>The salary looks higher on paper. But after state taxes, housing costs, and local expenses—is it
-                        really a raise? Or are you just working harder to maintain the same lifestyle?</p>
-
-                    <p><strong>Most people guess. We calculate.</strong></p>
-
-                    <hr style="margin: 2.5rem 0; border: 0; border-top: 1px solid var(--border-subtle);">
-
-                    <h3>Our Approach</h3>
-                    <p>OfferVerdict uses a "Reverse-Disposable Income" methodology. Instead of just comparing nominal
-                        salaries, we:</p>
-                    <ul style="margin-left: 1.5rem; margin-top: 1rem;">
-                        <li>Calculate <strong>actual tax burdens</strong> using 2025 IRS and state tax tables</li>
-                        <li>Factor in <strong>real housing costs</strong> from Numbeo and local market data</li>
-                        <li>Estimate <strong>living expenses</strong> based on city-specific cost indices</li>
-                        <li>Show your <strong>true residual income</strong>—what you actually keep</li>
-                    </ul>
-
-                    <hr style="margin: 2.5rem 0; border: 0; border-top: 1px solid var(--border-subtle);">
-
-                    <!-- Author Section for EEAT -->
-                    <h3>About the Creator</h3>
-                    <div style="display: flex; gap: 1.5rem; align-items: flex-start; margin-top: 1rem;">
-                        <div
-                            style="width: 80px; height: 80px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: 700; flex-shrink: 0;">
-                            H</div>
-                        <div>
-                            <p style="margin: 0; font-weight: 600; font-size: 1.2rem;">Hyeok Shin</p>
-                            <p style="margin: 0.25rem 0 0.75rem 0; color: var(--text-2); font-size: 0.95rem;">Founder &
-                                Lead Developer</p>
-                            <p style="margin: 0;">A professional with background in financial technology and data
-                                analysis. After personally experiencing the hidden costs of job relocation, I built
-                                OfferVerdict to help others make data-driven career decisions.</p>
-                        </div>
-                    </div>
-
-                    <hr style="margin: 2.5rem 0; border: 0; border-top: 1px solid var(--border-subtle);">
-
-                    <h3>Our Data Sources</h3>
-                    <p>We rely exclusively on authoritative, publicly available data:</p>
-                    <ul style="margin-left: 1.5rem; margin-top: 1rem;">
-                        <li><strong>IRS</strong> — Federal tax brackets and deductions (2025)</li>
-                        <li><strong>State Revenue Departments</strong> — State and local tax rates</li>
-                        <li><strong>Bureau of Labor Statistics (BLS)</strong> — Wage data and occupational statistics
-                        </li>
-                        <li><strong>Numbeo</strong> — Cost of living indices and housing data</li>
-                    </ul>
-                    <p style="margin-top: 1rem;">For full transparency, see our <a href="/methodology"
-                            style="color: var(--brand-primary);">Methodology</a> page.</p>
-
-                    <hr style="margin: 2.5rem 0; border: 0; border-top: 1px solid var(--border-subtle);">
-
-                    <h3>Contact Us</h3>
-                    <p>Have questions, feedback, or partnership inquiries?</p>
-                    <p style="margin-top: 0.5rem;">
-                        <strong>Email:</strong>
-                        <a href="mailto:pshinhyeok@gmail.com"
-                            style="color: var(--brand-primary);">pshinhyeok@gmail.com</a>
-                    </p>
-                </div>
-
-                <div style="margin-top: 3rem; text-align: center;">
-                    <a href="/" class="btn btn-primary">Try the Calculator</a>
-                </div>
+        <section class="content-ledger">
+            <div class="ledger-mark">02</div>
+            <div>
+                <h2>The new question has teeth</h2>
+                <p>
+                    Healthcare relocation offers often look attractive because the bonus, stipend, overtime, and
+                    differentials are shown together. The risk is hidden in repayment language and non-guaranteed
+                    schedule assumptions. OfferVerdict pulls those apart.
+                </p>
             </div>
+        </section>
+
+        <section class="content-split">
+            <div>
+                <h2>What the tool is trying to do</h2>
+                <p>
+                    The product gives a fast, practical read: acceptable, negotiate, or walk away. It is not a legal,
+                    tax, or financial advisor. It is a structured checklist and calculation layer before a worker signs
+                    a contract that may be expensive to leave.
+                </p>
+                <a href="/nurse-relocation-offer-checker" class="btn btn-premium">Run the offer checker</a>
+            </div>
+            <aside class="content-note">
+                <strong>Current wedge</strong>
+                <span>Nurses and healthcare roles with relocation, sign-on bonus, shift differential, or commitment-period clauses.</span>
+            </aside>
         </section>
 
         <div th:replace="~{fragments/footer :: footer}"></div>

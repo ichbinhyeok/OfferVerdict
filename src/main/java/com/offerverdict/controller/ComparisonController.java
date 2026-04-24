@@ -83,7 +83,7 @@ public class ComparisonController {
         return "forward:/favicon.svg";
     }
 
-    @GetMapping({ "/", "/start" })
+    @GetMapping("/start")
     public Object home(@RequestParam(name = "job", required = false) String job,
             @RequestParam(name = "cityA", required = false) String cityA,
             @RequestParam(name = "cityB", required = false) String cityB,
@@ -96,6 +96,12 @@ public class ComparisonController {
             jakarta.servlet.http.HttpServletRequest request,
             RedirectAttributes redirectAttributes,
             Model model) {
+
+        if (isLegacySurfaceRetired()) {
+            RedirectView redirectView = new RedirectView("/nurse-relocation-offer-checker", true);
+            redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
+            return redirectView;
+        }
 
         if ("compare".equalsIgnoreCase(mode)
                 && city1 != null && !city1.isBlank()
@@ -194,8 +200,7 @@ public class ComparisonController {
         model.addAttribute("metaDescription",
                 "Compare two job offers after tax, rent, and living costs. Use OfferVerdict to decide whether a move or raise actually improves your monthly cash flow.");
         model.addAttribute("canonicalUrl", comparisonService.buildCanonicalUrl("/"));
-        boolean shouldIndex = request.getQueryString() == null || request.getQueryString().isBlank();
-        model.addAttribute("shouldIndex", shouldIndex);
+        model.addAttribute("shouldIndex", false);
         model.addAttribute("jobsByCategory", groupJobsByCategory());
         model.addAttribute("citiesByState", groupCitiesByState());
         model.addAttribute("featuredRoleGuides", roleGuideService.featuredGuides());
@@ -234,6 +239,12 @@ public class ComparisonController {
             RedirectAttributes redirectAttributes,
             jakarta.servlet.http.HttpServletResponse response,
             Model model) {
+        if (isLegacySurfaceRetired()) {
+            RedirectView redirectView = new RedirectView("/nurse-relocation-offer-checker", true);
+            redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
+            return redirectView;
+        }
+
         ZonedDateTime dataLastModified = resolveDataLastModifiedUtc();
         String dataModifiedDate = dataLastModified.toLocalDate().toString();
         String analysisDateUtc = LocalDate.now(ZoneOffset.UTC).toString();
@@ -656,34 +667,15 @@ public class ComparisonController {
     private boolean shouldIndexThisPage(JobInfo job, CityCostEntry cityEntryA, CityCostEntry cityEntryB,
             double currentSalary, double offerSalary,
             boolean hasExplicitSalaryParams) {
-        // PERMANENTLY NOINDEX Custom / User-Generated Jobs to prevent spam
-        if ("Custom".equalsIgnoreCase(job.getCategory())) {
-            return false;
-        }
-        if (!job.isMajor()) {
-            return false;
-        }
-        if (hasExplicitSalaryParams) {
-            return false;
-        }
-        if (!isIndexableCity(cityEntryA) || !isIndexableCity(cityEntryB)) {
-            return false;
-        }
-
-        // Keep comparison pages within the same SEO salary boundaries as single pages.
-        double minSalary = appProperties.getSeoSalaryBucketMin();
-        double maxSalary = appProperties.getSeoSalaryBucketMax();
-        if (currentSalary < minSalary || currentSalary > maxSalary) {
-            return false;
-        }
-        if (offerSalary < minSalary || offerSalary > maxSalary) {
-            return false;
-        }
-        return true;
+        return false;
     }
 
     private boolean isIndexableCity(CityCostEntry city) {
         return city != null && city.getPriority() <= MAX_INDEXABLE_CITY_PRIORITY;
+    }
+
+    private boolean isLegacySurfaceRetired() {
+        return true;
     }
 
     private String buildSinglePageDestination(JobInfo job, CityCostEntry city, double salary) {

@@ -743,3 +743,171 @@ Purpose: persistent cross-session log for date-based analysis and implemented im
   - new hub / comparison structure is visible to Google
   - generic legacy URLs are still lingering because the 301 change has not been re-crawled
   - immediate action is blocked by reindex quota; next step is to wait for natural crawl or regain quota
+
+## 2026-04-23 - GSC Checkpoint (US Signal Emerging, Ranking Still Weak)
+
+- What was checked:
+  - Search Console MCP performance for:
+    - current 28-day window: `2026-03-24` to `2026-04-20`
+    - baseline 28-day window: `2026-02-24` to `2026-03-23`
+    - latest short window: `2026-04-13` to `2026-04-20`
+  - country, device, page, and query splits for `sc-domain:livingcostcheck.com`
+  - cleanup surfaces for:
+    - `www` host rows
+    - query-parameter URLs
+    - legacy `/salary-check/{city}/{salary}` URLs
+  - live HTTP response behavior for representative cleanup and indexable URLs
+
+- Current signal:
+  - Overall 28 days:
+    - current: `1 click / 166 impressions / 0.60% CTR / avg position 63.58`
+    - baseline: `0 clicks / 349 impressions / 0% CTR / avg position 1.76`
+  - US-only 28 days:
+    - current: `0 clicks / 140 impressions / avg position 70.27`
+    - baseline: `0 clicks / 17 impressions / avg position 11.82`
+  - Country mix:
+    - current: USA `140 impressions`, KOR `12 impressions / 1 click`
+    - baseline: USA `17 impressions`, KOR `330 impressions`
+  - Interpretation of the comparison:
+    - the old baseline was dominated by KOR diagnostic/noise impressions
+    - the current window has a much healthier country mix, with US impressions materially higher
+    - rankings are still far too weak to generate clicks
+  - Latest short window (`2026-04-13` to `2026-04-20`):
+    - overall: `0 clicks / 42 impressions / avg position 70.21`
+    - USA: `0 clicks / 41 impressions / avg position 71.66`
+    - this is not yet a recovery pattern; it is weak, early discovery
+
+- Page and query findings:
+  - US visible page rows are privacy-thresholded and do not add up to the full US country total.
+  - The homepage is the largest visible US surface:
+    - `85 US impressions / avg position 81.35`
+    - query cluster includes `moving salary calculator`, `relocation calculator salary`, and `salary calculator for relocation`
+  - The RN Austin vs Seattle comparison is the clearest focused US opportunity:
+    - `14 US impressions / avg position 50.36`
+    - queries include RN / nurse salary Seattle and Austin variants
+  - `/relocation-salary-calculator` is live, canonical, and present in the sitemap, but has `0` GSC impressions in the current 28-day window.
+  - `/should-i-take-this-offer` has `7` impressions at avg position `3.71`, but no query rows are exposed due to GSC privacy thresholds.
+  - `/job/registered-nurse` has `6` impressions at avg position `7.00`, also without exposed query rows.
+
+- Cleanup findings:
+  - Query-parameter URLs returned `0` page rows in the current 28-day GSC window.
+  - `www` host rows still exist but are small:
+    - `28` visible impressions across 5 rows
+    - this is down sharply from the old March snapshot where `www` had `603` impressions
+  - Legacy `/salary-check/` rows still appear in GSC:
+    - `76` visible impressions in the current 28-day page report
+    - these are now likely recrawl lag rather than a live template failure
+  - Live response checks:
+    - `/salary-check/corpus-christi-tx/100000` returns `301` to `/city/corpus-christi-tx`
+    - `/salary-check/austin-tx/20000` returns `301` to `/city/austin-tx`
+    - `https://www.livingcostcheck.com/salary-check/denver-co/50000` returns `301` to canonical host
+    - comparison URL with salary query parameters renders canonical clean URL plus `noindex, follow`
+    - canonical RN comparison renders `index, follow`
+    - low-priority `/city/corpus-christi-tx` renders `noindex,follow`
+
+- Interpretation:
+  - The technical cleanup is live and working.
+  - Search Console is still carrying old `/salary-check/` and `www` rows, but the size is now small enough to treat as recrawl lag unless it rises again.
+  - The strategic issue has moved from index hygiene to ranking and intent match.
+  - US impressions are finally visible, but the site is mostly sitting around positions `50-85`, which explains the zero US clicks.
+  - The homepage is absorbing relocation-calculator queries even though the dedicated relocation landing has no impressions yet.
+
+- Next Actions:
+  1. If manual indexing quota is available, request recrawl for:
+     - `/`
+     - `/relocation-salary-calculator`
+     - `/registered-nurse-salary-austin-tx-vs-seattle-wa`
+     - `/job/registered-nurse`
+     - `/city/austin-tx`
+     - `/city/seattle-wa`
+  2. Strengthen internal routing from the homepage toward `/relocation-salary-calculator`, because current relocation-calculator queries still resolve to the homepage in GSC.
+  3. Treat the RN Austin vs Seattle page as the first focused content test; it has enough US query shape to improve title/H1/body copy around Seattle RN salary comparison intent.
+  4. Keep monitoring cleanup rows weekly:
+     - parameter URL rows should remain at `0`
+     - `www` rows should continue falling from the current `28` visible impressions
+     - legacy `/salary-check/` rows should continue falling from the current `76` visible impressions
+
+## 2026-04-23 - V2 Follow-up Backlog (Offer Capture + Monetization)
+
+- Goal:
+  - reduce input friction for high-intent RN users who already have an offer letter or recruiter message
+  - connect the tool directly to monetization instead of shipping analysis features in isolation
+
+- Later-work backlog:
+  1. `Offer letter PDF upload`
+     - support text-based PDF extraction first
+     - feed extracted text into the existing offer-risk draft parser
+  2. `Scanned PDF / PNG OCR`
+     - add OCR pipeline for image-based offer letters and screenshots
+     - treat OCR as text recovery, not final semantic parsing
+  3. `LLM-based field extraction`
+     - normalize extracted text into:
+       - city
+       - current pay / offer pay
+       - sign-on
+       - relocation
+       - repayment clause
+       - shift / float / cancellation language
+       - insurance / benefits snippets
+     - return confidence + explicit missing fields for manual review
+  4. `Monetization CTA on results`
+     - add one primary CTA immediately after the report
+     - first candidates:
+       - `Get better RN offers`
+       - `Request offer review`
+       - `Talk to a recruiter`
+
+- Product principle:
+  - file parsing is not the business model by itself
+  - file parsing is the friction-removal layer that should push users into a monetizable conversion step
+
+## 2026-04-24 - Signing Hesitation Wedge + GSC Reality Check
+
+- Search Console MCP snapshot:
+  - Property: `sc-domain:livingcostcheck.com`
+  - Window: `2026-03-24` to `2026-04-21`
+  - Overall: `1 click / 173 impressions / 0.58% CTR / avg position 63.06`
+  - Top visible page: `/` with `109 impressions / avg position 72.80`
+  - `/job/registered-nurse`: `6 impressions / avg position 7.00`
+  - Top visible query cluster remains relocation-calculator intent:
+    - `moving salary calculator`: `27 impressions / avg position 83.85`
+    - `salary calculator for relocation`: `27 impressions / avg position 79.19`
+    - `relocation calculator salary`: `23 impressions / avg position 80.30`
+  - RN query fragments are present but weak:
+    - `rn seattle salary`: `3 impressions / avg position 47.67`
+    - `nurse salary in seattle`: `2 impressions / avg position 50`
+    - `rn salary seattle wa`: `2 impressions / avg position 47`
+
+- Interpretation:
+  - The current site does not yet have enough organic traffic to support revenue.
+  - The RN wedge has early indexability signs, but not enough query volume or ranking yet.
+  - The strongest product wedge is not generic `RN calculator`; it is `signing hesitation before accepting an RN offer`.
+  - The high-intent surface should target nurses who already have an offer and one unresolved concern:
+    - family separation
+    - childcare / night shift
+    - life fit
+    - toxic unit culture
+    - schedule / clawback / float / relocation risk
+
+- Changes made locally:
+  - Reframed the main tool title/copy around the hesitation moment:
+    - `Should I Sign This Nurse Offer?`
+    - `Paste the RN offer that is making you hesitate.`
+  - Added indexable high-intent pages:
+    - `/should-i-sign-nurse-job-offer`
+    - `/nurse-offer-life-fit`
+    - `/nurse-offer-family-relocation`
+    - `/nurse-night-shift-childcare-offer`
+    - `/nurse-offer-toxic-unit-culture`
+  - Added generated unit-specific hesitation pages via risk-intent expansion:
+    - `family-relocation-risk`
+    - `childcare-schedule-risk`
+    - `commute-burnout-risk`
+    - `toxic-unit-culture`
+  - Connected the homepage surface grid to the new high-intent pages.
+
+- Strategic conclusion:
+  - This can be worth testing, but it is not yet traffic-backed.
+  - The next success metric should not be clicks alone.
+  - Track whether new pages get impressions for hesitation queries within 2-4 weeks after deploy.
+  - If impressions stay near zero, the next pivot should not be more RN content; it should be a broader `high-risk offer decision` wedge or a non-SEO acquisition test.

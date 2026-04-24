@@ -3,6 +3,10 @@ spring:
     name: offer-verdict
   thymeleaf:
     cache: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 server:
   port: ${PORT:8080}

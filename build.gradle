@@ -23,6 +23,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.apache.pdfbox:pdfbox:2.0.32'
+    implementation 'net.sourceforge.tess4j:tess4j:5.18.0'
     
     // DevTools for automatic reload of templates and static resources
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

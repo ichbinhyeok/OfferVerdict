@@ -4,65 +4,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title}">Contact Us</title>
+    <title th:text="${title}">Contact OfferVerdict</title>
     <meta name="description" th:content="${metaDescription}">
-
+    <meta name="robots" content="noindex, follow">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="/css/tokens.css">
     <link rel="stylesheet" href="/css/core.css">
-    <link rel="stylesheet" href="/css/result.css">
-
-    <!-- Fonts -->
+    <link rel="stylesheet" href="/css/offer-risk.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Sora:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <!-- Analytics -->
     <div th:replace="~{fragments/analytics :: analytics}"></div>
 </head>
 
-<body class="theme-lucid">
-
+<body class="offer-risk-page">
     <nav class="top-nav">
         <div class="container">
             <a href="/" class="logo">OfferVerdict</a>
+            <div class="risk-nav-links">
+                <a href="/nurse-relocation-offer-checker">Tool</a>
+                <a href="/methodology">Methodology</a>
+            </div>
         </div>
     </nav>
 
-    <main class="main-content">
-        <!-- Hero -->
-        <section class="section-hero" style="background: var(--surface-1); padding: 4rem 0 2rem 0; text-align: center;">
-            <div class="container" style="max-width: 800px;">
-                <span class="badge"
-                    style="background: var(--brand-primary); color: white; padding: 4px 12px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Contact</span>
-                <h1 style="font-size: 2.5rem; margin-top: 1.5rem; letter-spacing: -0.03em;">Get in Touch</h1>
-                <p style="font-size: 1.25rem; color: var(--text-2); margin-top: 1rem;">We'd love to hear from you.</p>
-            </div>
+    <main class="content-shell container">
+        <section class="content-hero">
+            <span class="eyebrow">Contact</span>
+            <h1 th:text="${intentTitle}">Send healthcare offer feedback.</h1>
+            <p th:text="${intentLead}">
+                If the tool misses a real-world offer term, repayment clause, shift rule, or relocation edge case, send
+                it in. The product should learn from the contract language people actually see.
+            </p>
         </section>
 
-        <!-- Contact Box -->
-        <section class="section-contact" style="padding: 3rem 0; background: var(--bg-page);">
-            <div class="container" style="max-width: 600px;">
-                <div class="contact-card"
-                    style="background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 3rem; text-align: center; box-shadow: var(--shadow-sm);">
-                    <div class="icon" style="font-size: 3rem; margin-bottom: 1.5rem;">📧</div>
-                    <h3 style="margin-bottom: 1rem; color: var(--gray-900);">Email Us</h3>
-                    <p style="color: var(--gray-600); margin-bottom: 2rem; line-height: 1.6;">
-                        Have feedback, found a bug, or just want to share your success story?
-                    </p>
-                    <a href="mailto:spainhyeok@gmail.com"
-                        style="display: inline-block; font-size: 1.25rem; font-weight: 600; color: var(--brand-primary); text-decoration: none; padding: 0.5rem 1rem; background: var(--surface-1); border-radius: 8px;">
-                        spainhyeok@gmail.com
-                    </a>
-
-                    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--gray-100);">
-                        <p style="font-size: 0.9rem; color: var(--gray-500);">
-                            Based in Seoul, Korea.<br>
-                            Operating globally.
-                        </p>
-                    </div>
+        <section class="contact-preset" th:if="${intentLabel != null}">
+            <div class="contact-context">
+                <div>
+                    <span class="mono">follow-up</span>
+                    <strong th:text="${intentLabel}">Second review</strong>
+                </div>
+                <div>
+                    <span class="mono">mode</span>
+                    <strong th:text="${contextMode}">Offer review</strong>
+                </div>
+                <div>
+                    <span class="mono">verdict</span>
+                    <strong th:text="${contextVerdict}">NEGOTIATE</strong>
+                </div>
+                <div>
+                    <span class="mono">role</span>
+                    <strong th:text="${contextRole}">Registered Nurse (RN)</strong>
+                </div>
+                <div>
+                    <span class="mono">city</span>
+                    <strong th:text="${contextCity}">Seattle, WA</strong>
                 </div>
             </div>
+            <a class="btn btn-premium" th:href="${mailtoHref}">Open prefilled email</a>
+            <p class="contact-note">
+                This is not a paywall. It is a lightweight signal about what you would want after a useful free read.
+            </p>
+        </section>
+
+        <section class="contact-panel">
+            <span class="mono">contact</span>
+            <a th:href="${mailtoHref}" href="mailto:contact@livingcostcheck.com">contact@livingcostcheck.com</a>
+            <p>Useful notes include role, state, offer terms, repayment language, and which part felt unclear.</p>
         </section>
 
         <div th:replace="~{fragments/footer :: footer}"></div>

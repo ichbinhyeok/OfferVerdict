@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">RN Offer Issue Review</title>
+    <meta name="description" th:content="${metaDescription}">
+    <link rel="canonical" th:href="${canonicalUrl}">
+    <meta name="robots" th:content="${shouldIndex} ? 'index, follow' : 'noindex, follow'">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/core.css">
+    <link rel="stylesheet" href="/css/offer-risk.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Sora:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <div th:replace="~{fragments/analytics :: analytics}"></div>
+</head>
+
+<body class="offer-risk-page">
+    <nav class="top-nav top-nav-fresh">
+        <div class="container">
+            <a href="/" class="logo">OfferVerdict</a>
+            <div class="risk-nav-links">
+                <a href="/nurse-relocation-offer-checker">RN offer review</a>
+                <a href="/methodology">Methodology</a>
+                <a href="/contact">Feedback</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="content-shell container">
+        <section class="issue-hero">
+            <span class="eyebrow" th:text="${page.issueLabel}">Repayment risk</span>
+            <h1 th:text="${page.h1}">RN sign-on bonus clawback</h1>
+            <p class="issue-subhead" th:text="${page.subhead}">Do not let a bonus hide the downside.</p>
+            <p class="issue-lead" th:text="${page.lead}">
+                Paste the offer letter and check whether the written terms change the decision.
+            </p>
+            <div class="issue-actions">
+                <a class="btn btn-premium" href="/nurse-relocation-offer-checker">Paste your offer letter</a>
+                <a class="btn btn-ghost" href="/nurse-relocation-offer-checker?mode=job_post">Only have a job post?</a>
+            </div>
+        </section>
+
+        <section class="issue-tool-bridge issue-tool-bridge-primary">
+            <div>
+                <span class="mono">tool-first page</span>
+                <h2>This page is the preflight. The verdict comes from the offer review.</h2>
+                <p>
+                    Use the notes below to know what to look for, then paste the letter, recruiter email, screenshot,
+                    or messy offer note so the tool can turn your actual situation into a sign, negotiate, or
+                    walk-away packet.
+                </p>
+            </div>
+            <form class="issue-tool-form" action="/nurse-relocation-offer-checker" method="get">
+                <input type="hidden" name="issue" th:value="${issuePath}">
+                <button type="submit" class="btn btn-premium">Run offer review</button>
+                <small>No PDF required. Best input: final letter, recruiter email, screenshot, or job post text.</small>
+            </form>
+        </section>
+
+        <section class="issue-grid" aria-label="RN offer issue review">
+            <article class="issue-panel main">
+                <span class="mono">why it matters</span>
+                <h2 th:text="${page.whyItMatters}">A bonus can look generous while the contract puts exit risk on you.</h2>
+                <p>
+                    The review should start from the actual written terms. A recruiter summary can point you in the
+                    right direction, but the decision changes only when the final offer confirms pay, unit, shift,
+                    float, cancellation, support, and repayment language.
+                </p>
+            </article>
+
+            <article class="issue-panel">
+                <h2>Red flags to catch</h2>
+                <ul class="risk-list">
+                    <li th:each="flag : ${page.redFlags}" th:text="${flag}">The repayment clause is full instead of prorated.</li>
+                </ul>
+            </article>
+
+            <article class="issue-panel">
+                <h2>Ask before you sign</h2>
+                <ul class="risk-list">
+                    <li th:each="question : ${page.questions}" th:text="${question}">Is repayment forgiven monthly?</li>
+                </ul>
+            </article>
+
+            <article class="issue-panel">
+                <h2>What changes the decision</h2>
+                <ul class="risk-list">
+                    <li th:each="changer : ${page.decisionChangers}" th:text="${changer}">
+                        The written offer confirms the risk clearly.
+                    </li>
+                </ul>
+            </article>
+
+            <article class="issue-panel">
+                <h2>What the tool needs</h2>
+                <ul class="risk-list">
+                    <li th:each="input : ${page.toolInputs}" th:text="${input}">
+                        Offer letter or recruiter email
+                    </li>
+                </ul>
+            </article>
+
+            <article class="issue-panel full">
+                <h2>Walk-away line</h2>
+                <p class="walk-away-line" th:text="${page.walkAwayLine}">
+                    If they will not write proration and termination protection into the final offer, treat the bonus as risk, not income.
+                </p>
+            </article>
+        </section>
+
+        <section class="issue-grid issue-depth-grid" aria-label="Written language quality">
+            <article class="issue-panel">
+                <span class="mono">stronger language</span>
+                <h2>Better written offer language looks like this</h2>
+                <ul class="risk-list">
+                    <li th:each="line : ${page.strongerLanguage}" th:text="${line}">
+                        The offer names the exact term and limits.
+                    </li>
+                </ul>
+            </article>
+
+            <article class="issue-panel">
+                <span class="mono">weak language</span>
+                <h2>Weak language to challenge</h2>
+                <ul class="risk-list">
+                    <li th:each="line : ${page.weakLanguage}" th:text="${line}">
+                        The offer points to policy without limits.
+                    </li>
+                </ul>
+            </article>
+
+            <article class="issue-panel full">
+                <span class="mono">copyable ask</span>
+                <h2>Negotiation asks to send back</h2>
+                <ul class="risk-list">
+                    <li th:each="ask : ${page.negotiationAsks}" th:text="${ask}">
+                        Please add this term to the final written offer.
+                    </li>
+                </ul>
+            </article>
+        </section>
+
+        <section class="issue-tool-bridge">
+            <div>
+                <span class="mono">decision desk</span>
+                <h2>Turn this issue into a full RN offer verdict.</h2>
+                <p>
+                    The full packet checks money, contract downside, schedule control, unit survivability, document
+                    evidence, and the message to send back.
+                </p>
+            </div>
+            <a class="btn btn-premium" href="/nurse-relocation-offer-checker">Run the offer review</a>
+        </section>
+
+        <section class="surface-map">
+            <div class="surface-intro">
+                <span class="mono">related RN offer checks</span>
+                <h2>Same wedge, more entry points.</h2>
+            </div>
+            <div class="surface-grid">
+                <a class="surface-card" th:each="related : ${relatedPages}" th:href="${related.path}">
+                    <span class="surface-kicker" th:text="${related.issueLabel}">repayment</span>
+                    <strong th:text="${related.title}">Sign-on bonus clawback</strong>
+                    <p th:text="${related.summary}">Check whether bonus money becomes a repayment trap.</p>
+                </a>
+            </div>
+        </section>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+</body>
+
+</html>

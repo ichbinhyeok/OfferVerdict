@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Nurse Relocation Offer Checker</title>
+    <meta name="description" th:content="${metaDescription}">
+    <link rel="canonical" th:href="${canonicalUrl}">
+    <meta name="robots" th:content="${shouldIndex} ? 'index, follow' : 'noindex, follow'">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/core.css">
+    <link rel="stylesheet" href="/css/offer-risk.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Sora:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <div th:replace="~{fragments/analytics :: analytics}"></div>
+</head>
+
+<body class="offer-risk-page">
+    <nav class="top-nav top-nav-fresh">
+        <div class="container">
+            <a href="/" class="logo">OfferVerdict</a>
+            <div class="risk-nav-links">
+                <a href="/nurse-relocation-offer-checker">RN offer review</a>
+                <a href="/methodology">Methodology</a>
+                <a href="/contact">Feedback</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="risk-shell"
+        th:with="offerDraft=${offerDraft}, jobPostDraft=${jobPostDraft}">
+        <section class="decision-stage container" th:attr="data-active-mode=${activeMode}">
+            <div class="decision-intro">
+                <div class="decision-copy">
+                    <span class="eyebrow">For nurses with an offer in hand</span>
+                    <h1 th:text="${pageHeading}">Paste your RN offer letter.</h1>
+                    <p class="decision-lead" th:text="${pageLead}">
+                        Know whether to sign, negotiate, or walk away before you commit.
+                    </p>
+                    <p class="decision-proof">
+                        No PDF required. Paste the letter, recruiter email, job post, or just describe the offer
+                        that is making you hesitate. The tool works best when it can see the written terms, but a
+                        messy note is enough to start.
+                    </p>
+                    <div class="decision-concern-block">
+                        <span class="mono">what usually feels off</span>
+                        <div class="decision-concern-grid">
+                            <article>
+                                <strong>The pay does not feel worth the move.</strong>
+                                <p>Check whether the local leftover cash is actually strong after rent, tax, insurance, and relocation.</p>
+                            </article>
+                            <article>
+                                <strong>The bonus feels like a trap.</strong>
+                                <p>Catch sign-on, relocation, and clawback language before fake upside turns into downside.</p>
+                            </article>
+                            <article>
+                                <strong>The shift or float language feels vague.</strong>
+                                <p>See when weak shift guarantees, hospital-wide float, or cancellations make the money less real.</p>
+                            </article>
+                            <article>
+                                <strong>I am not sure I can survive this unit.</strong>
+                                <p>Use the packet to pressure-test orientation, support, workload, and specialty fit before you sign.</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mode-switch" role="tablist" aria-label="Decision mode">
+                    <button type="button" class="mode-pill"
+                        th:classappend="${activeMode == 'offer_review'} ? ' active' : ''"
+                        data-mode="offer_review" aria-controls="offer-review-panel"
+                        th:attr="aria-pressed=${activeMode == 'offer_review'}">
+                        Review an offer letter
+                    </button>
+                    <button type="button" class="mode-pill"
+                        th:classappend="${activeMode == 'job_post'} ? ' active' : ''"
+                        data-mode="job_post" aria-controls="job-post-panel"
+                        th:attr="aria-pressed=${activeMode == 'job_post'}">
+                        Only have a job post?
+                    </button>
+                </div>
+
+                <section class="issue-context-card" th:if="${issueContext != null}">
+                    <span class="mono">review focus from landing page</span>
+                    <h2 th:text="${issueContext.title}">ICU RN guaranteed hours</h2>
+                    <p th:text="${issueContext.summary}">
+                        Confirm the written term before trusting the offer.
+                    </p>
+                    <ul class="risk-list compact">
+                        <li th:each="question : ${issueContext.questions}" th:text="${question}">
+                            Are weekly hours guaranteed in writing?
+                        </li>
+                    </ul>
+                </section>
+
+                <div class="mode-briefs">
+                    <article class="mode-brief"
+                        th:classappend="${activeMode == 'offer_review'} ? ' active' : ''"
+                        data-mode-card="offer_review">
+                        <span class="mono">paste first</span>
+                        <h2>Start with whatever you actually have.</h2>
+                        <p>
+                            Use this when the package is real enough that one unclear term could change whether you
+                            sign. A PDF helps, but a recruiter email or rough note is not a blocker.
+                        </p>
+                        <ul class="brief-list">
+                            <li>Pull pay, sign-on, relocation, contract months, and shift language from pasted text or uploads</li>
+                            <li>Turn written terms into a sign, negotiate, or walk away verdict</li>
+                            <li>Generate the exact questions and negotiation note you can send back today</li>
+                        </ul>
+                    </article>
+
+                    <article class="mode-brief"
+                        th:classappend="${activeMode == 'job_post'} ? ' active' : ''"
+                        data-mode-card="job_post">
+                        <span class="mono">fallback</span>
+                        <h2>Use the quick screen only when no written offer exists yet.</h2>
+                        <p>
+                            A listing can tell you whether to reply. It cannot replace the document review once the
+                            real package lands.
+                        </p>
+                        <ul class="brief-list">
+                            <li>Screen pay quality and city pressure before a recruiter call</li>
+                            <li>Flag vague shift, float, and cancellation language early</li>
+                            <li>Come back to offer review as soon as the written terms exist</li>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+
+            <div class="mode-surface">
+                <section class="mode-panel"
+                    th:classappend="${activeMode == 'offer_review'} ? ' active' : ''"
+                    id="offer-review-panel" data-mode-panel="offer_review">
+                    <div class="ingest-card">
+                        <div class="panel-topline">
+                            <span>Offer intake</span>
+                            <strong>Paste the real package, recruiter email, or your plain-English concern first.</strong>
+                        </div>
+
+                        <form class="paste-form" action="/offer-risk-draft" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="variant" th:value="${variantPath}">
+                            <input type="hidden" name="analysisMode" value="offer_review">
+                            <input type="hidden" name="issue" th:value="${issueSlug}">
+                            <label>
+                                <span>Offer letter, recruiter email, or describe the offer you are unsure about</span>
+                                <textarea name="sourceText" rows="8"
+                                    placeholder="Example: I am an RN in Austin making $42/hr. I got a Seattle ICU offer at $60/hr for 36 hours, nights, $15k sign-on, $4k relocation, 24-month commitment. The pay is higher, but my family would stay in Austin at first and I am worried nights plus hospital-wide float will break the move."
+                                    th:text="${offerDraft.sourceText}"></textarea>
+                            </label>
+                            <p class="paste-footnote">
+                                If you only have a feeling, write the feeling. The hesitation matters: family distance, childcare, commute, unit culture, coworkers, nights, float, clawback, or the clause that feels off.
+                            </p>
+                            <div class="input-helper-grid" aria-label="Low-friction input options">
+                                <article>
+                                    <strong>Fastest path</strong>
+                                    <span>Paste the whole email or letter. Do not clean it up.</span>
+                                </article>
+                                <article>
+                                    <strong>No document yet</strong>
+                                    <span>Write the offer from memory and say what you are worried about.</span>
+                                </article>
+                                <article>
+                                    <strong>Best accuracy</strong>
+                                    <span>Add the final letter or screenshot when you have it.</span>
+                                </article>
+                                <article>
+                                    <strong>Only have anxiety?</strong>
+                                    <span>Say the worry first. The tool will ask for missing basics before a verdict.</span>
+                                </article>
+                            </div>
+                            <label class="file-upload">
+                                <span>Optional upload</span>
+                                <input type="file" name="sourceFile" accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.webp">
+                                <small>PDF, text files, screenshots, and image OCR work now. Upload is for convenience, not a requirement.</small>
+                            </label>
+                            <button type="submit" class="btn btn-ghost paste-submit">Build from my input</button>
+                        </form>
+
+                        <div class="parse-result"
+                            th:if="${parseResult != null and parseResult.analysisMode == 'offer_review'}">
+                            <div class="intake-review-head">
+                                <div>
+                                    <span class="parse-source" th:if="${parseResult.sourceLabel != null}" th:text="${parseResult.sourceLabel}">
+                                        Uploaded PDF: offer-letter.pdf
+                                    </span>
+                                    <h2>Check what we understood before the verdict.</h2>
+                                </div>
+                                <span class="intake-status"
+                                    th:classappend="${#lists.isEmpty(parseResult.missingCriticalFields)} ? ' ready' : ' needs-info'"
+                                    th:text="${#lists.isEmpty(parseResult.missingCriticalFields)} ? 'Ready to review' : 'Needs a few facts'">
+                                    Needs a few facts
+                                </span>
+                            </div>
+                            <p class="parse-summary" th:text="${parseResult.summary}">
+                                Auto-filled fields from the pasted offer.
+                            </p>
+                            <p class="parse-warning" th:if="${parseResult.parseWarning != null}" th:text="${parseResult.parseWarning}">
+                                Image OCR is not wired in this environment yet.
+                            </p>
+                            <div class="intake-review-grid">
+                                <section class="intake-understood" th:if="${!#lists.isEmpty(parseResult.extractedFields)}">
+                                    <strong>We understood</strong>
+                                    <div class="parse-chip-row">
+                                        <span class="parse-chip" th:each="field : ${parseResult.extractedFields}"
+                                            th:text="${field}">Offer city: Seattle, WA</span>
+                                    </div>
+                                </section>
+                                <section class="parse-missing" th:if="${!#lists.isEmpty(parseResult.missingCriticalFields)}">
+                                    <strong>Needed for a real verdict</strong>
+                                    <ul>
+                                        <li th:each="field : ${parseResult.missingCriticalFields}" th:text="${field}">Current city</li>
+                                    </ul>
+                                </section>
+                            </div>
+                            <div class="intake-next-step">
+                                <strong>Next step</strong>
+                                <p th:if="${#lists.isEmpty(parseResult.missingCriticalFields)}">
+                                    The basics are present. Review the auto-filled fields below, then run the verdict.
+                                </p>
+                                <p th:if="${!#lists.isEmpty(parseResult.missingCriticalFields)}">
+                                    Do not trust the verdict yet. Fill only the missing or wrong fields below, then run the review.
+                                </p>
+                            </div>
+                            <div class="parse-evidence" th:if="${!#lists.isEmpty(parseResult.evidenceSnippets)}">
+                                <strong>Input evidence we used:</strong>
+                                <ul>
+                                    <li th:each="snippet : ${parseResult.evidenceSnippets}" th:text="${snippet}">
+                                        Sign-on bonus of $15,000 is payable after start date.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <details class="manual-entry" th:open="${parseResult != null and parseResult.analysisMode == 'offer_review'}">
+                        <summary>No clean letter yet? Confirm only the terms the tool could not read.</summary>
+                        <form class="mode-form" action="/offer-risk-report" method="post"
+                            th:with="offerSourceLabel=${parseResult != null and parseResult.analysisMode == 'offer_review' ? parseResult.sourceLabel : ''},
+                                     offerParseWarning=${parseResult != null and parseResult.analysisMode == 'offer_review' ? parseResult.parseWarning : ''}">
+                            <input type="hidden" name="analysisMode" value="offer_review">
+                            <input type="hidden" name="issue" th:value="${issueSlug}">
+                            <textarea name="sourceText" hidden th:text="${offerDraft.sourceText}"></textarea>
+                            <input type="hidden" name="documentSourceLabel" th:value="${offerSourceLabel}">
+                            <input type="hidden" name="documentParseWarning" th:value="${offerParseWarning}">
+                            <div class="panel-topline panel-topline-form">
+                                <span>Manual fallback</span>
+                                <strong>Only touch the handful of terms the document or recruiter has not made clear yet.</strong>
+                            </div>
+
+                            <section class="form-section essentials">
+                                <div class="section-heading">
+                                    <span class="section-kicker">Essentials</span>
+                                    <h2>Current baseline and written offer target</h2>
+                                </div>
+                                <div class="form-grid two">
+                                    <label>
+                                        <span>Healthcare role</span>
+                                        <select name="roleSlug">
+                                            <option th:each="role : ${roles}" th:value="${role.slug}" th:text="${role.title}"
+                                                th:selected="${role.slug == offerDraft.roleSlug}">Registered Nurse</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Weekly scheduled hours</span>
+                                        <input type="number" name="weeklyHours" min="1" max="80" step="1"
+                                            th:value="${offerDraft.weeklyHours}">
+                                    </label>
+                                    <label>
+                                        <span>Current city</span>
+                                        <select name="currentCitySlug">
+                                            <option th:each="city : ${cities}" th:value="${city.slug}"
+                                                th:text="${city.city + ', ' + city.state}"
+                                                th:selected="${city.slug == offerDraft.currentCitySlug}">Austin, TX</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Offer city</span>
+                                        <select name="offerCitySlug">
+                                            <option th:each="city : ${cities}" th:value="${city.slug}"
+                                                th:text="${city.city + ', ' + city.state}"
+                                                th:selected="${city.slug == offerDraft.offerCitySlug}">Seattle, WA</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Current hourly rate</span>
+                                        <input type="number" name="currentHourlyRate" min="1" step="0.01"
+                                            th:value="${offerDraft.currentHourlyRate}">
+                                    </label>
+                                    <label>
+                                        <span>Offer hourly rate</span>
+                                        <input type="number" name="offerHourlyRate" min="1" step="0.01"
+                                            th:value="${offerDraft.offerHourlyRate}">
+                                    </label>
+                                </div>
+                            </section>
+
+                            <details class="form-detail">
+                                <summary>Schedule and differential detail</summary>
+                                <div class="form-grid three">
+                                    <label>
+                                        <span>Weekly overtime hours</span>
+                                        <input type="number" name="overtimeHours" min="0" max="40" step="1"
+                                            th:value="${offerDraft.overtimeHours}">
+                                    </label>
+                                    <label>
+                                        <span>Night diff %</span>
+                                        <input type="number" name="nightDiffPercent" min="0" max="100" step="0.5"
+                                            th:value="${offerDraft.nightDiffPercent}">
+                                    </label>
+                                    <label>
+                                        <span>Night hours/week</span>
+                                        <input type="number" name="nightHours" min="0" max="80" step="1"
+                                            th:value="${offerDraft.nightHours}">
+                                    </label>
+                                    <label>
+                                        <span>Weekend diff %</span>
+                                        <input type="number" name="weekendDiffPercent" min="0" max="100" step="0.5"
+                                            th:value="${offerDraft.weekendDiffPercent}">
+                                    </label>
+                                    <label>
+                                        <span>Weekend hours/week</span>
+                                        <input type="number" name="weekendHours" min="0" max="80" step="1"
+                                            th:value="${offerDraft.weekendHours}">
+                                    </label>
+                                </div>
+                            </details>
+
+                            <details class="form-detail" open>
+                                <summary>Contract, incentives, and protection</summary>
+                                <div class="form-grid three">
+                                    <label>
+                                        <span>Sign-on bonus</span>
+                                        <input type="number" name="signOnBonus" min="0" step="100"
+                                            th:value="${offerDraft.signOnBonus}">
+                                    </label>
+                                    <label>
+                                        <span>Relocation stipend</span>
+                                        <input type="number" name="relocationStipend" min="0" step="100"
+                                            th:value="${offerDraft.relocationStipend}">
+                                    </label>
+                                    <label>
+                                        <span>Moving cost estimate</span>
+                                        <input type="number" name="movingCost" min="0" step="100"
+                                            th:value="${offerDraft.movingCost}">
+                                    </label>
+                                    <label>
+                                        <span>Commitment months</span>
+                                        <input type="number" name="contractMonths" min="0" max="60" step="1"
+                                            th:value="${offerDraft.contractMonths}">
+                                    </label>
+                                    <label>
+                                        <span>Planned stay months</span>
+                                        <input type="number" name="plannedStayMonths" min="0" max="60" step="1"
+                                            th:value="${offerDraft.plannedStayMonths}">
+                                    </label>
+                                    <label>
+                                        <span>Repayment clause</span>
+                                        <select name="repaymentStyle">
+                                            <option value="prorated" th:selected="${offerDraft.repaymentStyle == 'prorated'}">Prorated</option>
+                                            <option value="full" th:selected="${offerDraft.repaymentStyle == 'full'}">Full repayment</option>
+                                            <option value="none" th:selected="${offerDraft.repaymentStyle == 'none'}">No repayment</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Unit / specialty</span>
+                                        <select name="unitType">
+                                            <option value="med_surg" th:selected="${offerDraft.unitType == 'med_surg'}">Med-surg / telemetry</option>
+                                            <option value="icu" th:selected="${offerDraft.unitType == 'icu'}">ICU / critical care</option>
+                                            <option value="ed" th:selected="${offerDraft.unitType == 'ed'}">Emergency department</option>
+                                            <option value="or" th:selected="${offerDraft.unitType == 'or'}">Operating room</option>
+                                            <option value="l_and_d" th:selected="${offerDraft.unitType == 'l_and_d'}">Labor and delivery</option>
+                                            <option value="clinic" th:selected="${offerDraft.unitType == 'clinic'}">Clinic / outpatient</option>
+                                            <option value="float_pool" th:selected="${offerDraft.unitType == 'float_pool'}">Float pool</option>
+                                            <option value="other" th:selected="${offerDraft.unitType == 'other'}">Other unit</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Shift guarantee</span>
+                                        <select name="shiftGuarantee">
+                                            <option value="written" th:selected="${offerDraft.shiftGuarantee == 'written'}">Written schedule</option>
+                                            <option value="verbal" th:selected="${offerDraft.shiftGuarantee == 'verbal'}">Discussed, not written</option>
+                                            <option value="rotating" th:selected="${offerDraft.shiftGuarantee == 'rotating'}">Rotating shift</option>
+                                            <option value="unknown" th:selected="${offerDraft.shiftGuarantee == 'unknown'}">Not confirmed</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Float terms</span>
+                                        <select name="floatRisk">
+                                            <option value="home_unit_only" th:selected="${offerDraft.floatRisk == 'home_unit_only'}">Home unit only</option>
+                                            <option value="adjacent_units" th:selected="${offerDraft.floatRisk == 'adjacent_units'}">Adjacent units</option>
+                                            <option value="hospital_wide" th:selected="${offerDraft.floatRisk == 'hospital_wide'}">Hospital-wide float</option>
+                                            <option value="unknown" th:selected="${offerDraft.floatRisk == 'unknown'}">Unknown</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Cancellation terms</span>
+                                        <select name="cancelRisk">
+                                            <option value="protected_hours" th:selected="${offerDraft.cancelRisk == 'protected_hours'}">Guaranteed hours</option>
+                                            <option value="low_census_only" th:selected="${offerDraft.cancelRisk == 'low_census_only'}">Low census only</option>
+                                            <option value="can_cancel_without_pay" th:selected="${offerDraft.cancelRisk == 'can_cancel_without_pay'}">Can cancel without pay</option>
+                                            <option value="unknown" th:selected="${offerDraft.cancelRisk == 'unknown'}">Unknown</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Current insurance/mo</span>
+                                        <input type="number" name="currentMonthlyInsurance" min="0" step="25"
+                                            th:value="${offerDraft.currentMonthlyInsurance}">
+                                    </label>
+                                    <label>
+                                        <span>Offer insurance/mo</span>
+                                        <input type="number" name="offerMonthlyInsurance" min="0" step="25"
+                                            th:value="${offerDraft.offerMonthlyInsurance}">
+                                    </label>
+                                </div>
+                            </details>
+
+                            <button type="submit" class="btn btn-premium risk-submit"
+                                th:text="${parseResult != null and parseResult.analysisMode == 'offer_review' and !#lists.isEmpty(parseResult.missingCriticalFields)}
+                                    ? 'I fixed the missing facts - review this offer'
+                                    : 'Review this offer'">
+                                Review this offer
+                            </button>
+                            <p class="form-footnote">
+                                Manual fields are cleanup, not the main product. Start with messy input, then fix only the terms that decide the verdict.
+                            </p>
+                        </form>
+                    </details>
+                </section>
+
+                <section class="mode-panel"
+                    th:classappend="${activeMode == 'job_post'} ? ' active' : ''"
+                    id="job-post-panel" data-mode-panel="job_post">
+                    <div class="ingest-card">
+                        <div class="panel-topline">
+                            <span>Fallback screen</span>
+                            <strong>Only use this when the written offer does not exist yet.</strong>
+                        </div>
+
+                        <form class="paste-form" action="/offer-risk-draft" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="variant" th:value="${variantPath}">
+                            <input type="hidden" name="analysisMode" value="job_post">
+                            <input type="hidden" name="issue" th:value="${issueSlug}">
+                            <label>
+                                <span>Job post, recruiter message, or listing excerpt</span>
+                                <textarea name="sourceText" rows="8"
+                                    placeholder="Paste the job post or recruiter message here."
+                                    th:text="${jobPostDraft.sourceText}"></textarea>
+                            </label>
+                            <p class="paste-footnote">
+                                We will try to pull the posted city, pay, unit, incentives, and fuzzy term language for a quick screen.
+                            </p>
+                            <label class="file-upload">
+                                <span>Or upload a screenshot or PDF</span>
+                                <input type="file" name="sourceFile" accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.webp">
+                                <small>Useful for job-post screenshots, recruiter flyers, or scanned nursing PDFs.</small>
+                            </label>
+                            <button type="submit" class="btn btn-ghost paste-submit">Auto-fill from job post</button>
+                        </form>
+
+                        <div class="parse-result"
+                            th:if="${parseResult != null and parseResult.analysisMode == 'job_post'}">
+                            <div class="intake-review-head">
+                                <div>
+                                    <span class="parse-source" th:if="${parseResult.sourceLabel != null}" th:text="${parseResult.sourceLabel}">
+                                        Pasted job post
+                                    </span>
+                                    <h2>Check the listing screen before spending time.</h2>
+                                </div>
+                                <span class="intake-status"
+                                    th:classappend="${#lists.isEmpty(parseResult.missingCriticalFields)} ? ' ready' : ' needs-info'"
+                                    th:text="${#lists.isEmpty(parseResult.missingCriticalFields)} ? 'Ready to screen' : 'Needs a few facts'">
+                                    Needs a few facts
+                                </span>
+                            </div>
+                            <p class="parse-summary" th:text="${parseResult.summary}">
+                                Auto-filled fields from the pasted listing.
+                            </p>
+                            <p class="parse-warning" th:if="${parseResult.parseWarning != null}" th:text="${parseResult.parseWarning}">
+                                That file type is not supported yet.
+                            </p>
+                            <div class="intake-review-grid">
+                                <section class="intake-understood" th:if="${!#lists.isEmpty(parseResult.extractedFields)}">
+                                    <strong>We understood</strong>
+                                    <div class="parse-chip-row">
+                                        <span class="parse-chip" th:each="field : ${parseResult.extractedFields}"
+                                            th:text="${field}">Offer city: Seattle, WA</span>
+                                    </div>
+                                </section>
+                                <section class="parse-missing" th:if="${!#lists.isEmpty(parseResult.missingCriticalFields)}">
+                                    <strong>Confirm before screening</strong>
+                                    <ul>
+                                        <li th:each="field : ${parseResult.missingCriticalFields}" th:text="${field}">Current city</li>
+                                    </ul>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form class="mode-form" action="/offer-risk-report" method="post"
+                        th:with="jobPostSourceLabel=${parseResult != null and parseResult.analysisMode == 'job_post' ? parseResult.sourceLabel : ''},
+                                 jobPostParseWarning=${parseResult != null and parseResult.analysisMode == 'job_post' ? parseResult.parseWarning : ''}">
+                        <input type="hidden" name="analysisMode" value="job_post">
+                        <input type="hidden" name="issue" th:value="${issueSlug}">
+                        <textarea name="sourceText" hidden th:text="${jobPostDraft.sourceText}"></textarea>
+                        <input type="hidden" name="documentSourceLabel" th:value="${jobPostSourceLabel}">
+                        <input type="hidden" name="documentParseWarning" th:value="${jobPostParseWarning}">
+                        <input type="hidden" name="currentCitySlug" th:value="${jobPostDraft.currentCitySlug}">
+                        <input type="hidden" name="currentHourlyRate" th:value="${jobPostDraft.currentHourlyRate}">
+                        <input type="hidden" name="currentMonthlyInsurance" th:value="${jobPostDraft.currentMonthlyInsurance}">
+                        <input type="hidden" name="plannedStayMonths" value="0">
+                        <input type="hidden" name="repaymentStyle" value="none">
+
+                        <div class="panel-topline panel-topline-form">
+                            <span>Job post fallback</span>
+                            <strong>Use the listing to decide whether to reply. Re-run the written offer as soon as it lands.</strong>
+                        </div>
+
+                        <section class="form-section essentials">
+                            <div class="section-heading">
+                                <span class="section-kicker">Essentials</span>
+                                <h2>Should this listing even get your time?</h2>
+                            </div>
+                            <div class="form-grid two">
+                                <label>
+                                    <span>Healthcare role</span>
+                                    <select name="roleSlug">
+                                        <option th:each="role : ${roles}" th:value="${role.slug}" th:text="${role.title}"
+                                            th:selected="${role.slug == jobPostDraft.roleSlug}">Registered Nurse</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    <span>Posted city</span>
+                                    <select name="offerCitySlug">
+                                        <option th:each="city : ${cities}" th:value="${city.slug}"
+                                            th:text="${city.city + ', ' + city.state}"
+                                            th:selected="${city.slug == jobPostDraft.offerCitySlug}">Seattle, WA</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    <span>Posted hourly rate</span>
+                                    <input type="number" name="offerHourlyRate" min="1" step="0.01"
+                                        th:value="${jobPostDraft.offerHourlyRate}">
+                                </label>
+                                <label>
+                                    <span>Weekly scheduled hours</span>
+                                    <input type="number" name="weeklyHours" min="1" max="80" step="1"
+                                        th:value="${jobPostDraft.weeklyHours}">
+                                </label>
+                            </div>
+                        </section>
+
+                        <details class="form-detail" open>
+                            <summary>Listing detail we can still screen now</summary>
+                            <div class="form-grid three">
+                                <label>
+                                    <span>Unit / specialty</span>
+                                    <select name="unitType">
+                                        <option value="med_surg" th:selected="${jobPostDraft.unitType == 'med_surg'}">Med-surg / telemetry</option>
+                                        <option value="icu" th:selected="${jobPostDraft.unitType == 'icu'}">ICU / critical care</option>
+                                        <option value="ed" th:selected="${jobPostDraft.unitType == 'ed'}">Emergency department</option>
+                                        <option value="or" th:selected="${jobPostDraft.unitType == 'or'}">Operating room</option>
+                                        <option value="l_and_d" th:selected="${jobPostDraft.unitType == 'l_and_d'}">Labor and delivery</option>
+                                        <option value="clinic" th:selected="${jobPostDraft.unitType == 'clinic'}">Clinic / outpatient</option>
+                                        <option value="float_pool" th:selected="${jobPostDraft.unitType == 'float_pool'}">Float pool</option>
+                                        <option value="other" th:selected="${jobPostDraft.unitType == 'other'}">Other unit</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    <span>Shift language</span>
+                                    <select name="shiftGuarantee">
+                                        <option value="written" th:selected="${jobPostDraft.shiftGuarantee == 'written'}">Exact shift listed</option>
+                                        <option value="verbal" th:selected="${jobPostDraft.shiftGuarantee == 'verbal'}">Looks specific but soft</option>
+                                        <option value="rotating" th:selected="${jobPostDraft.shiftGuarantee == 'rotating'}">Rotating shift</option>
+                                        <option value="unknown" th:selected="${jobPostDraft.shiftGuarantee == 'unknown'}">Not clear</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    <span>Float language</span>
+                                    <select name="floatRisk">
+                                        <option value="home_unit_only" th:selected="${jobPostDraft.floatRisk == 'home_unit_only'}">Home unit only</option>
+                                        <option value="adjacent_units" th:selected="${jobPostDraft.floatRisk == 'adjacent_units'}">Adjacent units</option>
+                                        <option value="hospital_wide" th:selected="${jobPostDraft.floatRisk == 'hospital_wide'}">Hospital-wide float</option>
+                                        <option value="unknown" th:selected="${jobPostDraft.floatRisk == 'unknown'}">Not listed</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    <span>Cancellation language</span>
+                                    <select name="cancelRisk">
+                                        <option value="protected_hours" th:selected="${jobPostDraft.cancelRisk == 'protected_hours'}">Guaranteed hours</option>
+                                        <option value="low_census_only" th:selected="${jobPostDraft.cancelRisk == 'low_census_only'}">Low census only</option>
+                                        <option value="can_cancel_without_pay" th:selected="${jobPostDraft.cancelRisk == 'can_cancel_without_pay'}">Can cancel without pay</option>
+                                        <option value="unknown" th:selected="${jobPostDraft.cancelRisk == 'unknown'}">Not listed</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    <span>Night diff % if listed</span>
+                                    <input type="number" name="nightDiffPercent" min="0" max="100" step="0.5"
+                                        th:value="${jobPostDraft.nightDiffPercent}">
+                                </label>
+                                <label>
+                                    <span>Weekend diff % if listed</span>
+                                    <input type="number" name="weekendDiffPercent" min="0" max="100" step="0.5"
+                                        th:value="${jobPostDraft.weekendDiffPercent}">
+                                </label>
+                                <label>
+                                    <span>Night hours/week estimate</span>
+                                    <input type="number" name="nightHours" min="0" max="80" step="1"
+                                        th:value="${jobPostDraft.nightHours}">
+                                </label>
+                                <label>
+                                    <span>Weekend hours/week estimate</span>
+                                    <input type="number" name="weekendHours" min="0" max="80" step="1"
+                                        th:value="${jobPostDraft.weekendHours}">
+                                </label>
+                                <label>
+                                    <span>Weekly overtime hours estimate</span>
+                                    <input type="number" name="overtimeHours" min="0" max="40" step="1"
+                                        th:value="${jobPostDraft.overtimeHours}">
+                                </label>
+                            </div>
+                        </details>
+
+                        <details class="form-detail">
+                            <summary>Optional incentives if the listing actually shows them</summary>
+                            <div class="form-grid three">
+                                <label>
+                                    <span>Sign-on bonus</span>
+                                    <input type="number" name="signOnBonus" min="0" step="100"
+                                        th:value="${jobPostDraft.signOnBonus}">
+                                </label>
+                                <label>
+                                    <span>Relocation stipend</span>
+                                    <input type="number" name="relocationStipend" min="0" step="100"
+                                        th:value="${jobPostDraft.relocationStipend}">
+                                </label>
+                                <label>
+                                    <span>Commitment months if listed</span>
+                                    <input type="number" name="contractMonths" min="0" max="60" step="1"
+                                        th:value="${jobPostDraft.contractMonths}">
+                                </label>
+                                <label>
+                                    <span>Moving cost estimate</span>
+                                    <input type="number" name="movingCost" min="0" step="100"
+                                        th:value="${jobPostDraft.movingCost}">
+                                </label>
+                                <label>
+                                    <span>Listed employee premium/mo</span>
+                                    <input type="number" name="offerMonthlyInsurance" min="0" step="25"
+                                        th:value="${jobPostDraft.offerMonthlyInsurance}">
+                                </label>
+                            </div>
+                        </details>
+
+                        <button type="submit" class="btn btn-premium risk-submit">Quick-screen this listing</button>
+                        <p class="form-footnote">
+                            Use this mode when the post is still vague and you only want to know if it deserves a recruiter call.
+                        </p>
+                    </form>
+                </section>
+            </div>
+        </section>
+
+        <section class="trust-strip container">
+            <article>
+                <span class="mono">why document first</span>
+                <strong>The written offer makes the verdict stronger.</strong>
+                <p>But the first useful read can start from a pasted email, screenshot, or plain-English note.</p>
+            </article>
+            <article>
+                <span class="mono">manual cleanup</span>
+                <strong>Hand-entry should feel light.</strong>
+                <p>Users should only fix missing city, pay, schedule, or clawback details after the tool reads their input.</p>
+            </article>
+            <article>
+                <span class="mono">job posts stay secondary</span>
+                <strong>A listing can earn a callback, not a signature.</strong>
+                <p>Quick-screen stays useful, but it should never feel like the main event once an offer exists.</p>
+            </article>
+        </section>
+
+        <section class="risk-method container">
+            <div class="method-manifesto">
+                <span class="mono">product thesis</span>
+                <h2>This should feel like a pre-sign RN decision desk, not a calculator.</h2>
+                <p>
+                    OfferVerdict is for one moment: a nurse has a real offer in hand and needs to know whether the
+                    written terms change the decision to sign, negotiate, relocate, or walk away without regretting the unit later.
+                </p>
+            </div>
+            <div class="method-steps" aria-label="How the report thinks">
+                <div><span>1</span><strong>Start from the nurse's raw input, even when it is only a messy note.</strong></div>
+                <div><span>2</span><strong>Separate guaranteed money from shift-dependent upside.</strong></div>
+                <div><span>3</span><strong>Price the downside hiding in clawbacks, float, cancellations, relocation, and unit survivability.</strong></div>
+                <div><span>4</span><strong>Return sign, negotiate, or walk away plus the next message to send right now.</strong></div>
+            </div>
+        </section>
+
+        <section class="surface-map container">
+            <div class="surface-intro">
+                <span class="mono">rn offer issues this catches</span>
+                <h2>Keep the wedge narrow. Keep the exposure surface broad.</h2>
+                <p>
+                    The identity stays simple: RN offer review. The visible content surface can still cover the issues nurses actually search when a package starts to feel wrong.
+                </p>
+            </div>
+            <div class="surface-grid">
+                <a class="surface-card" href="/rn-offer-red-flags">
+                    <span class="surface-kicker">decision intent</span>
+                    <strong>RN offer red flags before signing</strong>
+                    <p>Use the hub when an offer feels attractive but one unclear term could change the decision.</p>
+                </a>
+                <a class="surface-card" href="/should-i-accept-nurse-job-offer">
+                    <span class="surface-kicker">accept or negotiate</span>
+                    <strong>Should I accept this nurse job offer?</strong>
+                    <p>Turn hesitation into a sign, negotiate, or walk-away decision before the offer expires.</p>
+                </a>
+                <a class="surface-card" href="/should-i-sign-nurse-job-offer">
+                    <span class="surface-kicker">signing hesitation</span>
+                    <strong>Should I sign this nurse job offer?</strong>
+                    <p>Use this when the offer is real, the deadline is close, and one unresolved concern could change the decision.</p>
+                </a>
+                <a class="surface-card" href="/nurse-offer-life-fit">
+                    <span class="surface-kicker">life fit</span>
+                    <strong>Nurse offer life fit review</strong>
+                    <p>Check whether family, childcare, commute, nights, or support loss make a higher rate less livable.</p>
+                </a>
+                <a class="surface-card" href="/nurse-offer-letter-red-flags">
+                    <span class="surface-kicker">letter risk</span>
+                    <strong>Nurse offer letter red flags</strong>
+                    <p>Find the missing guarantees and vague clauses that should not survive into the final letter.</p>
+                </a>
+                <a class="surface-card" href="/nurse-offer-negotiation-questions">
+                    <span class="surface-kicker">negotiation</span>
+                    <strong>Questions to ask before signing</strong>
+                    <p>Use risk-first questions that turn recruiter promises into written commitments.</p>
+                </a>
+                <a class="surface-card" href="/rn-sign-on-bonus-clawback">
+                    <span class="surface-kicker">repayment risk</span>
+                    <strong>RN sign-on bonus clawback</strong>
+                    <p>See when a bonus makes the package look safer than it is because the repayment language puts the downside back on you.</p>
+                </a>
+                <a class="surface-card" href="/rn-night-shift-differential-offer">
+                    <span class="surface-kicker">pay quality</span>
+                    <strong>RN shift differential versus real base pay</strong>
+                    <p>Separate a genuinely strong base rate from pay that only looks good if nights, weekends, or overtime all go perfectly.</p>
+                </a>
+                <a class="surface-card" href="/rn-float-policy-offer">
+                    <span class="surface-kicker">term clarity</span>
+                    <strong>RN float policy and low-census cancellation risk</strong>
+                    <p>Catch the vague float or cancellation language that can make a high hourly number much less usable in real life.</p>
+                </a>
+                <a class="surface-card" href="/nurse-relocation-package-worth-it">
+                    <span class="surface-kicker">move economics</span>
+                    <strong>RN relocation support after taxes and moving cost</strong>
+                    <p>See whether the move still works once relocation money is taxed and the actual cash gap lands on you.</p>
+                </a>
+                <a class="surface-card" href="/nurse-offer-family-relocation">
+                    <span class="surface-kicker">family relocation</span>
+                    <strong>Family separation and nurse relocation risk</strong>
+                    <p>Pressure-test whether the household plan works before treating higher pay as a real win.</p>
+                </a>
+                <a class="surface-card" href="/nurse-night-shift-childcare-offer">
+                    <span class="surface-kicker">childcare schedule</span>
+                    <strong>Night shift, childcare, and offer risk</strong>
+                    <p>Check whether nights, weekends, call, and orientation can survive the real weekly coverage plan.</p>
+                </a>
+                <a class="surface-card" href="/rn-shift-guarantee-offer">
+                    <span class="surface-kicker">offer quality</span>
+                    <strong>Written shift guarantee versus recruiter promise</strong>
+                    <p>Know when the schedule looks stable in conversation but still is not protected enough in the written packet.</p>
+                </a>
+                <a class="surface-card" href="/rn-orientation-length-offer">
+                    <span class="surface-kicker">unit fit</span>
+                    <strong>Orientation, support, and unit survivability</strong>
+                    <p>Use the packet to pressure-test whether the unit feels livable, not just whether the headline rate looks decent.</p>
+                </a>
+                <a class="surface-card" href="/nurse-offer-toxic-unit-culture">
+                    <span class="surface-kicker">culture risk</span>
+                    <strong>Toxic unit culture before accepting</strong>
+                    <p>Treat bullying, turnover, unsafe assignments, and weak manager support as part of the offer decision.</p>
+                </a>
+            </div>
+        </section>
+
+        <section class="surface-map container">
+            <div class="surface-intro">
+                <span class="mono">specialty entry points</span>
+                <h2>Different RN units fail in different ways.</h2>
+                <p>
+                    The same hourly rate means something different in ICU, ED, med-surg/tele, or L&amp;D. The packet now pushes that context higher instead of treating every RN offer the same.
+                </p>
+            </div>
+            <div class="surface-grid specialty-grid">
+                <a class="surface-card" href="/icu-nurse-offer-red-flags">
+                    <span class="surface-kicker">icu</span>
+                    <strong>High-acuity support versus ICU pay</strong>
+                    <p>Orientation depth, preceptor support, float expectations, and charge coverage can matter more than another few dollars an hour.</p>
+                </a>
+                <a class="surface-card" href="/ed-nurse-offer-red-flags">
+                    <span class="surface-kicker">ed</span>
+                    <strong>Boarding, violence, and ED chaos load</strong>
+                    <p>Emergency offers can look attractive until boarding burden, psych volume, security, and throughput pressure show up.</p>
+                </a>
+                <a class="surface-card" href="/med-surg-tele-nurse-offer-red-flags">
+                    <span class="surface-kicker">med-surg / tele</span>
+                    <strong>Total-care load and turnover pressure</strong>
+                    <p>Admits, discharges, telemetry burden, and CNA support can decide whether the rate is actually survivable.</p>
+                </a>
+                <a class="surface-card" href="/labor-delivery-nurse-offer-red-flags">
+                    <span class="surface-kicker">l&amp;d</span>
+                    <strong>Induction, triage, OR coverage, and fetal monitoring</strong>
+                    <p>L&amp;D offers break differently. The real risk is often support structure and acuity coverage, not just the posted number.</p>
+                </a>
+                <a class="surface-card" href="/new-grad-nurse-offer-red-flags">
+                    <span class="surface-kicker">new grad</span>
+                    <strong>First offer support versus lock-in</strong>
+                    <p>Residency, preceptor quality, and repayment terms matter more when the nurse is entering the unit for the first time.</p>
+                </a>
+                <a class="surface-card" href="/travel-nurse-contract-red-flags">
+                    <span class="surface-kicker">travel</span>
+                    <strong>Guaranteed hours and cancellation risk</strong>
+                    <p>Travel contracts need protection around stipends, cancellation, float scope, and assignment changes.</p>
+                </a>
+            </div>
+        </section>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+    <script src="/js/offer-risk.js" defer></script>
+</body>
+
+</html>

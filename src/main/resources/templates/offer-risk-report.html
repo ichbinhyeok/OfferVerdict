@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Offer Risk Report</title>
+    <meta name="description" th:content="${metaDescription}">
+    <link rel="canonical" th:href="${canonicalUrl}">
+    <meta name="robots" th:content="${shouldIndex} ? 'index, follow' : 'noindex, follow'">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/core.css">
+    <link rel="stylesheet" href="/css/offer-risk.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Sora:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <div th:replace="~{fragments/analytics :: analytics}"></div>
+</head>
+
+<body class="offer-risk-page">
+    <nav class="top-nav top-nav-fresh">
+        <div class="container">
+            <a href="/" class="logo">OfferVerdict</a>
+            <div class="risk-nav-links">
+                <a th:href="${report.analysisMode == 'job_post' ? '/nurse-relocation-offer-checker?mode=job_post' : '/nurse-relocation-offer-checker?mode=offer_review'}"
+                    th:text="${report.analysisMode == 'job_post' ? 'Job post screen' : 'Offer review'}">Offer review</a>
+                <a href="/methodology">Methodology</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="risk-report-shell container">
+        <section class="report-hero" th:classappend="${report.verdictTone}">
+            <div class="report-eyebrow-row">
+                <span class="eyebrow" th:text="${report.analysisModeLabel}">Offer Review</span>
+                <span class="mode-badge" th:text="${report.marketAnchorLabel}">Local wage anchor</span>
+            </div>
+
+            <div class="report-headline">
+                <h1 th:text="${report.verdict}">NEGOTIATE</h1>
+                <p th:text="${report.verdictSummary}">
+                    There may be upside, but the contract and relocation terms need better protection.
+                </p>
+            </div>
+
+            <p class="report-packet-summary" th:text="${report.packetSummary}">
+                This is mainly a downside-allocation problem. Too much risk sits on you before the offer is safe enough to sign.
+            </p>
+
+            <p class="report-note" th:if="${report.analysisMode == 'job_post'}">
+                This is a recruiter-screen decision, not a sign-now verdict. Use it to decide whether the listing is
+                worth your time.
+            </p>
+
+            <div class="report-route" th:if="${report.analysisMode == 'offer_review'}">
+                <span>Current to offer</span>
+                <strong th:text="${report.currentCityName + ' -> ' + report.offerCityName}">Austin, TX -> Seattle, WA</strong>
+                <small th:text="${report.roleLabel}">Registered Nurse</small>
+            </div>
+
+            <div class="report-route" th:if="${report.analysisMode == 'job_post'}">
+                <span>Listing focus</span>
+                <strong th:text="${report.roleLabel + ' in ' + report.offerCityName}">Registered Nurse in Seattle, WA</strong>
+                <small>Decide whether to apply, verify, or ignore.</small>
+            </div>
+        </section>
+
+        <section class="signing-brief" aria-label="Decision brief">
+            <div class="brief-verdict-panel" th:classappend="${report.verdictTone}">
+                <span class="mono">decision brief</span>
+                <h2
+                    th:text="${report.verdict == 'ACCEPTABLE' ? 'This can work, but only if the letter stays clean.' : report.verdict == 'WALK AWAY' ? 'Do not sign this version.' : report.analysisMode == 'job_post' ? 'Worth a screen only if the recruiter proves the terms.' : 'Do not sign yet. Negotiate the weak points first.'}">
+                    Do not sign yet. Negotiate the weak points first.
+                </h2>
+                <p th:text="${report.packetSummary}">
+                    This is mainly a downside-allocation problem.
+                </p>
+                <div class="brief-money-line" th:if="${report.analysisMode == 'offer_review'}">
+                    <span>Real monthly change</span>
+                    <strong
+                        th:text="${(report.monthlyResidualDelta >= 0 ? '+$' : '-$') + #numbers.formatInteger(T(java.lang.Math).abs(report.monthlyResidualDelta), 0, 'COMMA') + '/mo'}">
+                        +$1,200/mo
+                    </strong>
+                </div>
+                <div class="brief-money-line" th:if="${report.analysisMode == 'job_post'}">
+                    <span>Modeled leftover in city</span>
+                    <strong
+                        th:text="${(report.offerMonthlyResidual >= 0 ? '+$' : '-$') + #numbers.formatInteger(T(java.lang.Math).abs(report.offerMonthlyResidual), 0, 'COMMA') + '/mo'}">
+                        +$2,100/mo
+                    </strong>
+                </div>
+                <div class="brief-life-line" th:if="${report.lifeFitRiskScore > 0}">
+                    <span>Life-fit constraint</span>
+                    <strong th:text="${report.lifeFitLabel}">Life fit needs a plan</strong>
+                    <p th:text="${report.lifeFitSummary}">
+                        This offer needs a concrete life plan before it deserves a signature.
+                    </p>
+                </div>
+            </div>
+
+            <div class="brief-column">
+                <article class="brief-block">
+                    <span th:text="${report.analysisMode == 'job_post' ? 'verify first' : 'signing blockers'}">signing blockers</span>
+                    <h3 th:text="${report.decisionLockLabel}">Do not sign until</h3>
+                    <ol>
+                        <li th:each="lock, iter : ${report.decisionLocks}" th:if="${iter.index < 3}" th:text="${lock}">
+                            Get repayment language in writing.
+                        </li>
+                    </ol>
+                </article>
+
+                <article class="brief-block accent">
+                    <span>next action</span>
+                    <h3 th:text="${report.actionLabel}">Copy this negotiation note</h3>
+                    <p th:text="${report.analysisMode == 'job_post'
+                        ? 'Use the recruiter message below before investing time in this listing.'
+                        : 'Use the draft below to turn the report into a concrete ask.'}">
+                        Use the draft below to turn the report into a concrete ask.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section class="decision-support-grid" aria-label="Decision support">
+            <article class="report-card priority full report-issue-focus" th:if="${issueContext != null}">
+                <div class="support-head">
+                    <h2>Review focus from the page you entered</h2>
+                    <span class="support-badge" th:text="${issueContext.label}">pay certainty</span>
+                </div>
+                <p class="support-note" th:text="${issueContext.title + ': ' + issueContext.summary}">
+                    ICU RN guaranteed hours: Confirm the written term before trusting the rate.
+                </p>
+                <ul class="risk-list compact">
+                    <li th:each="question : ${issueContext.questions}" th:text="${question}">
+                        Are weekly hours guaranteed in writing?
+                    </li>
+                </ul>
+                <p class="walk-away-line compact" th:text="${issueContext.walkAwayLine}">
+                    If this is not written, do not sign.
+                </p>
+            </article>
+
+            <article class="report-card priority decision-card">
+                <span class="card-kicker">why this could fail</span>
+                <h2>Biggest risks in this packet</h2>
+                <ul class="risk-list">
+                    <li th:each="risk : ${report.topRisks}" th:text="${risk}">Monthly cash is too thin for the risk.</li>
+                </ul>
+            </article>
+
+            <article class="report-card priority decision-card">
+                <span class="card-kicker">unit reality</span>
+                <h2 th:text="${report.survivabilityHeadline}">Can you survive this offer?</h2>
+                <p class="support-note" th:text="${report.survivabilitySummary}">
+                    The money may work, but the unit still needs enough support and structure to be survivable.
+                </p>
+                <ul class="risk-list">
+                    <li th:each="signal : ${report.survivabilitySignals}" th:text="${signal}">Confirm orientation length and support model.</li>
+                </ul>
+            </article>
+
+            <article class="report-card priority decision-card life-fit-card" th:if="${report.lifeFitRiskScore > 0}">
+                <span class="card-kicker">real-life constraint</span>
+                <h2 th:text="${report.lifeFitLabel}">Life fit needs a plan</h2>
+                <p class="support-note" th:text="${report.lifeFitSummary}">
+                    This offer needs a concrete life plan before it deserves a signature.
+                </p>
+                <ul class="risk-list">
+                    <li th:each="signal : ${report.lifeFitSignals}" th:text="${signal}">
+                        Family separation is a decision constraint.
+                    </li>
+                </ul>
+            </article>
+
+            <article class="report-card priority decision-card">
+                <div class="support-head">
+                    <div>
+                        <span class="card-kicker">decision logic</span>
+                        <h2>Why this verdict</h2>
+                    </div>
+                    <span class="support-badge" th:text="${report.confidenceLabel}">Moderate confidence</span>
+                </div>
+                <p class="support-note" th:text="${report.confidenceSummary}">
+                    This is directionally useful, but a few terms can still swing the answer.
+                </p>
+                <ul class="risk-list">
+                    <li th:each="reason : ${report.verdictReasons}" th:text="${reason}">Monthly cash is too thin for the risk.</li>
+                </ul>
+                <div class="support-subsection" th:if="${report.swingFactors != null and !#lists.isEmpty(report.swingFactors)}">
+                    <h3>What could still change this</h3>
+                    <ul class="risk-list compact">
+                        <li th:each="factor : ${report.swingFactors}" th:text="${factor}">Schedule terms could still shift the verdict.</li>
+                    </ul>
+                </div>
+            </article>
+            <article class="report-card priority decision-card">
+                <span class="card-kicker">questions that change the answer</span>
+                <h2 th:text="${report.analysisMode == 'job_post' ? 'Ask these before you spend more time' : 'Ask these before you sign'}">Ask these before you sign</h2>
+                <ul class="risk-list">
+                    <li th:each="question : ${report.mustAskNow}" th:text="${question}">Is repayment prorated?</li>
+                </ul>
+            </article>
+
+            <article class="report-card priority decision-card">
+                <span class="card-kicker">hard gate</span>
+                <h2 th:text="${report.decisionLockLabel}">Do not sign until</h2>
+                <ul class="risk-list">
+                    <li th:each="lock : ${report.decisionLocks}" th:text="${lock}">Repayment terms are fixed in writing.</li>
+                </ul>
+            </article>
+
+            <article class="report-card full walkaway-card">
+                <h2>Walk-away line</h2>
+                <p class="walk-away-line" th:text="${report.walkAwayLine}">
+                    If they will not write the unit, shift, float radius, and clawback protections into the final letter, do not sign.
+                </p>
+            </article>
+
+            <article class="report-card priority full document-evidence"
+                th:if="${documentParse != null and !#lists.isEmpty(documentParse.evidenceSnippets)}">
+                <div class="support-head">
+                    <h2 th:text="${report.analysisMode == 'job_post' ? 'Evidence from the listing' : 'Evidence from your input'}">
+                        Evidence from your input
+                    </h2>
+                    <span class="support-badge" th:text="${documentParse.sourceLabel}">Uploaded PDF: offer-letter.pdf</span>
+                </div>
+                <p class="support-note"
+                    th:text="${report.analysisMode == 'job_post'
+                        ? 'These are the actual listing lines the screen used before deciding whether this post deserves your time.'
+                        : 'These are the actual lines the review read from your pasted note, email, letter, screenshot, or upload before deciding whether you should sign, negotiate, or walk away.'}">
+                    These are the actual lines the review used before making the verdict.
+                </p>
+                <p class="parse-warning" th:if="${documentParse.parseWarning != null}" th:text="${documentParse.parseWarning}">
+                    Image OCR is not wired in this environment yet.
+                </p>
+                <div class="parse-chip-row" th:if="${!#lists.isEmpty(documentParse.extractedFields)}">
+                    <span class="parse-chip" th:each="field : ${documentParse.extractedFields}" th:text="${field}">
+                        Offer city: Seattle, WA
+                    </span>
+                </div>
+                <ul class="risk-list compact evidence-list">
+                    <li th:each="snippet : ${documentParse.evidenceSnippets}" th:text="${snippet}">
+                        Sign-on bonus of $15,000 is payable after start date.
+                    </li>
+                </ul>
+                <div class="parse-missing report-missing"
+                    th:if="${!#lists.isEmpty(documentParse.missingCriticalFields)}">
+                    <strong th:text="${report.analysisMode == 'job_post' ? 'Confirm before you trust this listing:' : 'Confirm before you sign:'}">
+                        Confirm before you sign:
+                    </strong>
+                    <ul>
+                        <li th:each="field : ${documentParse.missingCriticalFields}" th:text="${field}">Moving cost estimate</li>
+                    </ul>
+                </div>
+                <p class="input-notice" th:if="${report.analysisMode == 'offer_review'}">
+                    A PDF is optional. If this started from memory or a recruiter email, use the missing-items list
+                    above as the checklist for the final written letter.
+                </p>
+            </article>
+
+            <article class="report-card priority full">
+                <div class="support-head">
+                    <h2 th:text="${report.actionLabel}">Copy this negotiation note</h2>
+                    <span class="support-badge">Edit names and send</span>
+                </div>
+                <textarea class="action-draft" readonly th:text="${report.actionDraft}">Hi [Recruiter/HR],</textarea>
+            </article>
+        </section>
+
+        <section class="report-metrics" aria-label="Offer review metrics" th:if="${report.analysisMode == 'offer_review'}">
+            <div class="metric-tile">
+                <span>Monthly cash delta</span>
+                <strong
+                    th:text="${(report.monthlyResidualDelta >= 0 ? '+$' : '-$') + #numbers.formatInteger(T(java.lang.Math).abs(report.monthlyResidualDelta), 0, 'COMMA') + '/mo'}">+$1,200/mo</strong>
+                <small>After tax, rent, insurance, and baseline local costs.</small>
+            </div>
+            <div class="metric-tile">
+                <span>Repayment exposure</span>
+                <strong th:text="${'$' + #numbers.formatInteger(report.repaymentExposure, 0, 'COMMA')}">$10,000</strong>
+                <small th:text="${report.repaymentStyle}">Prorated repayment</small>
+            </div>
+            <div class="metric-tile">
+                <span>Break-even point</span>
+                <strong th:if="${report.breakEvenMonths < 999}"
+                    th:text="${#numbers.formatInteger(report.breakEvenMonths, 0) + ' months'}">6 months</strong>
+                <strong th:if="${report.breakEvenMonths >= 999}">No break-even</strong>
+                <small>Based on upfront gap plus repayment exposure.</small>
+            </div>
+            <div class="metric-tile">
+                <span>Market anchor</span>
+                <strong th:if="${report.offerPercentileAnchor != 0}"
+                    th:text="${(report.offerPercentileAnchor >= 0 ? '+' : '-') + #numbers.formatDecimal(T(java.lang.Math).abs(report.offerPercentileAnchor), 1, 1) + '%'}">+8.2%</strong>
+                <strong th:if="${report.offerPercentileAnchor == 0}">No strong anchor</strong>
+                <small th:if="${report.offerPercentileAnchor != 0}"
+                    th:text="${'vs median anchor'}">vs median anchor</small>
+                <small th:if="${report.offerPercentileAnchor == 0}" th:text="${report.marketAnchorLabel}">Local wage anchor</small>
+            </div>
+            <div class="metric-tile">
+                <span>Nurse schedule risk</span>
+                <strong th:if="${report.nurseScheduleRiskScore < 2}">Low</strong>
+                <strong th:if="${report.nurseScheduleRiskScore >= 2 and report.nurseScheduleRiskScore < 5}">Review</strong>
+                <strong th:if="${report.nurseScheduleRiskScore >= 5}">High</strong>
+                <small th:text="${report.shiftGuaranteeLabel + ' / ' + report.floatRiskLabel}">Written shift / Home unit only</small>
+            </div>
+        </section>
+
+        <section class="report-metrics" aria-label="Job post screen metrics" th:if="${report.analysisMode == 'job_post'}">
+            <div class="metric-tile">
+                <span>Estimated leftover in city</span>
+                <strong
+                    th:text="${(report.offerMonthlyResidual >= 0 ? '+$' : '-$') + #numbers.formatInteger(T(java.lang.Math).abs(report.offerMonthlyResidual), 0, 'COMMA') + '/mo'}">+$2,100/mo</strong>
+                <small>Modeled after tax, rent, and baseline local costs.</small>
+            </div>
+            <div class="metric-tile">
+                <span>Listed incentives</span>
+                <strong
+                    th:text="${'$' + #numbers.formatInteger(report.signOnBonus + report.relocationStipend, 0, 'COMMA')}">$0</strong>
+                <small>Bonus and relocation support shown in the listing.</small>
+            </div>
+            <div class="metric-tile">
+                <span>Commitment signal</span>
+                <strong th:if="${report.contractMonths > 0}"
+                    th:text="${#numbers.formatInteger(report.contractMonths, 0) + ' months listed'}">12 months listed</strong>
+                <strong th:if="${report.contractMonths <= 0}">No lock-in listed</strong>
+                <small>Still verify repayment terms in writing before you trust it.</small>
+            </div>
+            <div class="metric-tile">
+                <span>Market anchor</span>
+                <strong th:if="${report.offerPercentileAnchor != 0}"
+                    th:text="${(report.offerPercentileAnchor >= 0 ? '+' : '-') + #numbers.formatDecimal(T(java.lang.Math).abs(report.offerPercentileAnchor), 1, 1) + '%'}">+8.2%</strong>
+                <strong th:if="${report.offerPercentileAnchor == 0}">No strong anchor</strong>
+                <small th:if="${report.offerPercentileAnchor != 0}"
+                    th:text="${'vs median anchor'}">vs median anchor</small>
+                <small th:if="${report.offerPercentileAnchor == 0}" th:text="${report.marketAnchorLabel}">Local wage anchor</small>
+            </div>
+            <div class="metric-tile">
+                <span>Term clarity</span>
+                <strong th:if="${report.nurseScheduleRiskScore < 2}">Clear</strong>
+                <strong th:if="${report.nurseScheduleRiskScore >= 2 and report.nurseScheduleRiskScore < 5}">Needs review</strong>
+                <strong th:if="${report.nurseScheduleRiskScore >= 5}">Vague</strong>
+                <small th:text="${report.shiftGuaranteeLabel + ' / ' + report.cancelRiskLabel}">Shift not confirmed / Cancellation terms unknown</small>
+            </div>
+        </section>
+
+        <section class="report-grid">
+            <article class="report-card priority">
+                <h2 th:text="${report.analysisMode == 'job_post' ? 'Everything else flagged' : 'Everything else flagged'}">Everything else flagged</h2>
+                <ul class="risk-list">
+                    <li th:each="flag : ${report.redFlags}" th:text="${flag}">Repayment clause needs review.</li>
+                </ul>
+            </article>
+
+            <article class="report-card priority">
+                <h2 th:text="${report.analysisMode == 'job_post' ? 'How to salvage the screen' : 'How to salvage the offer'}">Negotiation moves</h2>
+                <ul class="risk-list">
+                    <li th:each="move : ${report.negotiationMoves}" th:text="${move}">Ask for repayment protection.</li>
+                </ul>
+            </article>
+
+            <article class="report-card full">
+                <h2 th:text="${report.analysisMode == 'job_post' ? 'Full recruiter question bank' : 'Full HR question bank'}">Questions to ask HR</h2>
+                <ul class="risk-list">
+                    <li th:each="question : ${report.hrQuestions}" th:text="${question}">Is repayment prorated?</li>
+                </ul>
+            </article>
+
+            <article class="report-card full">
+                <h2 th:text="${report.analysisMode == 'job_post' ? 'Listing economics' : 'Financial breakdown'}">Pay stack</h2>
+                <div th:if="${report.analysisMode == 'offer_review'}">
+                    <div class="line-item">
+                        <span>Current annual pay</span>
+                        <strong th:text="${'$' + #numbers.formatInteger(report.currentAnnualPay, 0, 'COMMA')}">$78,624</strong>
+                    </div>
+                    <div class="line-item">
+                        <span>Offer base pay</span>
+                        <strong th:text="${'$' + #numbers.formatInteger(report.baseAnnualPay, 0, 'COMMA')}">$104,832</strong>
+                    </div>
+                    <div class="line-item">
+                        <span>Overtime upside</span>
+                        <strong th:text="${'$' + #numbers.formatInteger(report.overtimeAnnualPay, 0, 'COMMA')}">$17,472</strong>
+                    </div>
+                    <div class="line-item">
+                        <span>Shift differential upside</span>
+                        <strong th:text="${'$' + #numbers.formatInteger(report.differentialAnnualPay, 0, 'COMMA')}">$9,436</strong>
+                    </div>
+                    <div class="line-item total">
+                        <span>Modeled offer annual pay</span>
+                        <strong th:text="${'$' + #numbers.formatInteger(report.offerAnnualPay, 0, 'COMMA')}">$131,740</strong>
+                    </div>
+                </div>
+                <div th:if="${report.analysisMode == 'job_post'}">
+                    <div class="line-item">
+                        <span>Listed base pay</span>
+                        <strong th:text="${'$' + #numbers.formatInteger(report.baseAnnualPay, 0, 'COMMA')}">$104,832</strong>
+                    </div>
+                    <div class="line-item">
+                        <span>Shift differential upside</span>
+                        <strong th:text="${'$' + #numbers.formatInteger(report.differentialAnnualPay, 0, 'COMMA')}">$9,436</strong>
+                    </div>
+                    <div class="line-item">
+                        <span>Overtime upside</span>
+                        <strong th:text="${'$' + #numbers.formatInteger(report.overtimeAnnualPay, 0, 'COMMA')}">$17,472</strong>
+                    </div>
+                    <div class="line-item">
+                        <span>Estimated leftover in offer city</span>
+                        <strong
+                            th:text="${(report.offerMonthlyResidual >= 0 ? '+$' : '-$') + #numbers.formatInteger(T(java.lang.Math).abs(report.offerMonthlyResidual), 0, 'COMMA') + '/mo'}">+$2,100/mo</strong>
+                    </div>
+                    <div class="line-item total">
+                        <span>Modeled annual pay signal</span>
+                        <strong th:text="${'$' + #numbers.formatInteger(report.offerAnnualPay, 0, 'COMMA')}">$131,740</strong>
+                    </div>
+                </div>
+            </article>
+
+            <article class="report-card">
+                <h2 th:text="${report.analysisMode == 'job_post' ? 'Listing terms on paper' : 'Written terms on paper'}">Nurse-specific terms</h2>
+                <div class="line-item">
+                    <span>Unit / specialty</span>
+                    <strong th:text="${report.unitTypeLabel}">Med-surg / telemetry</strong>
+                </div>
+                <div class="line-item">
+                    <span>Shift guarantee</span>
+                    <strong th:text="${report.shiftGuaranteeLabel}">Written shift schedule</strong>
+                </div>
+                <div class="line-item">
+                    <span>Float terms</span>
+                    <strong th:text="${report.floatRiskLabel}">Home unit only</strong>
+                </div>
+                <div class="line-item">
+                    <span>Cancellation terms</span>
+                    <strong th:text="${report.cancelRiskLabel}">Guaranteed scheduled hours</strong>
+                </div>
+                <div class="line-item total">
+                    <span th:text="${report.analysisMode == 'job_post' ? 'Insurance premium listed' : 'Insurance premium change'}">Insurance premium change</span>
+                    <strong th:if="${report.analysisMode == 'job_post'}"
+                        th:text="${report.offerMonthlyInsurance > 0 ? '$' + #numbers.formatInteger(report.offerMonthlyInsurance, 0, 'COMMA') + '/mo' : 'Not listed'}">$0/mo</strong>
+                    <strong th:if="${report.analysisMode == 'offer_review'}"
+                        th:text="${(report.monthlyInsuranceDelta >= 0 ? '+$' : '-$') + #numbers.formatInteger(T(java.lang.Math).abs(report.monthlyInsuranceDelta), 0, 'COMMA') + '/mo'}">+$0/mo</strong>
+                </div>
+            </article>
+
+            <article class="report-card">
+                <h2 th:text="${report.analysisMode == 'job_post' ? 'Incentives and lock-in' : 'Upfront money'}">Upfront money</h2>
+                <div class="line-item">
+                    <span>Sign-on bonus</span>
+                    <strong th:text="${'$' + #numbers.formatInteger(report.signOnBonus, 0, 'COMMA')}">$15,000</strong>
+                </div>
+                <div class="line-item">
+                    <span>Relocation stipend</span>
+                    <strong th:text="${'$' + #numbers.formatInteger(report.relocationStipend, 0, 'COMMA')}">$5,000</strong>
+                </div>
+                <div class="line-item">
+                    <span th:text="${report.analysisMode == 'job_post' ? 'Moving cost estimate' : 'Moving cost'}">Moving cost</span>
+                    <strong th:text="${'-$' + #numbers.formatInteger(report.movingCost, 0, 'COMMA')}">-$7,000</strong>
+                </div>
+                <div class="line-item" th:if="${report.analysisMode == 'job_post'}">
+                    <span>Commitment period</span>
+                    <strong th:if="${report.contractMonths > 0}"
+                        th:text="${#numbers.formatInteger(report.contractMonths, 0) + ' months listed'}">24 months listed</strong>
+                    <strong th:if="${report.contractMonths <= 0}">Not listed</strong>
+                </div>
+                <div class="line-item total" th:if="${report.analysisMode == 'offer_review'}">
+                    <span>Estimated net upfront value</span>
+                    <strong
+                        th:text="${(report.estimatedNetUpfrontValue >= 0 ? '+$' : '-$') + #numbers.formatInteger(T(java.lang.Math).abs(report.estimatedNetUpfrontValue), 0, 'COMMA')}">+$7,000</strong>
+                </div>
+                <div class="line-item total" th:if="${report.analysisMode == 'job_post'}">
+                    <span>Net upfront signal</span>
+                    <strong
+                        th:text="${(report.estimatedNetUpfrontValue >= 0 ? '+$' : '-$') + #numbers.formatInteger(T(java.lang.Math).abs(report.estimatedNetUpfrontValue), 0, 'COMMA')}">+$7,000</strong>
+                </div>
+            </article>
+
+        </section>
+
+        <section class="signal-strip" aria-label="Follow-up intent">
+            <div class="signal-intro">
+                <span class="mono">next step signal</span>
+                <h2>What would help next?</h2>
+                <p>
+                    Keep the tool free for now. If this read was useful, leave one honest follow-up signal so we know
+                    what actually matters after a real offer check.
+                </p>
+            </div>
+            <div class="signal-options">
+                <a class="signal-card"
+                    data-intent-signal
+                    data-intent="second_review"
+                    th:data-analysis-mode="${report.analysisMode}"
+                    th:data-verdict="${report.verdict}"
+                    th:href="@{/contact(intent='second_review', analysisMode=${report.analysisMode}, verdict=${report.verdict}, role=${report.roleLabel}, city=${report.offerCityName})}">
+                    <span class="signal-kicker">highest intent</span>
+                    <strong>I would want a second review</strong>
+                    <p>Use this if the free read got you close, but you would still want a final human check.</p>
+                </a>
+                <a class="signal-card"
+                    data-intent-signal
+                    data-intent="better_offers"
+                    th:data-analysis-mode="${report.analysisMode}"
+                    th:data-verdict="${report.verdict}"
+                    th:href="@{/contact(intent='better_offers', analysisMode=${report.analysisMode}, verdict=${report.verdict}, role=${report.roleLabel}, city=${report.offerCityName})}">
+                    <span class="signal-kicker">market option</span>
+                    <strong>Show me better RN offers</strong>
+                    <p>Use this if you would rather compare better options than spend more time negotiating this one.</p>
+                </a>
+                <a class="signal-card"
+                    data-intent-signal
+                    data-intent="scan_ocr_feedback"
+                    th:data-analysis-mode="${report.analysisMode}"
+                    th:data-verdict="${report.verdict}"
+                    th:href="@{/contact(intent='scan_ocr_feedback', analysisMode=${report.analysisMode}, verdict=${report.verdict}, role=${report.roleLabel}, city=${report.offerCityName})}">
+                    <span class="signal-kicker">friction signal</span>
+                    <strong>Tell me when scan OCR gets stronger</strong>
+                    <p>Use this if the biggest blocker was messy screenshots, photos, or scanned pages instead of the report itself.</p>
+                </a>
+            </div>
+        </section>
+
+        <section class="report-actions">
+            <a th:href="${report.analysisMode == 'job_post' ? '/nurse-relocation-offer-checker?mode=job_post' : '/nurse-relocation-offer-checker?mode=offer_review'}"
+                class="btn btn-premium"
+                th:text="${report.analysisMode == 'job_post' ? 'Screen another listing' : 'Run another offer'}">Run another offer</a>
+            <a th:href="${report.analysisMode == 'job_post' ? '/nurse-relocation-offer-checker?mode=offer_review' : '/sign-on-bonus-repayment-calculator'}"
+                class="btn btn-ghost"
+                th:text="${report.analysisMode == 'job_post' ? 'Switch to full offer review' : 'Check bonus repayment'}">Check bonus repayment</a>
+        </section>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+    <script src="/js/offer-risk.js" defer></script>
+</body>
+
+</html>

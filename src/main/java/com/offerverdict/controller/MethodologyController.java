@@ -15,9 +15,9 @@ public class MethodologyController {
 
     @GetMapping("/methodology")
     public String methodology(Model model) {
-        model.addAttribute("title", "Our Methodology - OfferVerdict");
+        model.addAttribute("title", "Methodology | OfferVerdict Healthcare Offer Risk");
         model.addAttribute("metaDescription",
-                "Learn how OfferVerdict calculates cost of living comparisons using IRS tax data, BLS statistics, and real-time market data.");
+                "How OfferVerdict estimates healthcare relocation offer risk using pay terms, taxes, rent, moving costs, shift differentials, and bonus repayment exposure.");
         model.addAttribute("lastTaxUpdate", "January 2026");
         model.addAttribute("lastCostUpdate", java.time.LocalDate.now());
         return "methodology";
