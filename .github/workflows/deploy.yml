@@ -56,13 +56,19 @@ jobs:
             # Run new container with persistent data volume
             docker run -d \
               --name offer-verdict \
+              --restart unless-stopped \
               -p 8082:8080 \
               --memory="512m" \
-              -e JAVA_OPTS="-XX:+UseSerialGC -Xms128m -Xmx256m -Xss512k" \
+              -e JAVA_OPTS="-XX:+UseSerialGC -XX:ActiveProcessorCount=2 -Xms128m -Xmx256m -Xss512k -Djava.awt.headless=true" \
               -e APP_LEADS_STORAGE_DIR="/app/data/leads" \
               -e APP_LEADS_BACKUP_DIR="/app/data/leads-backup" \
               -v /opt/offerverdict/data:/app/data \
               shinhyeok22/offer-verdict:latest
+
+            # Fail the deploy if the container dies on boot or the app never responds.
+            sleep 10
+            docker ps --filter "name=offer-verdict" --filter "status=running" --quiet | grep -q . || (docker logs offer-verdict && exit 1)
+            curl -fsS http://127.0.0.1:8082/ > /dev/null || (docker logs offer-verdict && exit 1)
 
             # Remove dangling images
             docker image prune -f

@@ -26,4 +26,4 @@ EXPOSE 8080
 
 # 애플리케이션 실행
 # JVM 옵션은 GitHub Actions 배포 스크립트에서 동적으로 주입할 예정입니다.
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -jar app.jar"]
